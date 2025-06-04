@@ -1,15 +1,200 @@
+--
+-- Comprehensive UI theming for Neovim with no-clown-fiesta theme
+-- Features:
+-- - Consistent #151515 background across ALL UI elements (main editor, Telescope, LSP floating windows, command line)
+-- - Enhanced syntax highlighting with better contrast and vibrancy
+-- - Telescope theming with proper title colors and selection highlighting
+-- - LSP hover/signature help windows styled to match the theme
+-- - Command line (noice) floating windows with consistent background
+-- - Completion menu (nvim-cmp) styled with theme colors
+-- - LSP Saga windows themed consistently
+-- - Auto-persistence of custom highlights after theme changes via ColorScheme autocmd
+--
 local theme_opts = {
 	styles = {
 		type = { bold = true },
 		lsp = { underline = false },
 		match_paren = { underline = true },
+		functions = { bold = true }, -- Make functions bolder for better contrast
+		keywords = { bold = true },  -- Make keywords bolder
+		comments = { italic = true }, -- Make comments italic for distinction
 	},
 }
 
 local function config_theme()
 	local plugin = require("no-clown-fiesta")
 	plugin.setup(theme_opts)
-	return plugin.load()
+	plugin.load()
+
+	-- Apply additional highlight enhancements for better vibrancy and contrast
+	local enhancements = {
+		-- Enhance syntax highlighting with better contrast
+		Normal = { fg = "#E1E1E1", bg = "#151515" }, -- Match Telescope background exactly
+		NormalNC = { fg = "#E1E1E1", bg = "#151515" }, -- Non-current window background
+		Function = { fg = "#88afa2", bold = true }, -- Enhanced cyan for functions
+		Keyword = { fg = "#7E97AB", bold = true }, -- Enhanced gray-blue for keywords
+		String = { fg = "#A2B5C1" }, -- Brighter string color
+		Number = { fg = "#b46958", bold = true }, -- Enhanced red for numbers
+		Comment = { fg = "#727272", italic = true }, -- Italic comments
+		Type = { fg = "#E1E1E1", bold = true }, -- Bold types
+		Constant = { fg = "#E1E1E1", bold = true }, -- Bold constants
+		Special = { fg = "#FFA557" }, -- Orange for special characters
+		PreProc = { fg = "#AA749F" }, -- Purple for preprocessor
+		Identifier = { fg = "#BAD7FF" }, -- Blue for identifiers
+		Statement = { fg = "#7E97AB", bold = true }, -- Bold statements
+
+		-- Enhanced UI elements
+		Visual = { bg = "#2A2A2A" }, -- Darker visual selection for better contrast
+		Search = { fg = "#151515", bg = "#FFA557", bold = true }, -- High contrast search
+		IncSearch = { fg = "#151515", bg = "#F4BF75", bold = true }, -- High contrast incremental search
+		CursorLine = { bg = "#1A1A1A" }, -- Subtle cursor line
+		LineNr = { fg = "#505050" }, -- Brighter line numbers
+		CursorLineNr = { fg = "#AFAFAF", bold = true }, -- Bright current line number
+		StatusLine = { fg = "#E1E1E1", bg = "#202020" }, -- Enhanced statusline
+		WinSeparator = { fg = "#404040" }, -- Brighter window separators
+
+		-- Ensure floating windows match the main background
+		NormalFloat = { fg = "#E1E1E1", bg = "#151515" }, -- Floating windows background
+		FloatBorder = { fg = "#505050", bg = "#151515" }, -- Floating window borders
+
+		-- Enhanced diagnostic colors for better visibility
+		DiagnosticError = { fg = "#E74C3C" }, -- Brighter red
+		DiagnosticWarn = { fg = "#F39C12" }, -- Brighter orange
+		DiagnosticInfo = { fg = "#3498DB" }, -- Brighter blue
+		DiagnosticHint = { fg = "#17A2B8" }, -- Brighter cyan
+
+		-- Enhanced git colors
+		GitSignsAdd = { fg = "#27AE60" }, -- Brighter green
+		GitSignsChange = { fg = "#3498DB" }, -- Brighter blue
+		GitSignsDelete = { fg = "#E74C3C" }, -- Brighter red
+
+		-- Enhanced popup menu
+		Pmenu = { fg = "#E1E1E1", bg = "#151515" }, -- Better contrast popup menu to match theme
+		PmenuSel = { fg = "#151515", bg = "#BAD7FF", bold = true }, -- High contrast selection
+		PmenuBorder = { fg = "#505050", bg = "#151515" }, -- Visible popup border to match theme
+		PmenuKind = { fg = "#88afa2", bg = "#151515" }, -- LSP kind indicators
+		PmenuKindSel = { fg = "#151515", bg = "#BAD7FF", bold = true }, -- Selected LSP kind
+		PmenuExtra = { fg = "#AFAFAF", bg = "#151515" }, -- Extra text
+		PmenuExtraSel = { fg = "#151515", bg = "#BAD7FF" }, -- Selected extra text
+
+		-- Enhanced Telescope theming for consistency with no-clown-fiesta
+		TelescopeNormal = { fg = "#E1E1E1", bg = "#151515" },
+		TelescopeBorder = { fg = "#505050", bg = "#151515" },
+		TelescopePromptNormal = { fg = "#E1E1E1", bg = "#1A1A1A" },
+		TelescopePromptBorder = { fg = "#BAD7FF", bg = "#1A1A1A" },
+		TelescopePromptTitle = { fg = "#151515", bg = "#BAD7FF", bold = true },
+		TelescopePromptPrefix = { fg = "#88afa2", bold = true },
+		TelescopePromptCounter = { fg = "#F4BF75" },
+		TelescopeResultsNormal = { fg = "#E1E1E1", bg = "#151515" },
+		TelescopeResultsBorder = { fg = "#505050", bg = "#151515" },
+		TelescopeResultsTitle = { fg = "#151515", bg = "#90A959", bold = true },
+		TelescopePreviewNormal = { fg = "#E1E1E1", bg = "#171717" },
+		TelescopePreviewBorder = { fg = "#505050", bg = "#171717" },
+		TelescopePreviewTitle = { fg = "#151515", bg = "#FFA557", bold = true },
+		TelescopeSelection = { fg = "#E1E1E1", bg = "#2A2A2A", bold = true },
+		TelescopeSelectionCaret = { fg = "#88afa2", bold = true },
+		TelescopeMatching = { fg = "#F4BF75", bold = true },
+		TelescopeMultiSelection = { fg = "#AA749F", bold = true },
+		TelescopeMultiIcon = { fg = "#AA749F" },
+
+		-- LSP Saga theming for consistency
+		SagaNormal = { fg = "#E1E1E1", bg = "#151515" },
+		SagaBorder = { fg = "#505050", bg = "#151515" },
+		SagaTitle = { fg = "#151515", bg = "#BAD7FF", bold = true },
+		SagaHover = { fg = "#E1E1E1", bg = "#151515" },
+		SagaCodeAction = { fg = "#F4BF75", bold = true },
+		SagaRename = { fg = "#E1E1E1", bg = "#151515" },
+		SagaFinderSelection = { fg = "#E1E1E1", bg = "#2A2A2A", bold = true },
+	}
+
+	-- Apply the enhancements
+	for group, opts in pairs(enhancements) do
+		vim.api.nvim_set_hl(0, group, opts)
+	end
+
+	-- Ensure Telescope highlights are applied after theme load
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		group = vim.api.nvim_create_augroup("TelescopeThemeEnhancements", { clear = true }),
+		callback = function()
+			-- Ensure main background matches Telescope background exactly
+			vim.api.nvim_set_hl(0, "Normal", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NormalNC", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NormalFloat", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "FloatBorder", { fg = "#505050", bg = "#151515" })
+
+			-- Re-apply Telescope highlights to ensure they persist after theme changes
+			local telescope_highlights = {
+				TelescopeNormal = { fg = "#E1E1E1", bg = "#151515" },
+				TelescopeBorder = { fg = "#505050", bg = "#151515" },
+				TelescopePromptNormal = { fg = "#E1E1E1", bg = "#1A1A1A" },
+				TelescopePromptBorder = { fg = "#BAD7FF", bg = "#1A1A1A" },
+				TelescopePromptTitle = { fg = "#151515", bg = "#BAD7FF", bold = true },
+				TelescopePromptPrefix = { fg = "#88afa2", bold = true },
+				TelescopePromptCounter = { fg = "#F4BF75" },
+				TelescopeResultsNormal = { fg = "#E1E1E1", bg = "#151515" },
+				TelescopeResultsBorder = { fg = "#505050", bg = "#151515" },
+				TelescopeResultsTitle = { fg = "#151515", bg = "#90A959", bold = true },
+				TelescopePreviewNormal = { fg = "#E1E1E1", bg = "#171717" },
+				TelescopePreviewBorder = { fg = "#505050", bg = "#171717" },
+				TelescopePreviewTitle = { fg = "#151515", bg = "#FFA557", bold = true },
+				TelescopeSelection = { fg = "#E1E1E1", bg = "#2A2A2A", bold = true },
+				TelescopeSelectionCaret = { fg = "#88afa2", bold = true },
+				TelescopeMatching = { fg = "#F4BF75", bold = true },
+				TelescopeMultiSelection = { fg = "#AA749F", bold = true },
+				TelescopeMultiIcon = { fg = "#AA749F" },
+			}
+
+			for group, opts in pairs(telescope_highlights) do
+				vim.api.nvim_set_hl(0, group, opts)
+			end
+
+			-- Re-apply LSP floating window highlights
+			vim.api.nvim_set_hl(0, "LspSignatureActiveParameter", {
+				bg = "#2A2A2A",
+				fg = "#F4BF75",
+				bold = true,
+				italic = true
+			})
+			vim.api.nvim_set_hl(0, "FloatTitle", {
+				bg = "#BAD7FF",
+				fg = "#151515",
+				bold = true
+			})
+
+			-- Re-apply noice highlights
+			vim.api.nvim_set_hl(0, "NoiceCmdlinePopup", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoiceCmdlinePopupBorder", { fg = "#505050", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoiceCmdlinePrompt", { fg = "#BAD7FF", bold = true })
+			vim.api.nvim_set_hl(0, "NoiceCmdlineIcon", { fg = "#88afa2" })
+			vim.api.nvim_set_hl(0, "NoicePopup", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoicePopupBorder", { fg = "#505050", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoiceConfirm", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoiceConfirmBorder", { fg = "#505050", bg = "#151515" })
+
+			-- Re-apply popup menu highlights for consistency
+			vim.api.nvim_set_hl(0, "Pmenu", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "PmenuSel", { fg = "#151515", bg = "#BAD7FF", bold = true })
+			vim.api.nvim_set_hl(0, "PmenuBorder", { fg = "#505050", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "PmenuKind", { fg = "#88afa2", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "PmenuKindSel", { fg = "#151515", bg = "#BAD7FF", bold = true })
+			vim.api.nvim_set_hl(0, "PmenuExtra", { fg = "#AFAFAF", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "PmenuExtraSel", { fg = "#151515", bg = "#BAD7FF" })
+
+			-- LSP Saga specific highlights to match theme
+			vim.api.nvim_set_hl(0, "SagaNormal", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "SagaBorder", { fg = "#505050", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "SagaTitle", { fg = "#151515", bg = "#BAD7FF", bold = true })
+			vim.api.nvim_set_hl(0, "SagaHover", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "SagaCodeAction", { fg = "#F4BF75", bold = true })
+			vim.api.nvim_set_hl(0, "SagaRename", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "SagaFinderSelection", { fg = "#E1E1E1", bg = "#2A2A2A", bold = true })
+		end,
+	})
+
+	-- Apply all highlights immediately after theme load
+	vim.schedule(function()
+		vim.cmd("doautocmd ColorScheme")
+	end)
 end
 return {
 	-- Colorscheme
@@ -17,7 +202,7 @@ return {
 		"aktersnurra/no-clown-fiesta.nvim",
 		priority = 1000,
 		config = config_theme,
-    lazy = false
+		lazy = false
 	},
 
 	-- Status line
@@ -28,84 +213,224 @@ return {
 			local lualine = require("lualine")
 			local lazy_status = require("lazy.status") -- to configure lazy pending updates count
 
+			-- Enhanced no-clown-fiesta palette with improved vibrancy and contrast
 			local colors = {
-				blue = "#65D1FF",
-				green = "#3EFFDC",
-				violet = "#FF61EF",
-				yellow = "#FFDA7B",
-				red = "#FF4A4A",
-				fg = "#c3ccdc",
-				bg = "#112638",
-				inactive_bg = "#2c3043",
+				-- Core theme colors from no-clown-fiesta palette
+				bg = "#151515",           -- Main background
+				alt_bg = "#171717",       -- Alternative background
+				accent = "#202020",       -- Accent background
+				fg = "#E1E1E1",          -- Main foreground
+				light_gray = "#AFAFAF",   -- Light gray text
+				medium_gray = "#727272",  -- Medium gray text
+				gray = "#373737",        -- Dark gray
+
+				-- Enhanced vibrant colors with better contrast
+				blue = "#BAD7FF",        -- Bright blue (no-clown-fiesta blue)
+				cyan = "#88afa2",        -- Cyan (no-clown-fiesta cyan)
+				green = "#90A959",       -- Green (no-clown-fiesta green)
+				yellow = "#F4BF75",      -- Yellow (no-clown-fiesta yellow)
+				orange = "#FFA557",      -- Orange (no-clown-fiesta orange)
+				red = "#b46958",         -- Red (no-clown-fiesta red)
+				purple = "#AA749F",      -- Purple (no-clown-fiesta purple)
+				gray_blue = "#7E97AB",   -- Gray-blue (no-clown-fiesta gray_blue)
 			}
 
 			local my_lualine_theme = {
 				normal = {
 					a = { bg = colors.blue, fg = colors.bg, gui = "bold" },
-					b = { bg = colors.bg, fg = colors.fg },
-					c = { bg = colors.bg, fg = colors.fg },
+					b = { bg = colors.alt_bg, fg = colors.fg },
+					c = { bg = colors.bg, fg = colors.light_gray },
 				},
 				insert = {
 					a = { bg = colors.green, fg = colors.bg, gui = "bold" },
-					b = { bg = colors.bg, fg = colors.fg },
-					c = { bg = colors.bg, fg = colors.fg },
+					b = { bg = colors.alt_bg, fg = colors.fg },
+					c = { bg = colors.bg, fg = colors.light_gray },
 				},
 				visual = {
-					a = { bg = colors.violet, fg = colors.bg, gui = "bold" },
-					b = { bg = colors.bg, fg = colors.fg },
-					c = { bg = colors.bg, fg = colors.fg },
+					a = { bg = colors.purple, fg = colors.fg, gui = "bold" },
+					b = { bg = colors.alt_bg, fg = colors.fg },
+					c = { bg = colors.bg, fg = colors.light_gray },
 				},
 				command = {
 					a = { bg = colors.yellow, fg = colors.bg, gui = "bold" },
-					b = { bg = colors.bg, fg = colors.fg },
-					c = { bg = colors.bg, fg = colors.fg },
+					b = { bg = colors.alt_bg, fg = colors.fg },
+					c = { bg = colors.bg, fg = colors.light_gray },
 				},
 				replace = {
-					a = { bg = colors.red, fg = colors.bg, gui = "bold" },
-					b = { bg = colors.bg, fg = colors.fg },
-					c = { bg = colors.bg, fg = colors.fg },
+					a = { bg = colors.red, fg = colors.fg, gui = "bold" },
+					b = { bg = colors.alt_bg, fg = colors.fg },
+					c = { bg = colors.bg, fg = colors.light_gray },
 				},
 				inactive = {
-					a = { bg = colors.inactive_bg, fg = colors.semilightgray, gui = "bold" },
-					b = { bg = colors.inactive_bg, fg = colors.semilightgray },
-					c = { bg = colors.inactive_bg, fg = colors.semilightgray },
+					a = { bg = colors.gray, fg = colors.medium_gray, gui = "bold" },
+					b = { bg = colors.gray, fg = colors.medium_gray },
+					c = { bg = colors.gray, fg = colors.medium_gray },
 				},
 			}
 
-			-- configure lualine with modified theme
+			-- configure lualine with enhanced theme
 			lualine.setup({
 				options = {
 					theme = my_lualine_theme,
+					component_separators = { left = "", right = "" },
+					section_separators = { left = "", right = "" },
+					globalstatus = true, -- Use global statusline for better alignment
 				},
 				sections = {
+					lualine_a = {
+						{
+							"mode",
+							fmt = function(str)
+								return str:sub(1,1) -- Show only first letter (N, I, V, C, R)
+							end
+						}
+					},
+					lualine_b = {
+						{
+							"branch",
+							icon = "󰊢",
+							color = { fg = colors.cyan }
+						},
+						{
+							"diff",
+							colored = true,
+							diff_color = {
+								added    = { fg = colors.green },
+								modified = { fg = colors.yellow },
+								removed  = { fg = colors.red },
+							},
+						}
+					},
+					lualine_c = {
+						{
+							"filename",
+							path = 1, -- Show relative path
+							color = { fg = colors.fg },
+							symbols = {
+								modified = " ●",
+								readonly = " 󰌾",
+								unnamed = " [No Name]",
+							}
+						}
+					},
 					lualine_x = {
 						{
 							lazy_status.updates,
 							cond = lazy_status.has_updates,
-							color = { fg = "#ff9e64" },
+							color = { fg = colors.orange },
 						},
-						{ "encoding" },
-						{ "fileformat" },
-						{ "filetype" },
+						{
+							"diagnostics",
+							sources = { "nvim_lsp", "nvim_diagnostic" },
+							sections = { "error", "warn", "info", "hint" },
+							diagnostics_color = {
+								error = { fg = colors.red },
+								warn  = { fg = colors.yellow },
+								info  = { fg = colors.blue },
+								hint  = { fg = colors.cyan },
+							},
+							symbols = {
+								error = " ",
+								warn = " ",
+								info = " ",
+								hint = " "
+							},
+						},
+						{
+							"encoding",
+							color = { fg = colors.medium_gray }
+						},
+						{
+							"fileformat",
+							color = { fg = colors.medium_gray },
+							symbols = {
+								unix = "LF",
+								dos = "CRLF",
+								mac = "CR",
+							}
+						},
+						{
+							"filetype",
+							colored = true,
+							icon_only = false,
+							color = { fg = colors.gray_blue }
+						},
 					},
+					lualine_y = {
+						{
+							"progress",
+							color = { fg = colors.light_gray }
+						}
+					},
+					lualine_z = {
+						{
+							"location",
+							color = { fg = colors.fg }
+						}
+					}
+				},
+				inactive_sections = {
+					lualine_a = {},
+					lualine_b = {},
+					lualine_c = {
+						{
+							"filename",
+							color = { fg = colors.medium_gray }
+						}
+					},
+					lualine_x = {
+						{
+							"location",
+							color = { fg = colors.medium_gray }
+						}
+					},
+					lualine_y = {},
+					lualine_z = {}
 				},
 			})
 		end,
 	},
-	-- Highlight yanked text
+	-- Highlight yanked text with enhanced styling
 	{
 		"machakann/vim-highlightedyank",
 		event = "VeryLazy",
+		config = function()
+			-- Enhanced yank highlight with no-clown-fiesta colors
+			vim.g.highlightedyank_highlight_duration = 200
+			vim.api.nvim_set_hl(0, "HighlightedyankRegion", {
+				fg = "#151515",
+				bg = "#F4BF75",
+				bold = true
+			})
+		end,
 	},
 
-	-- Indentation guides
+	-- Indentation guides with enhanced visibility
 	{
 		"lukas-reineke/indent-blankline.nvim",
 		main = "ibl",
-		opts = {},
+		opts = {
+			indent = {
+				char = "│",
+				tab_char = "│",
+			},
+			scope = {
+				enabled = true,
+				char = "│",
+				show_start = true,
+				show_end = true,
+				highlight = { "IblScope" },
+			},
+		},
+		config = function(_, opts)
+			require("ibl").setup(opts)
+			-- Enhanced indent guide colors
+			vim.api.nvim_set_hl(0, "IblIndent", { fg = "#2A2A2A" })
+			vim.api.nvim_set_hl(0, "IblScope", { fg = "#404040", bold = true })
+		end,
 	},
 
-	-- Better UI elements
+	-- Better UI elements with enhanced theming
 	{
 		"folke/noice.nvim",
 		event = "VeryLazy",
@@ -126,7 +451,41 @@ return {
 				command_palette = true,
 				long_message_to_split = true,
 			},
+			-- Enhanced command line styling
+			cmdline = {
+				enabled = true,
+				view = "cmdline_popup",
+				format = {
+					cmdline = { pattern = "^:", icon = "", lang = "vim" },
+					search_down = { kind = "search", pattern = "^/", icon = " ", lang = "regex" },
+					search_up = { kind = "search", pattern = "^%?", icon = " ", lang = "regex" },
+					filter = { pattern = "^:%s*!", icon = "$", lang = "bash" },
+					lua = { pattern = "^:%s*lua%s+", icon = "", lang = "lua" },
+					help = { pattern = "^:%s*he?l?p?%s+", icon = "󰋖" },
+				},
+			},
+			-- Enhanced messages styling
+			messages = {
+				enabled = true,
+				view = "notify",
+				view_error = "notify",
+				view_warn = "notify",
+				view_history = "messages",
+				view_search = "virtualtext",
+			},
 		},
+		config = function(_, opts)
+			require("noice").setup(opts)
+			-- Enhanced noice highlight groups with no-clown-fiesta theme
+			vim.api.nvim_set_hl(0, "NoiceCmdlinePopup", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoiceCmdlinePopupBorder", { fg = "#505050", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoiceCmdlinePrompt", { fg = "#BAD7FF", bold = true })
+			vim.api.nvim_set_hl(0, "NoiceCmdlineIcon", { fg = "#88afa2" })
+			vim.api.nvim_set_hl(0, "NoicePopup", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoicePopupBorder", { fg = "#505050", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoiceConfirm", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoiceConfirmBorder", { fg = "#505050", bg = "#151515" })
+		end,
 	},
 
 	-- Telescope symbols (replaces symbols-outline with beautiful telescope UI)
@@ -886,6 +1245,35 @@ return {
 				timeout = 3000,
 				max_width = 80,
 				level = vim.log.levels.ERROR,
+			})
+		end,
+	},
+
+	-- Enhanced yank highlighting with theme colors
+	{
+		"machakann/vim-highlightedyank",
+		event = "TextYankPost",
+		config = function()
+			-- Configure highlighted yank with no-clown-fiesta theme colors
+			vim.g.highlightedyank_highlight_duration = 200
+
+			-- Set custom yank highlight using theme colors
+			vim.api.nvim_create_autocmd("ColorScheme", {
+				group = vim.api.nvim_create_augroup("YankHighlightTheme", { clear = true }),
+				callback = function()
+					vim.api.nvim_set_hl(0, "HighlightedyankRegion", {
+						fg = "#151515",
+						bg = "#F4BF75",
+						bold = true
+					})
+				end,
+			})
+
+			-- Apply immediately
+			vim.api.nvim_set_hl(0, "HighlightedyankRegion", {
+				fg = "#151515",
+				bg = "#F4BF75",
+				bold = true
 			})
 		end,
 	},

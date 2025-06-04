@@ -59,28 +59,41 @@ return {
 				col = 0,
 			})
 
-			-- Custom highlight groups for signature help
+			-- Configure LSP hover with consistent styling
+			vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+				border = "rounded",
+				focusable = true,
+				style = "minimal",
+				max_width = 80,
+				max_height = 15,
+				wrap = true,
+				title = " Documentation ",
+				title_pos = "center",
+			})
+
+			-- Custom highlight groups for LSP floating windows to match theme
 			vim.api.nvim_create_autocmd("ColorScheme", {
 				group = vim.api.nvim_create_augroup("CustomLspHighlights", {}),
 				callback = function()
-					-- Signature help window styling
+					-- LSP signature help styling with no-clown-fiesta theme
 					vim.api.nvim_set_hl(0, "LspSignatureActiveParameter", {
-						bg = "#3d4556",
-						fg = "#e0af68",
+						bg = "#2A2A2A",
+						fg = "#F4BF75",
 						bold = true,
 						italic = true
 					})
+					-- Ensure all floating windows match Telescope background
 					vim.api.nvim_set_hl(0, "FloatBorder", {
-						fg = "#7aa2f7",
-						bg = "#1f2335"
+						fg = "#505050",
+						bg = "#151515"
 					})
 					vim.api.nvim_set_hl(0, "NormalFloat", {
-						bg = "#1f2335",
-						fg = "#c0caf5"
+						bg = "#151515",
+						fg = "#E1E1E1"
 					})
 					vim.api.nvim_set_hl(0, "FloatTitle", {
-						bg = "#7aa2f7",
-						fg = "#1f2335",
+						bg = "#BAD7FF",
+						fg = "#151515",
 						bold = true
 					})
 				end,

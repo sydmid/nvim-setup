@@ -104,16 +104,74 @@ return {
 					relativenumber = true,
 					side = "right",
 				},
-				-- change folder arrow icons
+				-- Enhanced icons with Catppuccin-style aesthetics
 				renderer = {
 					indent_markers = {
 						enable = true,
+						inline_arrows = true,
+						icons = {
+							corner = "└",
+							edge = "│",
+							item = "│",
+							bottom = "─",
+							none = " ",
+						},
 					},
+					root_folder_label = ":~:s?$?/..?",
+					highlight_git = "icon",
+					highlight_diagnostics = "icon",
+					highlight_opened_files = "icon",
+					highlight_modified = "icon",
 					icons = {
-						glyphs = {
+						web_devicons = {
+							file = {
+								enable = true,
+								color = true,
+							},
 							folder = {
-								arrow_closed = "", -- arrow when folder is closed
-								arrow_open = "", -- arrow when folder is open
+								enable = false,
+								color = true,
+							},
+						},
+						git_placement = "before",
+						modified_placement = "after",
+						diagnostics_placement = "signcolumn",
+						bookmarks_placement = "signcolumn",
+						padding = " ",
+						symlink_arrow = " ➛ ",
+						show = {
+							file = true,
+							folder = true,
+							folder_arrow = true,
+							git = true,
+							modified = true,
+							diagnostics = true,
+							bookmarks = true,
+						},
+						glyphs = {
+							default = "󰈔",
+							symlink = "󰌷",
+							bookmark = "󰆤",
+							modified = "●",
+							hidden = "󰜌",
+							folder = {
+								arrow_closed = "󰅂", -- Catppuccin chevron right
+								arrow_open = "󰅀",   -- Catppuccin chevron down
+								default = "󰉋",      -- Folder icon
+								open = "󰝰",         -- Open folder
+								empty = "󰉖",        -- Empty folder
+								empty_open = "󰷏",   -- Empty open folder
+								symlink = "󰉒",      -- Symlinked folder
+								symlink_open = "󰉒", -- Open symlinked folder
+							},
+							git = {
+								unstaged = "󰄱",     -- Modified files (yellow)
+								staged = "󰱒",       -- Staged files (green)
+								unmerged = "󰘬",     -- Merge conflicts (red)
+								renamed = "󰑕",      -- Renamed files (blue)
+								untracked = "󰋖",    -- New files (green)
+								deleted = "󰍴",      -- Deleted files (red)
+								ignored = "󰿠",      -- Ignored files (gray)
 							},
 						},
 					},
