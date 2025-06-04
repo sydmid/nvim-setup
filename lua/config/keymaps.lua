@@ -196,6 +196,17 @@ end, { desc = "Format document" })
 -- LSP keymaps have been moved to lua/plugins/lsp/lspconfig.lua
 -- This centralizes all LSP functionality and ensures keymaps are only active
 -- when an LSP server is actually attached to the current buffer
+--
+-- Key LSP keymaps available:
+--   <D-i>     - Show hover documentation (beautiful popup)
+--   <D-S-i>   - Show method signature help (manual trigger, beautiful popup)
+--   gd        - Go to definition
+--   <leader>pd - Peek definition
+--   <leader>ca - Code actions
+--   <leader>lr - Rename symbol
+--
+-- Note: Automatic signature help popups are disabled to prevent intrusive behavior.
+-- Use <D-S-i> (Cmd+Shift+I) to manually trigger signature help when needed.
 
 -- Harpoon mappings
 map("n", "<leader>a1", ":lua require('harpoon.mark').add_file()<CR>", { desc = "Add to harpoon" })

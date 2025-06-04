@@ -34,6 +34,86 @@ return {
 				},
 			})
 
+			-- Configure LSP signature help with improved styling and fixed dimensions
+			vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+				border = "rounded",
+				focusable = true,  -- Make it focusable for navigation
+				silent = true,
+				close_events = { "BufHidden", "InsertCharPre" },  -- Remove CursorMoved to keep it open
+				max_width = 80,
+				max_height = 15,
+				wrap = true,
+				-- Custom styling
+				style = "minimal",
+				-- Position the window near the cursor
+				anchor_bias = "below",
+				-- Force window dimensions
+				width = 80,
+				height = 15,
+				-- Additional styling options
+				title = " Signature Help ",
+				title_pos = "center",
+				-- Window position
+				relative = "cursor",
+				row = 1,
+				col = 0,
+			})
+
+			-- Custom highlight groups for signature help
+			vim.api.nvim_create_autocmd("ColorScheme", {
+				group = vim.api.nvim_create_augroup("CustomLspHighlights", {}),
+				callback = function()
+					-- Signature help window styling
+					vim.api.nvim_set_hl(0, "LspSignatureActiveParameter", {
+						bg = "#3d4556",
+						fg = "#e0af68",
+						bold = true,
+						italic = true
+					})
+					vim.api.nvim_set_hl(0, "FloatBorder", {
+						fg = "#7aa2f7",
+						bg = "#1f2335"
+					})
+					vim.api.nvim_set_hl(0, "NormalFloat", {
+						bg = "#1f2335",
+						fg = "#c0caf5"
+					})
+					vim.api.nvim_set_hl(0, "FloatTitle", {
+						bg = "#7aa2f7",
+						fg = "#1f2335",
+						bold = true
+					})
+				end,
+			})
+
+			-- Trigger the highlight setup immediately
+			vim.cmd("doautocmd ColorScheme")
+
+			-- Custom signature help function with better window management
+			local function show_signature_help()
+				local params = vim.lsp.util.make_position_params()
+				vim.lsp.buf_request(0, 'textDocument/signatureHelp', params, function(err, result, ctx, config)
+					if err or not result or not result.signatures or #result.signatures == 0 then
+						return
+					end
+
+					-- Custom window configuration
+					local opts = {
+						border = "rounded",
+						focusable = true,
+						style = "minimal",
+						max_width = 80,
+						max_height = 15,
+						wrap = true,
+						title = " Signature Help ",
+						title_pos = "center",
+						close_events = { "BufHidden" },
+					}
+
+					vim.lsp.handlers["textDocument/signatureHelp"](err, result, ctx, vim.tbl_extend("force", config or {}, opts))
+				end)
+			end
+
 			-- Setup LSP
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 			local lspconfig = require("lspconfig")
@@ -50,6 +130,37 @@ return {
 			-- Best practice: Define all LSP-related keymaps in the LspAttach event
 			-- This ensures the keymaps are only active when an LSP server is attached to the buffer
 			-- Prevents errors when trying to use LSP features in buffers without LSP support
+
+			-- Auto-trigger signature help autocmd
+			vim.api.nvim_create_autocmd("LspAttach", {
+				group = vim.api.nvim_create_augroup("UserLspSignatureHelp", {}),
+				callback = function(ev)
+					local client = vim.lsp.get_client_by_id(ev.data.client_id)
+					if client and client.server_capabilities.signatureHelpProvider then
+						-- Auto-trigger signature help on specific events
+						vim.api.nvim_create_autocmd({ "TextChangedI" }, {
+							buffer = ev.buf,
+							group = vim.api.nvim_create_augroup("SignatureHelpAutoTrigger", { clear = false }),
+							callback = function()
+								local line = vim.api.nvim_get_current_line()
+								local col = vim.api.nvim_win_get_cursor(0)[2]
+								local char_before = col > 0 and line:sub(col, col) or ""
+								local char_current = line:sub(col + 1, col + 1)
+
+								-- Trigger on function call characters
+								if char_before == "(" or char_before == "," or char_current == "(" then
+									vim.defer_fn(function()
+										if vim.fn.pumvisible() == 0 then
+											vim.lsp.buf.signature_help()
+										end
+									end, 150)
+								end
+							end,
+						})
+					end
+				end,
+			})
+
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("UserLspConfig", {}),
 				callback = function(ev)
@@ -91,7 +202,95 @@ return {
 					-- Common LSP keymaps for all languages
 					keymap("n", "gD", vim.lsp.buf.declaration, { buffer = ev.buf, desc = "Go to declaration" })
 					keymap("n", "<leader>pt", "<cmd>Lspsaga peek_type_definition<CR>", { buffer = ev.buf, desc = "Peek type definition" })
-					keymap("n", "<leader>is", "<cmd>Lspsaga signature_help<CR>", { buffer = ev.buf, desc = "Signature Help (Lspsaga)" })
+
+					-- Signature help keymaps with auto-trigger and enhanced functionality
+					-- Manual signature help triggers
+					keymap("n", "<D-S-i>", function()
+						show_signature_help()
+					end, { buffer = ev.buf, desc = "Show method signature", silent = true })
+
+					keymap("i", "<D-S-i>", function()
+						show_signature_help()
+					end, { buffer = ev.buf, desc = "Show method signature", silent = true })
+
+					-- Signature help navigation between overloads
+					keymap("i", "<C-k>", function()
+						if vim.fn.pumvisible() == 0 then
+							-- Navigate to previous signature overload
+							local params = vim.lsp.util.make_position_params()
+							vim.lsp.buf_request(0, 'textDocument/signatureHelp', params, function(err, result, ctx, config)
+								if result and result.signatures and #result.signatures > 1 then
+									local current = result.activeSignature or 0
+									local prev = current > 0 and current - 1 or #result.signatures - 1
+									result.activeSignature = prev
+
+									local opts = {
+										border = "rounded",
+										focusable = true,
+										style = "minimal",
+										max_width = 80,
+										max_height = 15,
+										wrap = true,
+										title = " Signature Help (" .. (prev + 1) .. "/" .. #result.signatures .. ") ",
+										title_pos = "center",
+									}
+									vim.lsp.handlers["textDocument/signatureHelp"](err, result, ctx, vim.tbl_extend("force", config or {}, opts))
+								else
+									show_signature_help()
+								end
+							end)
+						else
+							vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-p>", true, false, true), "n", false)
+						end
+					end, { buffer = ev.buf, desc = "Previous signature overload or completion", silent = true })
+
+					keymap("i", "<C-j>", function()
+						if vim.fn.pumvisible() == 0 then
+							-- Navigate to next signature overload
+							local params = vim.lsp.util.make_position_params()
+							vim.lsp.buf_request(0, 'textDocument/signatureHelp', params, function(err, result, ctx, config)
+								if result and result.signatures and #result.signatures > 1 then
+									local current = result.activeSignature or 0
+									local next = (current + 1) % #result.signatures
+									result.activeSignature = next
+
+									local opts = {
+										border = "rounded",
+										focusable = true,
+										style = "minimal",
+										max_width = 80,
+										max_height = 15,
+										wrap = true,
+										title = " Signature Help (" .. (next + 1) .. "/" .. #result.signatures .. ") ",
+										title_pos = "center",
+									}
+									vim.lsp.handlers["textDocument/signatureHelp"](err, result, ctx, vim.tbl_extend("force", config or {}, opts))
+								else
+									show_signature_help()
+								end
+							end)
+						else
+							vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-n>", true, false, true), "n", false)
+						end
+					end, { buffer = ev.buf, desc = "Next signature overload or completion", silent = true })
+
+					-- Auto-trigger signature help when typing function parameters
+					local function auto_signature_help()
+						if vim.fn.pumvisible() == 0 then
+							show_signature_help()
+						end
+					end
+
+					-- Auto-trigger on opening parentheses and commas
+					keymap("i", "(", function()
+						vim.api.nvim_feedkeys("(", "n", false)
+						vim.defer_fn(auto_signature_help, 100)
+					end, { buffer = ev.buf, desc = "Auto-trigger signature help", silent = true })
+
+					keymap("i", ",", function()
+						vim.api.nvim_feedkeys(",", "n", false)
+						vim.defer_fn(auto_signature_help, 100)
+					end, { buffer = ev.buf, desc = "Auto-trigger signature help", silent = true })
 
 					-- Enhanced hover with Lspsaga for better UI
 					keymap("n", "<D-i>", "<cmd>Lspsaga hover_doc<CR>", { buffer = ev.buf, desc = "Show documentation (Lspsaga)", silent = true })
