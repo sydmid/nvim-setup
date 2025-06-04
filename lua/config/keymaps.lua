@@ -353,8 +353,24 @@ map("v", "<D-S-f>", function()
 	require("telescope.builtin").live_grep({ default_text = selected_text })
 end, { desc = "telescope find selected text in all files", silent = true })
 
-map("n", "<D-f>", "/", { desc = "find text in current file", silent = true })
--- map("x", "<D-f>", your_search_function, { noremap = true, silent = true })
+-- Enhanced search function that searches for word under cursor
+local function search_word_under_cursor()
+	local word = vim.fn.expand("<cword>")
+	if word == "" then
+		-- If no word under cursor, fall back to regular search
+		vim.api.nvim_feedkeys("/", "n", false)
+	else
+		-- Search for the word using vim's search functionality
+		-- Use \< and \> for whole word matching (vim best practice)
+		local search_pattern = "\\<" .. vim.fn.escape(word, "\\") .. "\\>"
+		vim.fn.setreg("/", search_pattern)
+		vim.cmd("normal! n")
+		-- Enable search highlighting
+		vim.opt.hlsearch = true
+	end
+end
+
+map("n", "<D-f>", search_word_under_cursor, { desc = "search word under cursor in current file", silent = true })
 
 -- Miscellaneous
 map({ "n", "i", "v" }, "<D-s>", "<Cmd>w<CR>", { noremap = true, silent = true })
