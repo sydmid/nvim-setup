@@ -103,10 +103,10 @@ map("n", "<S-K>", "5gk", { desc = "Move up 5 lines", silent = true })
 map("n", "<D-j>", ":set scrolloff=0<CR>5j5<C-e>:set scrolloff=5<CR>", { noremap = true, silent = true })
 map("n", "<D-k>", ":set scrolloff=0<CR>5k5<C-y>:set scrolloff=5<CR>", { noremap = true, silent = true })
 
-map({"n","v"}, "<D-h>", "b", { desc = "Previous word", silent = true })
-map({"n","v"}, "<D-l>", "e", { desc = "Next word", silent = true })
-map({"n","v"}, "H", "_", { desc = "Start of line", silent = true })
-map({"n","v"}, "L", "$", { desc = "End of line", silent = true })
+map({"n","v"}, "H", "b", { desc = "Previous word", silent = true })
+map({"n","v"}, "L", "e", { desc = "Next word", silent = true })
+map({"n","v"}, "<D-h>", "_", { desc = "Start of line", silent = true })
+map({"n","v"}, "<D-l>", "$", { desc = "End of line", silent = true })
 
 -- Improved redo
 map("n", "U", "<C-r>", { desc = "Redo", silent = true })

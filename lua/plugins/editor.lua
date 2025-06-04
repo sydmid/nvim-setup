@@ -305,6 +305,12 @@ return {
 			telescope.load_extension("fzf")
 			telescope.load_extension("frecency")
 
+			-- Load csharpls-extended telescope extension if available
+			local has_csharpls_extended = pcall(require, "csharpls_extended")
+			if has_csharpls_extended then
+				telescope.load_extension("csharpls_definition")
+			end
+
 			-- Custom function to show all files with priority for recently opened ones
 			local function find_files_with_priority()
 				require("telescope").extensions.frecency.frecency({

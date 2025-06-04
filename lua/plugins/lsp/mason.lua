@@ -47,7 +47,6 @@ return {
         "pyright",
         "eslint",
         "bashls",
-        "omnisharp",
         "csharp_ls",
       },
     })

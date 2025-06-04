@@ -155,35 +155,28 @@ return {
 						})
 					end,
 
-					["omnisharp"] = function()
-						local pid = vim.fn.getpid()
-						lspconfig.omnisharp.setup({
-							cmd = { "omnisharp", "--languageserver", "--hostPID", tostring(pid) },
+					["csharp_ls"] = function()
+						local handlers = {}
+
+						-- Only add the handler if the plugin is available
+						local ok, csharpls_extended = pcall(require, "csharpls_extended")
+						if ok and csharpls_extended.handler then
+							handlers["textDocument/definition"] = csharpls_extended.handler
+						end
+
+						lspconfig.csharp_ls.setup({
 							capabilities = capabilities,
+							handlers = handlers,
 							root_dir = lspconfig.util.root_pattern("*.sln", "*.csproj", "omnisharp.json", "function.json"),
+							init_options = {
+								AutomaticWorkspaceInit = true,
+							},
 							settings = {
-								FormattingOptions = {
-									EnableEditorConfigSupport = true,
-									OrganizeImports = true,
+								csharp = {
+									semanticHighlighting = {
+										enabled = true,
+									},
 								},
-								MsBuild = {
-									LoadProjectsOnDemand = false,
-								},
-								RoslynExtensionsOptions = {
-									EnableAnalyzersSupport = true,
-									EnableImportCompletion = true,
-									AnalyzeOpenDocumentsOnly = false,
-									EnableDecompilationSupport = true, -- Enable decompilation
-								},
-								Sdk = {
-									IncludePrereleases = true,
-								},
-								-- Enable metadata as source for decompilation
-								enableMsBuildLoadProjectsOnDemand = false,
-								enableRoslynAnalyzers = true,
-								organizeImportsOnFormat = true,
-								enableEditorConfigSupport = true,
-								enableDecompilationSupport = true,
 							},
 						})
 					end,
@@ -193,7 +186,7 @@ return {
 				-- Set up servers manually
 				local servers = {
 					"html", "cssls", "tailwindcss", "svelte", "lua_ls", "graphql",
-					"emmet_ls", "prismals", "pyright", "eslint", "bashls", "omnisharp"
+					"emmet_ls", "prismals", "pyright", "eslint", "bashls", "csharp_ls"
 				}
 
 				for _, server_name in ipairs(servers) do
@@ -220,35 +213,28 @@ return {
 								},
 							},
 						})
-					elseif server_name == "omnisharp" then
-						local pid = vim.fn.getpid()
-						lspconfig.omnisharp.setup({
-							cmd = { "omnisharp", "--languageserver", "--hostPID", tostring(pid) },
+					elseif server_name == "csharp_ls" then
+						local handlers = {}
+
+						-- Only add the handler if the plugin is available
+						local ok, csharpls_extended = pcall(require, "csharpls_extended")
+						if ok and csharpls_extended.handler then
+							handlers["textDocument/definition"] = csharpls_extended.handler
+						end
+
+						lspconfig.csharp_ls.setup({
 							capabilities = capabilities,
+							handlers = handlers,
 							root_dir = lspconfig.util.root_pattern("*.sln", "*.csproj", "omnisharp.json", "function.json"),
+							init_options = {
+								AutomaticWorkspaceInit = true,
+							},
 							settings = {
-								FormattingOptions = {
-									EnableEditorConfigSupport = true,
-									OrganizeImports = true,
+								csharp = {
+									semanticHighlighting = {
+										enabled = true,
+									},
 								},
-								MsBuild = {
-									LoadProjectsOnDemand = false,
-								},
-								RoslynExtensionsOptions = {
-									EnableAnalyzersSupport = true,
-									EnableImportCompletion = true,
-									AnalyzeOpenDocumentsOnly = false,
-									EnableDecompilationSupport = true, -- Enable decompilation
-								},
-								Sdk = {
-									IncludePrereleases = true,
-								},
-								-- Enable metadata as source for decompilation
-								enableMsBuildLoadProjectsOnDemand = false,
-								enableRoslynAnalyzers = true,
-								organizeImportsOnFormat = true,
-								enableEditorConfigSupport = true,
-								enableDecompilationSupport = true,
 							},
 						})
 					else
@@ -264,6 +250,12 @@ return {
 					vim.bo[ev.buf].filetype = "sh"
 				end,
 			})
+
+			-- Setup csharpls-extended for Neovim 0.11+
+			local has_csharpls_extended, csharpls_extended = pcall(require, "csharpls_extended")
+			if has_csharpls_extended and csharpls_extended.buf_read_cmd_bind then
+				csharpls_extended.buf_read_cmd_bind()
+			end
 		end,
 	},
 }

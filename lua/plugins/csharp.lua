@@ -265,7 +265,7 @@ return {
 
   -- OmniSharp Extended - enables go-to-definition for imported libraries
   {
-    "Hoffs/omnisharp-extended-lsp.nvim",
+    "Decodetalkers/csharpls-extended-lsp.nvim",
     lazy = true,
     ft = { "cs" },
   },
