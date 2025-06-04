@@ -7,6 +7,7 @@ return {
 			{ "folke/neodev.nvim", opts = {} },
 			"williamboman/mason-lspconfig.nvim",
 			"glepnir/lspsaga.nvim",
+			"Hoffs/omnisharp-extended-lsp.nvim",
 		},
 		config = function()
 			-- Fix position_encoding warning
@@ -54,16 +55,41 @@ return {
 				callback = function(ev)
 					local opts = { buffer = ev.buf, silent = true }
 					local keymap = vim.keymap.set
+					local client = vim.lsp.get_client_by_id(ev.data.client_id)
 
-					-- Standard LSP navigation commands
-					keymap("n", "gd", "<cmd>Lspsaga goto_definition<CR>", { buffer = ev.buf, desc = "Go to definition" })
+					-- C# specific keymaps with omnisharp-extended
+					if client and client.name == "omnisharp" then
+						-- Enhanced LSP keymaps for C# with omnisharp-extended decompilation support
+						keymap("n", "gd", function()
+							require("omnisharp_extended").lsp_definitions()
+						end, { buffer = ev.buf, desc = "Go to definition (with decompilation)" })
+
+						keymap("n", "<leader>pd", function()
+							require("omnisharp_extended").lsp_definitions()
+						end, { buffer = ev.buf, desc = "Peek definition (with decompilation)" })
+
+						keymap("n", "<leader>us", function()
+							require("omnisharp_extended").lsp_references()
+						end, { buffer = ev.buf, desc = "Find references (enhanced)" })
+
+						keymap("n", "<leader>ii", function()
+							require("omnisharp_extended").lsp_implementation()
+						end, { buffer = ev.buf, desc = "Find implementations (enhanced)" })
+
+						keymap("n", "gt", function()
+							require("omnisharp_extended").lsp_type_definition()
+						end, { buffer = ev.buf, desc = "Go to type definition (enhanced)" })
+					else
+						-- Standard LSP navigation commands for non-C# files
+						keymap("n", "gd", "<cmd>Lspsaga goto_definition<CR>", { buffer = ev.buf, desc = "Go to definition" })
+						keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>", { buffer = ev.buf, desc = "Peek definition" })
+						keymap("n", "<leader>us", "<cmd>Telescope lsp_references<CR>", { buffer = ev.buf, desc = "Find references" })
+						keymap("n", "<leader>ii", "<cmd>Telescope lsp_implementations<CR>", { buffer = ev.buf, desc = "Find implementations" })
+						keymap("n", "gt", "<cmd>Lspsaga goto_type_definition<CR>", { buffer = ev.buf, desc = "Go to type definition" })
+					end
+
+					-- Common LSP keymaps for all languages
 					keymap("n", "gD", vim.lsp.buf.declaration, { buffer = ev.buf, desc = "Go to declaration" })
-					keymap("n", "gt", "<cmd>Lspsaga goto_type_definition<CR>", { buffer = ev.buf, desc = "Go to type definition" })
-					keymap("n", "<leader>us", "<cmd>Telescope lsp_references<CR>", { buffer = ev.buf, desc = "Find references" })
-					keymap("n", "<leader>ii", "<cmd>Telescope lsp_implementations<CR>", { buffer = ev.buf, desc = "Find implementations" })
-
-					-- Lspsaga peek keymaps - these provide a preview without jumping to the definition
-					keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>", { buffer = ev.buf, desc = "Peek definition" })
 					keymap("n", "<leader>pt", "<cmd>Lspsaga peek_type_definition<CR>", { buffer = ev.buf, desc = "Peek type definition" })
 					keymap("n", "<leader>is", "<cmd>Lspsaga signature_help<CR>", { buffer = ev.buf, desc = "Signature Help (Lspsaga)" })
 
@@ -128,13 +154,46 @@ return {
 							},
 						})
 					end,
+
+					["omnisharp"] = function()
+						local pid = vim.fn.getpid()
+						lspconfig.omnisharp.setup({
+							cmd = { "omnisharp", "--languageserver", "--hostPID", tostring(pid) },
+							capabilities = capabilities,
+							root_dir = lspconfig.util.root_pattern("*.sln", "*.csproj", "omnisharp.json", "function.json"),
+							settings = {
+								FormattingOptions = {
+									EnableEditorConfigSupport = true,
+									OrganizeImports = true,
+								},
+								MsBuild = {
+									LoadProjectsOnDemand = false,
+								},
+								RoslynExtensionsOptions = {
+									EnableAnalyzersSupport = true,
+									EnableImportCompletion = true,
+									AnalyzeOpenDocumentsOnly = false,
+									EnableDecompilationSupport = true, -- Enable decompilation
+								},
+								Sdk = {
+									IncludePrereleases = true,
+								},
+								-- Enable metadata as source for decompilation
+								enableMsBuildLoadProjectsOnDemand = false,
+								enableRoslynAnalyzers = true,
+								organizeImportsOnFormat = true,
+								enableEditorConfigSupport = true,
+								enableDecompilationSupport = true,
+							},
+						})
+					end,
 				})
 			else
 				-- Fallback for newer versions of mason-lspconfig
 				-- Set up servers manually
 				local servers = {
 					"html", "cssls", "tailwindcss", "svelte", "lua_ls", "graphql",
-					"emmet_ls", "prismals", "pyright", "eslint", "bashls"
+					"emmet_ls", "prismals", "pyright", "eslint", "bashls", "omnisharp"
 				}
 
 				for _, server_name in ipairs(servers) do
@@ -159,6 +218,37 @@ return {
 								bashIde = {
 									shellcheckPath = "",
 								},
+							},
+						})
+					elseif server_name == "omnisharp" then
+						local pid = vim.fn.getpid()
+						lspconfig.omnisharp.setup({
+							cmd = { "omnisharp", "--languageserver", "--hostPID", tostring(pid) },
+							capabilities = capabilities,
+							root_dir = lspconfig.util.root_pattern("*.sln", "*.csproj", "omnisharp.json", "function.json"),
+							settings = {
+								FormattingOptions = {
+									EnableEditorConfigSupport = true,
+									OrganizeImports = true,
+								},
+								MsBuild = {
+									LoadProjectsOnDemand = false,
+								},
+								RoslynExtensionsOptions = {
+									EnableAnalyzersSupport = true,
+									EnableImportCompletion = true,
+									AnalyzeOpenDocumentsOnly = false,
+									EnableDecompilationSupport = true, -- Enable decompilation
+								},
+								Sdk = {
+									IncludePrereleases = true,
+								},
+								-- Enable metadata as source for decompilation
+								enableMsBuildLoadProjectsOnDemand = false,
+								enableRoslynAnalyzers = true,
+								organizeImportsOnFormat = true,
+								enableEditorConfigSupport = true,
+								enableDecompilationSupport = true,
 							},
 						})
 					else

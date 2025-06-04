@@ -38,6 +38,7 @@ return {
 					"css",
 					"markdown",
 					"markdown_inline",
+					"c_sharp", -- C# syntax highlighting
 				},
 				-- enable autotagging (w/ nvim-ts-autotag plugin)
 				autotag = {
@@ -255,6 +256,7 @@ return {
 					sh = { "shfmt" },
 					bash = { "shfmt" },
 					zsh = { "shfmt_zsh", "zsh_indent" }, -- Try shfmt_zsh first, fallback to custom indenter
+					cs = { "csharpier" }, -- C# formatting
 				},
 				formatters = {
 					shfmt = {

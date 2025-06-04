@@ -140,5 +140,5 @@ vim.keymap.set("x", "<D-?>", function()
 end, { silent = true, desc = "Toggle comment (visual) and move down" })
 
 -- NerdTree
--- vim.g.NERDTreeWinPos = "right"
+-- vim.g.NerdTreeWinPos = "right"
 -- vim.g.lazyvim_check_order = false

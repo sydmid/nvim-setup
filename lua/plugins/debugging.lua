@@ -1,5 +1,5 @@
 return {
-	-- Debug Adapter Protocol
+	-- Debug Adapter Protocol - General configuration for non-C# debugging
 	{
 		"mfussenegger/nvim-dap",
 		dependencies = {
@@ -7,24 +7,27 @@ return {
 			"nvim-neotest/nvim-nio",
 		},
 		config = function()
+			-- Note: C# specific DAP configuration is handled in csharp.lua
+			-- This file handles general DAP setup for other languages
+
 			local dap = require("dap")
-			local dapui = require("dapui")
 
-			-- Set up DAP UI
-			dapui.setup()
+			-- Add other language debuggers here as needed
+			-- Example for Node.js debugging:
+			-- dap.adapters.node2 = {
+			--   type = 'executable',
+			--   command = 'node',
+			--   args = {os.getenv('HOME') .. '/dev/microsoft/vscode-node-debug2/out/src/nodeDebug.js'},
+			-- }
 
-			-- Automatically open/close DAP UI when starting/stopping debugging
-			dap.listeners.after.event_initialized["dapui_config"] = function()
-				dapui.open()
-			end
-			dap.listeners.before.event_terminated["dapui_config"] = function()
-				dapui.close()
-			end
-			dap.listeners.before.event_exited["dapui_config"] = function()
-				dapui.close()
-			end
+			-- Example for Python debugging:
+			-- dap.adapters.python = {
+			--   type = 'executable',
+			--   command = 'python',
+			--   args = { '-m', 'debugpy.adapter' },
+			-- }
 
-			-- Set up keymaps
+			-- General DAP keymaps (these complement the C# specific F-key mappings)
 			vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, { desc = "Toggle Breakpoint" })
 			vim.keymap.set("n", "<leader>dB", function()
 				dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
@@ -36,15 +39,6 @@ return {
 			vim.keymap.set("n", "<leader>dr", dap.repl.open, { desc = "Open REPL" })
 			vim.keymap.set("n", "<leader>dl", dap.run_last, { desc = "Run Last Debug Configuration" })
 			vim.keymap.set("n", "<leader>dt", dap.terminate, { desc = "Terminate Debugging" })
-			vim.keymap.set("n", "<leader>du", dapui.toggle, { desc = "Toggle Debug UI" })
 		end,
-	},
-
-	-- DAP UI
-	{
-		"rcarriga/nvim-dap-ui",
-		dependencies = {
-			"mfussenegger/nvim-dap",
-		},
 	},
 }

@@ -47,6 +47,8 @@ return {
         "pyright",
         "eslint",
         "bashls",
+        "omnisharp",
+        "csharp_ls",
       },
     })
 
@@ -60,6 +62,8 @@ return {
         "eslint_d",
         "shfmt", -- shell script formatter
         "shellcheck", -- shell script linter
+        "csharpier", -- C# formatter
+        "xmlformatter", -- XML formatter for C# projects
       },
     })
   end,
