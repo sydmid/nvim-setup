@@ -366,6 +366,12 @@ return {
 			)
 			keymap.set("n", "<leader>fC", "<cmd>Telescope command_history<cr>", { desc = "Find command history" })
 
+			-- LSP symbols with telescope
+			keymap.set("n", "<leader>fs", "<cmd>Telescope lsp_document_symbols<cr>", { desc = "Find document symbols" })
+			keymap.set("n", "<leader>fS", "<cmd>Telescope lsp_workspace_symbols<cr>", { desc = "Find workspace symbols" })
+			keymap.set("n", "<leader>fi", "<cmd>Telescope lsp_implementations<cr>", { desc = "Find implementations" })
+			keymap.set("n", "<leader>fr", "<cmd>Telescope lsp_references<cr>", { desc = "Find references" })
+
 			-- Enable line numbers in telescope preview windows
 			vim.api.nvim_create_autocmd("User", {
 				pattern = "TelescopePreviewerLoaded",

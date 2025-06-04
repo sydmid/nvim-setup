@@ -192,7 +192,7 @@ map("n", "<leader>fd", function()
 end, { desc = "Format document" })
 
 -- Structure view (similar to IDE structure tool)
-map("n", "<D-o>", ":SymbolsOutline<CR>", { desc = "Toggle structure view", silent = true })
+-- map("n", "<D-o>", ":SymbolsOutline<CR>", { desc = "Toggle structure view", silent = true })
 
 -- LSP keymaps have been moved to lua/plugins/lsp/lspconfig.lua
 -- This centralizes all LSP functionality and ensures keymaps are only active
