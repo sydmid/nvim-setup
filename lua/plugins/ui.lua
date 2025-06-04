@@ -363,10 +363,7 @@ return {
 						}
 					},
 					lualine_z = {
-						{
-							"location",
-							color = { fg = colors.fg }
-						}
+						-- Location hidden per user request
 					}
 				},
 				inactive_sections = {
@@ -379,10 +376,7 @@ return {
 						}
 					},
 					lualine_x = {
-						{
-							"location",
-							color = { fg = colors.medium_gray }
-						}
+						-- Location hidden per user request
 					},
 					lualine_y = {},
 					lualine_z = {}
