@@ -85,15 +85,15 @@ return {
 					-- Ensure all floating windows match Telescope background
 					vim.api.nvim_set_hl(0, "FloatBorder", {
 						fg = "#505050",
-						bg = "#151515"
+						bg = "#121212"
 					})
 					vim.api.nvim_set_hl(0, "NormalFloat", {
-						bg = "#151515",
+						bg = "#121212",
 						fg = "#E1E1E1"
 					})
 					vim.api.nvim_set_hl(0, "FloatTitle", {
 						bg = "#BAD7FF",
-						fg = "#151515",
+						fg = "#121212",
 						bold = true
 					})
 				end,

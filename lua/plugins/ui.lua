@@ -1,7 +1,7 @@
 --
 -- Comprehensive UI theming for Neovim with no-clown-fiesta theme
 -- Features:
--- - Consistent #151515 background across ALL UI elements (main editor, Telescope, LSP floating windows, command line)
+-- - Consistent #121212 background across ALL UI elements (main editor, Telescope, LSP floating windows, command line)
 -- - Enhanced syntax highlighting with better contrast and vibrancy
 -- - Telescope theming with proper title colors and selection highlighting
 -- - LSP hover/signature help windows styled to match the theme
@@ -29,8 +29,8 @@ local function config_theme()
 	-- Apply additional highlight enhancements for better vibrancy and contrast
 	local enhancements = {
 		-- Enhance syntax highlighting with better contrast
-		Normal = { fg = "#E1E1E1", bg = "#151515" }, -- Match Telescope background exactly
-		NormalNC = { fg = "#E1E1E1", bg = "#151515" }, -- Non-current window background
+		Normal = { fg = "#E1E1E1", bg = "#121212" }, -- Match Telescope background exactly
+		NormalNC = { fg = "#E1E1E1", bg = "#121212" }, -- Non-current window background
 		Function = { fg = "#88afa2", bold = true }, -- Enhanced cyan for functions
 		Keyword = { fg = "#7E97AB", bold = true }, -- Enhanced gray-blue for keywords
 		String = { fg = "#A2B5C1" }, -- Brighter string color
@@ -45,8 +45,8 @@ local function config_theme()
 
 		-- Enhanced UI elements
 		Visual = { bg = "#2A2A2A" }, -- Darker visual selection for better contrast
-		Search = { fg = "#151515", bg = "#FFA557", bold = true }, -- High contrast search
-		IncSearch = { fg = "#151515", bg = "#F4BF75", bold = true }, -- High contrast incremental search
+		Search = { fg = "#121212", bg = "#FFA557", bold = true }, -- High contrast search
+		IncSearch = { fg = "#121212", bg = "#F4BF75", bold = true }, -- High contrast incremental search
 		CursorLine = { bg = "#1A1A1A" }, -- Subtle cursor line
 		LineNr = { fg = "#505050" }, -- Brighter line numbers
 		CursorLineNr = { fg = "#AFAFAF", bold = true }, -- Bright current line number
@@ -54,8 +54,8 @@ local function config_theme()
 		WinSeparator = { fg = "#404040" }, -- Brighter window separators
 
 		-- Ensure floating windows match the main background
-		NormalFloat = { fg = "#E1E1E1", bg = "#151515" }, -- Floating windows background
-		FloatBorder = { fg = "#505050", bg = "#151515" }, -- Floating window borders
+		NormalFloat = { fg = "#E1E1E1", bg = "#121212" }, -- Floating windows background
+		FloatBorder = { fg = "#505050", bg = "#121212" }, -- Floating window borders
 
 		-- Enhanced diagnostic colors for better visibility
 		DiagnosticError = { fg = "#E74C3C" }, -- Brighter red
@@ -69,28 +69,28 @@ local function config_theme()
 		GitSignsDelete = { fg = "#E74C3C" }, -- Brighter red
 
 		-- Enhanced popup menu
-		Pmenu = { fg = "#E1E1E1", bg = "#151515" }, -- Better contrast popup menu to match theme
-		PmenuSel = { fg = "#151515", bg = "#BAD7FF", bold = true }, -- High contrast selection
-		PmenuBorder = { fg = "#505050", bg = "#151515" }, -- Visible popup border to match theme
-		PmenuKind = { fg = "#88afa2", bg = "#151515" }, -- LSP kind indicators
-		PmenuKindSel = { fg = "#151515", bg = "#BAD7FF", bold = true }, -- Selected LSP kind
-		PmenuExtra = { fg = "#AFAFAF", bg = "#151515" }, -- Extra text
-		PmenuExtraSel = { fg = "#151515", bg = "#BAD7FF" }, -- Selected extra text
+		Pmenu = { fg = "#E1E1E1", bg = "#121212" }, -- Better contrast popup menu to match theme
+		PmenuSel = { fg = "#121212", bg = "#BAD7FF", bold = true }, -- High contrast selection
+		PmenuBorder = { fg = "#505050", bg = "#121212" }, -- Visible popup border to match theme
+		PmenuKind = { fg = "#88afa2", bg = "#121212" }, -- LSP kind indicators
+		PmenuKindSel = { fg = "#121212", bg = "#BAD7FF", bold = true }, -- Selected LSP kind
+		PmenuExtra = { fg = "#AFAFAF", bg = "#121212" }, -- Extra text
+		PmenuExtraSel = { fg = "#121212", bg = "#BAD7FF" }, -- Selected extra text
 
 		-- Enhanced Telescope theming for consistency with no-clown-fiesta
-		TelescopeNormal = { fg = "#E1E1E1", bg = "#151515" },
-		TelescopeBorder = { fg = "#505050", bg = "#151515" },
+		TelescopeNormal = { fg = "#E1E1E1", bg = "#121212" },
+		TelescopeBorder = { fg = "#505050", bg = "#121212" },
 		TelescopePromptNormal = { fg = "#E1E1E1", bg = "#1A1A1A" },
 		TelescopePromptBorder = { fg = "#BAD7FF", bg = "#1A1A1A" },
-		TelescopePromptTitle = { fg = "#151515", bg = "#BAD7FF", bold = true },
+		TelescopePromptTitle = { fg = "#121212", bg = "#BAD7FF", bold = true },
 		TelescopePromptPrefix = { fg = "#88afa2", bold = true },
 		TelescopePromptCounter = { fg = "#F4BF75" },
-		TelescopeResultsNormal = { fg = "#E1E1E1", bg = "#151515" },
-		TelescopeResultsBorder = { fg = "#505050", bg = "#151515" },
-		TelescopeResultsTitle = { fg = "#151515", bg = "#90A959", bold = true },
-		TelescopePreviewNormal = { fg = "#E1E1E1", bg = "#171717" },
-		TelescopePreviewBorder = { fg = "#505050", bg = "#171717" },
-		TelescopePreviewTitle = { fg = "#151515", bg = "#FFA557", bold = true },
+		TelescopeResultsNormal = { fg = "#E1E1E1", bg = "#121212" },
+		TelescopeResultsBorder = { fg = "#505050", bg = "#121212" },
+		TelescopeResultsTitle = { fg = "#121212", bg = "#90A959", bold = true },
+		TelescopePreviewNormal = { fg = "#E1E1E1", bg = "#121212" },
+		TelescopePreviewBorder = { fg = "#505050", bg = "#121212" },
+		TelescopePreviewTitle = { fg = "#121212", bg = "#FFA557", bold = true },
 		TelescopeSelection = { fg = "#E1E1E1", bg = "#2A2A2A", bold = true },
 		TelescopeSelectionCaret = { fg = "#88afa2", bold = true },
 		TelescopeMatching = { fg = "#F4BF75", bold = true },
@@ -98,12 +98,12 @@ local function config_theme()
 		TelescopeMultiIcon = { fg = "#AA749F" },
 
 		-- LSP Saga theming for consistency
-		SagaNormal = { fg = "#E1E1E1", bg = "#151515" },
-		SagaBorder = { fg = "#505050", bg = "#151515" },
-		SagaTitle = { fg = "#151515", bg = "#BAD7FF", bold = true },
-		SagaHover = { fg = "#E1E1E1", bg = "#151515" },
+		SagaNormal = { fg = "#E1E1E1", bg = "#121212" },
+		SagaBorder = { fg = "#505050", bg = "#121212" },
+		SagaTitle = { fg = "#121212", bg = "#BAD7FF", bold = true },
+		SagaHover = { fg = "#E1E1E1", bg = "#121212" },
 		SagaCodeAction = { fg = "#F4BF75", bold = true },
-		SagaRename = { fg = "#E1E1E1", bg = "#151515" },
+		SagaRename = { fg = "#E1E1E1", bg = "#121212" },
 		SagaFinderSelection = { fg = "#E1E1E1", bg = "#2A2A2A", bold = true },
 	}
 
@@ -117,26 +117,26 @@ local function config_theme()
 		group = vim.api.nvim_create_augroup("TelescopeThemeEnhancements", { clear = true }),
 		callback = function()
 			-- Ensure main background matches Telescope background exactly
-			vim.api.nvim_set_hl(0, "Normal", { fg = "#E1E1E1", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "NormalNC", { fg = "#E1E1E1", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "NormalFloat", { fg = "#E1E1E1", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "FloatBorder", { fg = "#505050", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "Normal", { fg = "#E1E1E1", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "NormalNC", { fg = "#E1E1E1", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "NormalFloat", { fg = "#E1E1E1", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "FloatBorder", { fg = "#505050", bg = "#121212" })
 
 			-- Re-apply Telescope highlights to ensure they persist after theme changes
 			local telescope_highlights = {
-				TelescopeNormal = { fg = "#E1E1E1", bg = "#151515" },
-				TelescopeBorder = { fg = "#505050", bg = "#151515" },
+				TelescopeNormal = { fg = "#E1E1E1", bg = "#121212" },
+				TelescopeBorder = { fg = "#505050", bg = "#121212" },
 				TelescopePromptNormal = { fg = "#E1E1E1", bg = "#1A1A1A" },
 				TelescopePromptBorder = { fg = "#BAD7FF", bg = "#1A1A1A" },
-				TelescopePromptTitle = { fg = "#151515", bg = "#BAD7FF", bold = true },
+				TelescopePromptTitle = { fg = "#121212", bg = "#BAD7FF", bold = true },
 				TelescopePromptPrefix = { fg = "#88afa2", bold = true },
 				TelescopePromptCounter = { fg = "#F4BF75" },
-				TelescopeResultsNormal = { fg = "#E1E1E1", bg = "#151515" },
-				TelescopeResultsBorder = { fg = "#505050", bg = "#151515" },
-				TelescopeResultsTitle = { fg = "#151515", bg = "#90A959", bold = true },
-				TelescopePreviewNormal = { fg = "#E1E1E1", bg = "#171717" },
-				TelescopePreviewBorder = { fg = "#505050", bg = "#171717" },
-				TelescopePreviewTitle = { fg = "#151515", bg = "#FFA557", bold = true },
+				TelescopeResultsNormal = { fg = "#E1E1E1", bg = "#121212" },
+				TelescopeResultsBorder = { fg = "#505050", bg = "#121212" },
+				TelescopeResultsTitle = { fg = "#121212", bg = "#90A959", bold = true },
+				TelescopePreviewNormal = { fg = "#E1E1E1", bg = "#121212" },
+				TelescopePreviewBorder = { fg = "#505050", bg = "#121212" },
+				TelescopePreviewTitle = { fg = "#121212", bg = "#FFA557", bold = true },
 				TelescopeSelection = { fg = "#E1E1E1", bg = "#2A2A2A", bold = true },
 				TelescopeSelectionCaret = { fg = "#88afa2", bold = true },
 				TelescopeMatching = { fg = "#F4BF75", bold = true },
@@ -157,36 +157,36 @@ local function config_theme()
 			})
 			vim.api.nvim_set_hl(0, "FloatTitle", {
 				bg = "#BAD7FF",
-				fg = "#151515",
+				fg = "#121212",
 				bold = true
 			})
 
 			-- Re-apply noice highlights
-			vim.api.nvim_set_hl(0, "NoiceCmdlinePopup", { fg = "#E1E1E1", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "NoiceCmdlinePopupBorder", { fg = "#505050", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoiceCmdlinePopup", { fg = "#E1E1E1", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "NoiceCmdlinePopupBorder", { fg = "#505050", bg = "#121212" })
 			vim.api.nvim_set_hl(0, "NoiceCmdlinePrompt", { fg = "#BAD7FF", bold = true })
 			vim.api.nvim_set_hl(0, "NoiceCmdlineIcon", { fg = "#88afa2" })
-			vim.api.nvim_set_hl(0, "NoicePopup", { fg = "#E1E1E1", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "NoicePopupBorder", { fg = "#505050", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "NoiceConfirm", { fg = "#E1E1E1", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "NoiceConfirmBorder", { fg = "#505050", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoicePopup", { fg = "#E1E1E1", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "NoicePopupBorder", { fg = "#505050", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "NoiceConfirm", { fg = "#E1E1E1", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "NoiceConfirmBorder", { fg = "#505050", bg = "#121212" })
 
 			-- Re-apply popup menu highlights for consistency
-			vim.api.nvim_set_hl(0, "Pmenu", { fg = "#E1E1E1", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "PmenuSel", { fg = "#151515", bg = "#BAD7FF", bold = true })
-			vim.api.nvim_set_hl(0, "PmenuBorder", { fg = "#505050", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "PmenuKind", { fg = "#88afa2", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "PmenuKindSel", { fg = "#151515", bg = "#BAD7FF", bold = true })
-			vim.api.nvim_set_hl(0, "PmenuExtra", { fg = "#AFAFAF", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "PmenuExtraSel", { fg = "#151515", bg = "#BAD7FF" })
+			vim.api.nvim_set_hl(0, "Pmenu", { fg = "#E1E1E1", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "PmenuSel", { fg = "#121212", bg = "#BAD7FF", bold = true })
+			vim.api.nvim_set_hl(0, "PmenuBorder", { fg = "#505050", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "PmenuKind", { fg = "#88afa2", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "PmenuKindSel", { fg = "#121212", bg = "#BAD7FF", bold = true })
+			vim.api.nvim_set_hl(0, "PmenuExtra", { fg = "#AFAFAF", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "PmenuExtraSel", { fg = "#121212", bg = "#BAD7FF" })
 
 			-- LSP Saga specific highlights to match theme
-			vim.api.nvim_set_hl(0, "SagaNormal", { fg = "#E1E1E1", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "SagaBorder", { fg = "#505050", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "SagaTitle", { fg = "#151515", bg = "#BAD7FF", bold = true })
-			vim.api.nvim_set_hl(0, "SagaHover", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "SagaNormal", { fg = "#E1E1E1", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "SagaBorder", { fg = "#505050", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "SagaTitle", { fg = "#121212", bg = "#BAD7FF", bold = true })
+			vim.api.nvim_set_hl(0, "SagaHover", { fg = "#E1E1E1", bg = "#121212" })
 			vim.api.nvim_set_hl(0, "SagaCodeAction", { fg = "#F4BF75", bold = true })
-			vim.api.nvim_set_hl(0, "SagaRename", { fg = "#E1E1E1", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "SagaRename", { fg = "#E1E1E1", bg = "#121212" })
 			vim.api.nvim_set_hl(0, "SagaFinderSelection", { fg = "#E1E1E1", bg = "#2A2A2A", bold = true })
 		end,
 	})
@@ -216,8 +216,8 @@ return {
 			-- Enhanced no-clown-fiesta palette with improved vibrancy and contrast
 			local colors = {
 				-- Core theme colors from no-clown-fiesta palette
-				bg = "#151515",           -- Main background
-				alt_bg = "#171717",       -- Alternative background
+				bg = "#121212",           -- Main background
+				alt_bg = "#121212",       -- Alternative background
 				accent = "#202020",       -- Accent background
 				fg = "#E1E1E1",          -- Main foreground
 				light_gray = "#AFAFAF",   -- Light gray text
@@ -398,7 +398,7 @@ return {
 			-- Enhanced yank highlight with no-clown-fiesta colors
 			vim.g.highlightedyank_highlight_duration = 200
 			vim.api.nvim_set_hl(0, "HighlightedyankRegion", {
-				fg = "#151515",
+				fg = "#121212",
 				bg = "#F4BF75",
 				bold = true
 			})
@@ -477,14 +477,14 @@ return {
 		config = function(_, opts)
 			require("noice").setup(opts)
 			-- Enhanced noice highlight groups with no-clown-fiesta theme
-			vim.api.nvim_set_hl(0, "NoiceCmdlinePopup", { fg = "#E1E1E1", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "NoiceCmdlinePopupBorder", { fg = "#505050", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoiceCmdlinePopup", { fg = "#E1E1E1", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "NoiceCmdlinePopupBorder", { fg = "#505050", bg = "#121212" })
 			vim.api.nvim_set_hl(0, "NoiceCmdlinePrompt", { fg = "#BAD7FF", bold = true })
 			vim.api.nvim_set_hl(0, "NoiceCmdlineIcon", { fg = "#88afa2" })
-			vim.api.nvim_set_hl(0, "NoicePopup", { fg = "#E1E1E1", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "NoicePopupBorder", { fg = "#505050", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "NoiceConfirm", { fg = "#E1E1E1", bg = "#151515" })
-			vim.api.nvim_set_hl(0, "NoiceConfirmBorder", { fg = "#505050", bg = "#151515" })
+			vim.api.nvim_set_hl(0, "NoicePopup", { fg = "#E1E1E1", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "NoicePopupBorder", { fg = "#505050", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "NoiceConfirm", { fg = "#E1E1E1", bg = "#121212" })
+			vim.api.nvim_set_hl(0, "NoiceConfirmBorder", { fg = "#505050", bg = "#121212" })
 		end,
 	},
 
@@ -1262,7 +1262,7 @@ return {
 				group = vim.api.nvim_create_augroup("YankHighlightTheme", { clear = true }),
 				callback = function()
 					vim.api.nvim_set_hl(0, "HighlightedyankRegion", {
-						fg = "#151515",
+						fg = "#121212",
 						bg = "#F4BF75",
 						bold = true
 					})
@@ -1271,7 +1271,7 @@ return {
 
 			-- Apply immediately
 			vim.api.nvim_set_hl(0, "HighlightedyankRegion", {
-				fg = "#151515",
+				fg = "#121212",
 				bg = "#F4BF75",
 				bold = true
 			})
