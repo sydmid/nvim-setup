@@ -675,6 +675,108 @@ return {
 		},
 	},
 
+	-- Symbols Outline - Traditional sidebar view (complements Telescope symbols)
+	-- Provides a persistent sidebar with document symbols for quick overview
+	-- Works great alongside the Telescope symbol pickers for different workflows
+	{
+		"simrat39/symbols-outline.nvim",
+		keys = {
+			{
+				"<leader>ss",
+				function()
+					require("symbols-outline").toggle_outline()
+				end,
+				desc = "Toggle Symbols Outline",
+			},
+		},
+		config = function()
+			require("symbols-outline").setup({
+				-- Enhanced symbols outline configuration with minimal padding
+				highlight_hovered_item = true,
+				show_guides = true,
+				auto_preview = false, -- Disable auto preview to avoid conflicts with Telescope
+				position = "right", -- Position on the right side
+				relative_width = true,
+				width = 25, -- 25% of screen width
+				auto_close = false,
+				show_numbers = false,
+				show_relative_numbers = false,
+				show_symbol_details = false, -- Reduce clutter by hiding extra details
+				preview_bg_highlight = "Pmenu",
+				autofold_depth = nil, -- Don't auto-fold any levels
+				auto_unfold_hover = true,
+				fold_markers = { "", "" }, -- Minimal fold markers
+				wrap = false,
+				-- Minimize spacing and padding for maximum space efficiency
+				winblend = 0,
+				border = "none", -- Remove border to save space
+				cursor_follows_symbol = true,
+				keymaps = { -- Custom keymaps for symbols outline
+					close = {"<Esc>", "q"},
+					goto_location = "<Cr>",
+					focus_location = "o",
+					hover_symbol = "<C-space>",
+					toggle_preview = "K",
+					rename_symbol = "r",
+					code_actions = "a",
+					fold = "h",
+					unfold = "l",
+					fold_all = "zM",
+					unfold_all = "zR",
+					fold_reset = "zE",
+				},
+				lsp_blacklist = {},
+				symbol_blacklist = {},
+				-- Optimize display for maximum space efficiency
+				symbols_padding = 0, -- Remove symbol padding
+				show_guides = false, -- Disable guide lines for cleaner look
+				-- Enhanced symbol icons using the same icons as Telescope
+				symbols = {
+					File = { icon = "󰈔", hl = "@text.uri" },
+					Module = { icon = "󰏖", hl = "@namespace" },
+					Namespace = { icon = "󰌗", hl = "@namespace" },
+					Package = { icon = "󰏗", hl = "@namespace" },
+					Class = { icon = "󰠱", hl = "@type" },
+					Method = { icon = "󰊕", hl = "@method" },
+					Property = { icon = "󰜢", hl = "@method" },
+					Field = { icon = "󰓹", hl = "@field" },
+					Constructor = { icon = "󰆧", hl = "@constructor" },
+					Enum = { icon = "󰕘", hl = "@type" },
+					Interface = { icon = "󰜰", hl = "@type" },
+					Function = { icon = "󰡱", hl = "@function" },
+					Variable = { icon = "󰀫", hl = "@constant" },
+					Constant = { icon = "󰏿", hl = "@constant" },
+					String = { icon = "󰀬", hl = "@string" },
+					Number = { icon = "󰎠", hl = "@number" },
+					Boolean = { icon = "󰨙", hl = "@boolean" },
+					Array = { icon = "󰅪", hl = "@constant" },
+					Object = { icon = "󰅩", hl = "@type" },
+					Key = { icon = "󰌋", hl = "@type" },
+					Null = { icon = "󰟢", hl = "@type" },
+					EnumMember = { icon = "󰕘", hl = "@field" },
+					Struct = { icon = "󰙅", hl = "@type" },
+					Event = { icon = "󰉁", hl = "@type" },
+					Operator = { icon = "󰆕", hl = "@operator" },
+					TypeParameter = { icon = "󰊄", hl = "@parameter" },
+				},
+			})
+
+			-- Additional optimization: set compact window options when outline opens
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "Outline",
+				callback = function()
+					-- Maximize space utilization in the outline window
+					vim.opt_local.signcolumn = "no"  -- Remove sign column
+					vim.opt_local.foldcolumn = "0"   -- Remove fold column
+					vim.opt_local.number = false     -- Ensure no line numbers
+					vim.opt_local.relativenumber = false
+					vim.opt_local.wrap = false       -- Ensure no wrapping
+					vim.opt_local.cursorline = true  -- Highlight current line for better visibility
+				end,
+			})
+		end,
+	},
+
 	-- Tmux Tab Navigator
 	{
 		"christoomey/vim-tmux-navigator",
