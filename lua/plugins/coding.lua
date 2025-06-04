@@ -238,6 +238,11 @@ return {
 			local conform = require("conform")
 
 			conform.setup({
+				-- Add debugging and notifications
+				log_level = vim.log.levels.WARN,
+				notify_on_error = true,
+				notify_no_formatters = false,
+
 				formatters_by_ft = {
 					javascript = { "prettier" },
 					typescript = { "prettier" },
@@ -259,6 +264,25 @@ return {
 					cs = { "csharpier" }, -- C# formatting
 				},
 				formatters = {
+					csharpier = {
+						command = function()
+							-- First try to find csharpier in Mason's bin directory
+							local mason_bin = vim.fn.expand("~/.local/share/nvim/mason/bin/csharpier")
+							if vim.fn.executable(mason_bin) == 1 then
+								return mason_bin
+							end
+							-- Fallback to system PATH
+							return "csharpier"
+						end,
+						args = {
+							"format",
+							"--config-path",
+							vim.fn.expand("~/.config/nvim/.csharpierrc.json"),
+							"--write-stdout"
+						},
+						stdin = true,
+						cwd = require("conform.util").root_file({ ".csproj", "*.sln", "Directory.Build.props" }),
+					},
 					shfmt = {
 						prepend_args = { "-i", "2", "-ci" } -- 2-space indentation and indent switch cases
 					},
@@ -311,8 +335,7 @@ return {
 					}
 				},
 				format_on_save = {
-					lsp_fallback = true,
-					async = false,
+					lsp_format = "fallback",
 					timeout_ms = 1000,
 					-- Exclude problematic shell config files
 					-- Use a function for more complex exclusion logic
@@ -332,11 +355,13 @@ return {
 
 			vim.keymap.set({ "n", "v" }, "<leader>mp", function()
 				conform.format({
-					lsp_fallback = true,
-					async = false,
+					lsp_format = "fallback",
 					timeout_ms = 1000,
 				})
 			end, { desc = "Format file or range (in visual mode)" })
+
+			-- Add conform info command for debugging
+			vim.keymap.set("n", "<leader>ci", "<cmd>ConformInfo<cr>", { desc = "Show Conform info" })
 		end,
 	},
 	{

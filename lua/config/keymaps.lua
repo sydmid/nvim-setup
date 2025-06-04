@@ -184,8 +184,7 @@ map("n", "<leader>fd", function()
 	else
 		-- Use conform for regular formatting
 		conform.format({
-			lsp_fallback = true,
-			async = false,
+			lsp_format = "fallback",
 			timeout_ms = 1000,
 		})
 	end
