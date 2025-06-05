@@ -309,11 +309,11 @@ return {
 					lualine_c = {
 					},
 					lualine_x = {
-						{
-							lazy_status.updates,
-							cond = lazy_status.has_updates,
-							color = { fg = colors.orange },
-						},
+						-- {
+						-- 	lazy_status.updates,
+						-- 	cond = lazy_status.has_updates,
+						-- 	color = { fg = colors.orange },
+						-- },
 						{
 							"diagnostics",
 							sources = { "nvim_lsp", "nvim_diagnostic" },
