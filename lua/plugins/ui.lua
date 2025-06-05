@@ -287,9 +287,14 @@ return {
 					},
 					lualine_b = {
 						{
-							"branch",
-							icon = "󰊢",
-							color = { fg = colors.cyan }
+							"filename",
+							path = 0, -- Show filename only (no path)
+							color = { fg = colors.fg },
+							symbols = {
+								modified = "",
+								readonly = "",
+								unnamed = "",
+							}
 						},
 						{
 							"diff",
@@ -302,16 +307,6 @@ return {
 						}
 					},
 					lualine_c = {
-						{
-							"filename",
-							path = 1, -- Show relative path
-							color = { fg = colors.fg },
-							symbols = {
-								modified = " ●",
-								readonly = " 󰌾",
-								unnamed = " [No Name]",
-							}
-						}
 					},
 					lualine_x = {
 						{
@@ -336,10 +331,10 @@ return {
 								hint = " "
 							},
 						},
-						{
-							"encoding",
-							color = { fg = colors.medium_gray }
-						},
+						-- {
+						-- 	"encoding",
+						-- 	color = { fg = colors.medium_gray }
+						-- },
 						{
 							"fileformat",
 							color = { fg = colors.medium_gray },
@@ -358,12 +353,16 @@ return {
 					},
 					lualine_y = {
 						{
-							"progress",
-							color = { fg = colors.light_gray }
+							-- "progress",
+							-- color = { fg = colors.light_gray }
 						}
 					},
 					lualine_z = {
-						-- Location hidden per user request
+						{
+							"branch",
+							icon = "󰊢",
+							color = { fg = colors.cyan, bg = colors.alt_bg }
+						}
 					}
 				},
 				inactive_sections = {

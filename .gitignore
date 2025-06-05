@@ -1,6 +1,8 @@
 # Folder view configuration files
 .DS_Store
 Desktop.ini
+lazyvim.json
+lazy-lock.json
 
 # Files that might appear on external disks
 .Spotlight-V100
