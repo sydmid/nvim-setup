@@ -119,6 +119,18 @@ map("n", "d", '"_d', { desc = "d: Delete without yanking" })
 map("n", "D", '"_D', { desc = "D: Delete to EOL without yanking" })
 map("v", "d", '"_d', { desc = "d: Delete without yanking" })
 
+-- Try standard Ctrl+Tab (may not work in all terminals)
+-- vim.keymap.set('n', '<C-Tab>', ':bnext<CR>', { noremap = true, silent = true })
+-- vim.keymap.set('n', '<C-S-Tab>', ':bprevious<CR>', { noremap = true, silent = true })
+-- Map Ctrl-Tab
+vim.keymap.set('n', '<Esc>[27;5I', ':bnext<CR>', { noremap = true, silent = true })
+-- Map Ctrl-Shift-Tab
+vim.keymap.set('n', '<Esc>[27;6I', ':bprevious<CR>', { noremap = true, silent = true })
+-- map('n', '\27[27;5I', ':bnext<CR>', { noremap = true, silent = true })
+-- map('n', '\27[27;6I', ':bprevious<CR>', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('n', '<Esc>[1;5I', ':bnext<CR>', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('n', '<Esc>[1;6I', ':bprevious<CR>', { noremap = true, silent = true })
+
 -- Code formatting
 map("n", "<leader>fd", function()
 	local conform = require("conform")
@@ -220,9 +232,6 @@ map("n", "<leader>2", ":lua require('harpoon.ui').nav_file(2)<CR>", { desc = "Na
 map("n", "<leader>3", ":lua require('harpoon.ui').nav_file(3)<CR>", { desc = "Navigate to harpoon 3" })
 map("n", "<leader>4", ":lua require('harpoon.ui').nav_file(4)<CR>", { desc = "Navigate to harpoon 4" })
 map("n", "<leader>5", ":lua require('harpoon.ui').nav_file(5)<CR>", { desc = "Navigate to harpoon 5" })
-
-map('n', '<C-Tab>', ":bn<CR>", { noremap = true, silent = true })
-map('n', '<C-S-Tab>', ":bp<CR>", { noremap = true, silent = true })
 
 -- Eagerly load harpoon modules at startup to ensure instant response
 -- This is more effective than the previous lazy-loading approach
