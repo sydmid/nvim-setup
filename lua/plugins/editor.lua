@@ -410,6 +410,81 @@ return {
 			)
 			keymap.set("n", "<leader>ft", "<cmd>TodoTelescope<cr>", { desc = "Find todos" })
 
+			-- Custom telescope picker for bookmark annotations only
+			keymap.set("n", "<leader>fa", function()
+				local builtin = require("telescope.builtin")
+				local pickers = require("telescope.pickers")
+				local finders = require("telescope.finders")
+				local conf = require("telescope.config").values
+				local actions = require("telescope.actions")
+				local action_state = require("telescope.actions.state")
+
+				-- Get bookmark annotations from the bookmarks plugin
+				local bookmarks_ok, bookmarks = pcall(require, "bookmarks")
+				if not bookmarks_ok then
+					vim.notify("Bookmarks plugin not available", vim.log.levels.ERROR)
+					return
+				end
+
+				local bookmark_list = bookmarks.bookmark_list()
+				local annotated_bookmarks = {}
+
+				if bookmark_list and type(bookmark_list) == "table" then
+					for _, bookmark in ipairs(bookmark_list) do
+						-- Only include bookmarks that have annotations
+						if bookmark.annotation and bookmark.annotation ~= "" then
+							-- Filter by current working directory
+							local relative_path = vim.fn.fnamemodify(bookmark.filename, ":.")
+							if vim.startswith(bookmark.filename, vim.fn.getcwd()) then
+								table.insert(annotated_bookmarks, {
+									filename = bookmark.filename,
+									lnum = bookmark.line,
+									col = 1,
+									text = bookmark.annotation,
+									display = string.format("%s:%d - %s", relative_path, bookmark.line, bookmark.annotation),
+								})
+							end
+						end
+					end
+				end
+
+				if #annotated_bookmarks == 0 then
+					vim.notify("No bookmark annotations found in current project", vim.log.levels.INFO)
+					return
+				end
+
+				-- Create telescope picker using the same configuration as other pickers
+				pickers.new({}, {
+					prompt_title = "♥ Find Bookmark Annotations",
+					finder = finders.new_table({
+						results = annotated_bookmarks,
+						entry_maker = function(entry)
+							return {
+								value = entry,
+								display = entry.display,
+								ordinal = entry.display,
+								filename = entry.filename,
+								lnum = entry.lnum,
+								col = entry.col,
+							}
+						end,
+					}),
+					sorter = conf.generic_sorter({}),
+					previewer = conf.file_previewer({}),
+					attach_mappings = function(prompt_bufnr)
+						actions.select_default:replace(function()
+							local selection = action_state.get_selected_entry()
+							actions.close(prompt_bufnr)
+							if selection then
+								vim.cmd("edit " .. vim.fn.fnameescape(selection.filename))
+								vim.api.nvim_win_set_cursor(0, {selection.lnum, selection.col})
+							end
+						end)
+						return true
+					end,
+				}):find()
+			end, { desc = "Find bookmark annotations" })
+
 			-- Additional Telescope mappings (converted from FZF)
 			keymap.set("n", "<leader>fj", "<cmd>Telescope jumplist<cr>", { desc = "Find jumps" })
 			keymap.set("n", "<leader>fm", "<cmd>Telescope marks<cr>", { desc = "Find marks" })
