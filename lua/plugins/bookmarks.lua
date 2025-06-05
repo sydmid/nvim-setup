@@ -38,8 +38,8 @@ return {
       },
       -- Sign appearance
       signs = {
-        add = { hl = "BookMarksAdd", text = "⚑", numhl = "BookMarksAddNr", linehl = "BookMarksAddLn" },
-        ann = { hl = "BookMarksAnn", text = "♥", numhl = "BookMarksAnnNr", linehl = "BookMarksAnnLn" },
+        add = { hl = "BookMarksAdd", text = "●", numhl = "BookMarksAddNr", linehl = "BookMarksAddLn" },
+        ann = { hl = "BookMarksAnn", text = "●", numhl = "BookMarksAnnNr", linehl = "BookMarksAnnLn" },
       },
       -- Mappings
       on_attach = function()
@@ -47,8 +47,9 @@ return {
       end
     })
 
-    -- Restore original notify
-    vim.notify = orig_notify
+    -- Set up custom colors for bookmark signs
+    vim.api.nvim_set_hl(0, "BookMarksAdd", { fg = "#4A90E2" }) -- Blue circle for regular bookmarks
+    vim.api.nvim_set_hl(0, "BookMarksAnn", { fg = "#50C878" }) -- Green circle for annotated bookmarks
 
     -- Set up mappings to match VSCode and register with which-key using v3 format
     local keymaps = {
