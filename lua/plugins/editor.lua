@@ -494,8 +494,12 @@ return {
 			keymap.set(
 				"n",
 				"<leader>fl",
-				"<cmd>Telescope current_buffer_fuzzy_find<cr>",
-				{ desc = "Find in current buffer" }
+				function()
+					require("telescope.builtin").current_buffer_fuzzy_find({
+						previewer = false,
+					})
+				end,
+				{ desc = "Find in current buffer (no preview)" }
 			)
 			keymap.set("n", "<leader>fC", "<cmd>Telescope command_history<cr>", { desc = "Find command history" })
 
