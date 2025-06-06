@@ -165,13 +165,13 @@ return {
 								symlink_open = "󰉒", -- Open symlinked folder
 							},
 							git = {
-								unstaged = "󰄱",     -- Modified files (yellow)
-								staged = "󰱒",       -- Staged files (green)
-								unmerged = "󰘬",     -- Merge conflicts (red)
-								renamed = "󰑕",      -- Renamed files (blue)
-								untracked = "󰋖",    -- New files (green)
-								deleted = "󰍴",      -- Deleted files (red)
-								ignored = "󰿠",      -- Ignored files (gray)
+								unstaged = "✗",      -- Modified files (yellow)
+								staged = "✓",        -- Staged files (green)
+								unmerged = "",       -- Merge conflicts (red)
+								renamed = "➜",       -- Renamed files (blue)
+								untracked = "★",     -- New files (green)
+								deleted = "",       -- Deleted files (red)
+								ignored = "",       -- Ignored files (gray)
 							},
 						},
 					},
