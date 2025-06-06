@@ -691,6 +691,11 @@ return {
 										}), { reset_prompt = false })
 									end)
 
+									-- Add proper Esc handling
+									map("i", "<Esc>", actions.close)
+									map("n", "<Esc>", actions.close)
+									map("n", "q", actions.close)
+
 									-- Enhanced default action with better visual feedback
 									actions.select_default:replace(function()
 										local selection = action_state.get_selected_entry()
@@ -993,12 +998,15 @@ return {
 									}
 								end,
 							}),
-							sorter = conf.generic_sorter({}),
-							attach_mappings = function(prompt_bufnr, map)
+							sorter = conf.generic_sorter({}),							attach_mappings = function(prompt_bufnr, map)
+								-- Add proper Esc handling
+								map("i", "<Esc>", actions.close)
+								map("n", "<Esc>", actions.close)
+								map("n", "q", actions.close)
+
 								actions.select_default:replace(function()
 									local selection = action_state.get_selected_entry()
 									actions.close(prompt_bufnr)
-
 									if selection then
 										create_filtered_picker(selection.value.name)
 									end
@@ -1020,6 +1028,13 @@ return {
 						symbol_type_width = 15,
 						show_line = true,
 						previewer = true,
+						attach_mappings = function(prompt_bufnr, map_func)
+							local actions = require("telescope.actions")
+							map_func("i", "<Esc>", actions.close)
+							map_func("n", "<Esc>", actions.close)
+							map_func("n", "q", actions.close)
+							return true
+						end,
 					})
 				end,
 				desc = "Workspace Symbols (Telescope)",

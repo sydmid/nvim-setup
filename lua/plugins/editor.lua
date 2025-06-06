@@ -387,28 +387,78 @@ return {
 					sorting_strategy = "ascending",
 					prompt_prefix = " > ",
 					selection_caret = " > ",
+					attach_mappings = function(prompt_bufnr, map_func)
+						local actions = require("telescope.actions")
+						map_func("i", "<Esc>", actions.close)
+						map_func("n", "<Esc>", actions.close)
+						map_func("n", "q", actions.close)
+						return true
+					end,
 				})
 			end
 
 			-- set keymaps
 			local keymap = vim.keymap -- for conciseness
 			local builtin = require("telescope.builtin")
-			keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
-			keymap.set("n", "<leader>fo", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
-			keymap.set("n", "<D-p>", builtin.find_files, { desc = "Fuzzy find files in cwd" })
+
+			-- Helper function to create telescope mappings with proper Esc handling
+			local function telescope_with_esc(builtin_func, opts)
+				opts = opts or {}
+				return function()
+					local telescope_opts = vim.tbl_extend("force", opts, {
+						attach_mappings = function(prompt_bufnr, map_func)
+							local actions = require("telescope.actions")
+							map_func("i", "<Esc>", actions.close)
+							map_func("n", "<Esc>", actions.close)
+							map_func("n", "q", actions.close)
+							-- Preserve any existing attach_mappings
+							if opts.attach_mappings then
+								return opts.attach_mappings(prompt_bufnr, map_func)
+							end
+							return true
+						end,
+					})
+					builtin_func(telescope_opts)
+				end
+			end
+
+			keymap.set("n", "<leader>ff", telescope_with_esc(builtin.find_files), { desc = "Fuzzy find files in cwd" })
+			keymap.set("n", "<leader>fo", telescope_with_esc(builtin.oldfiles), { desc = "Fuzzy find recent files" })
+			keymap.set("n", "<D-p>", telescope_with_esc(builtin.find_files), { desc = "Fuzzy find files in cwd" })
 			-- keymap.set("n", "<D-p>", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
 			-- keymap.set("n", "<D-S-p>", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
 			keymap.set("n", "<leader>fp", function()
 				find_files_with_priority()
 			end, { desc = "Find files with priority for recent" })
-			keymap.set("n", "<leader>fs", "<cmd>Telescope live_grep<cr>", { desc = "Find string in cwd" })
+			keymap.set("n", "<leader>fs", telescope_with_esc(builtin.live_grep), { desc = "Find string in cwd" })
 			keymap.set(
 				"n",
 				"<leader>fc",
-				"<cmd>Telescope grep_string<cr>",
+				telescope_with_esc(builtin.grep_string),
 				{ desc = "Find string under cursor in cwd" }
 			)
-			keymap.set("n", "<leader>ft", "<cmd>TodoTelescope<cr>", { desc = "Find todos" })
+			keymap.set("n", "<leader>ft", function()
+				-- Use telescope for todo search with proper Esc handling
+				local telescope_opts = {
+					attach_mappings = function(prompt_bufnr, map_func)
+						local actions = require("telescope.actions")
+						map_func("i", "<Esc>", actions.close)
+						map_func("n", "<Esc>", actions.close)
+						map_func("n", "q", actions.close)
+						return true
+					end,
+				}
+				-- Try todo-comments telescope extension first, fallback to live_grep
+				local ok, todo_comments = pcall(require, "todo-comments")
+				if ok and todo_comments.search then
+					todo_comments.search(telescope_opts)
+				else
+					builtin.live_grep(vim.tbl_extend("force", telescope_opts, {
+						default_text = "TODO\\|FIXME\\|NOTE\\|HACK\\|WARN",
+						additional_args = { "--regex" }
+					}))
+				end
+			end, { desc = "Find todos" })
 
 			-- Custom telescope picker for bookmark annotations only
 			keymap.set("n", "<leader>fa", function()
@@ -480,34 +530,46 @@ return {
 								vim.api.nvim_win_set_cursor(0, {selection.lnum, selection.col})
 							end
 						end)
+						-- Add proper Esc handling
+						local map_func = vim.keymap.set
+						map_func("i", "<Esc>", function() actions.close(prompt_bufnr) end, { buffer = true })
+						map_func("n", "<Esc>", function() actions.close(prompt_bufnr) end, { buffer = true })
+						map_func("n", "q", function() actions.close(prompt_bufnr) end, { buffer = true })
 						return true
 					end,
 				}):find()
 			end, { desc = "Find bookmark annotations" })
 
 			-- Additional Telescope mappings (converted from FZF)
-			keymap.set("n", "<leader>fj", "<cmd>Telescope jumplist<cr>", { desc = "Find jumps" })
-			keymap.set("n", "<leader>fm", "<cmd>Telescope marks<cr>", { desc = "Find marks" })
-			keymap.set("n", "<leader>fw", "<cmd>Telescope windows<cr>", { desc = "Find windows" })
-			keymap.set("n", "<leader>fh", "<cmd>Telescope help_tags<cr>", { desc = "Find help tags" })
-			keymap.set("n", "<leader>fb", "<cmd>Telescope buffers<cr>", { desc = "Find buffers" })
+			keymap.set("n", "<leader>fj", telescope_with_esc(builtin.jumplist), { desc = "Find jumps" })
+			keymap.set("n", "<leader>fm", telescope_with_esc(builtin.marks), { desc = "Find marks" })
+			keymap.set("n", "<leader>fw", telescope_with_esc(builtin.buffers), { desc = "Find windows" })
+			keymap.set("n", "<leader>fh", telescope_with_esc(builtin.help_tags), { desc = "Find help tags" })
+			keymap.set("n", "<leader>fb", telescope_with_esc(builtin.buffers), { desc = "Find buffers" })
 			keymap.set(
 				"n",
 				"<leader>fl",
 				function()
 					require("telescope.builtin").current_buffer_fuzzy_find({
 						previewer = false,
+						attach_mappings = function(prompt_bufnr, map_func)
+							local actions = require("telescope.actions")
+							map_func("i", "<Esc>", actions.close)
+							map_func("n", "<Esc>", actions.close)
+							map_func("n", "q", actions.close)
+							return true
+						end,
 					})
 				end,
 				{ desc = "Find in current buffer (no preview)" }
 			)
-			keymap.set("n", "<leader>fC", "<cmd>Telescope command_history<cr>", { desc = "Find command history" })
+			keymap.set("n", "<leader>fC", telescope_with_esc(builtin.command_history), { desc = "Find command history" })
 
 			-- LSP symbols with telescope
-			keymap.set("n", "<leader>fs", "<cmd>Telescope lsp_document_symbols<cr>", { desc = "Find document symbols" })
-			keymap.set("n", "<leader>fS", "<cmd>Telescope lsp_workspace_symbols<cr>", { desc = "Find workspace symbols" })
-			keymap.set("n", "<leader>fi", "<cmd>Telescope lsp_implementations<cr>", { desc = "Find implementations" })
-			keymap.set("n", "<leader>fr", "<cmd>Telescope lsp_references<cr>", { desc = "Find references" })
+			keymap.set("n", "<leader>fs", telescope_with_esc(builtin.lsp_document_symbols), { desc = "Find document symbols" })
+			keymap.set("n", "<leader>fS", telescope_with_esc(builtin.lsp_workspace_symbols), { desc = "Find workspace symbols" })
+			keymap.set("n", "<leader>fi", telescope_with_esc(builtin.lsp_implementations), { desc = "Find implementations" })
+			keymap.set("n", "<leader>fr", telescope_with_esc(builtin.lsp_references), { desc = "Find references" })
 
 			-- Enable line numbers in telescope preview windows
 			vim.api.nvim_create_autocmd("User", {

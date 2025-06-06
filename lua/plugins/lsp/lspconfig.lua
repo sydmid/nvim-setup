@@ -207,8 +207,28 @@ return {
 						-- Standard LSP navigation commands for non-C# files
 						keymap("n", "gd", "<cmd>Lspsaga goto_definition<CR>", { buffer = ev.buf, desc = "Go to definition" })
 						keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>", { buffer = ev.buf, desc = "Peek definition" })
-						keymap("n", "<leader>us", "<cmd>Telescope lsp_references<CR>", { buffer = ev.buf, desc = "Find references" })
-						keymap("n", "<leader>ii", "<cmd>Telescope lsp_implementations<CR>", { buffer = ev.buf, desc = "Find implementations" })
+						keymap("n", "<leader>us", function()
+							require("telescope.builtin").lsp_references({
+								attach_mappings = function(prompt_bufnr, map_func)
+									local actions = require("telescope.actions")
+									map_func("i", "<Esc>", actions.close)
+									map_func("n", "<Esc>", actions.close)
+									map_func("n", "q", actions.close)
+									return true
+								end,
+							})
+						end, { buffer = ev.buf, desc = "Find references" })
+						keymap("n", "<leader>ii", function()
+							require("telescope.builtin").lsp_implementations({
+								attach_mappings = function(prompt_bufnr, map_func)
+									local actions = require("telescope.actions")
+									map_func("i", "<Esc>", actions.close)
+									map_func("n", "<Esc>", actions.close)
+									map_func("n", "q", actions.close)
+									return true
+								end,
+							})
+						end, { buffer = ev.buf, desc = "Find implementations" })
 						keymap("n", "gt", "<cmd>Lspsaga goto_type_definition<CR>", { buffer = ev.buf, desc = "Go to type definition" })
 					end
 
@@ -321,7 +341,18 @@ return {
 					-- Diagnostics with enhanced Lspsaga UI
 					-- Use ONLY Lspsaga for diagnostics UI to avoid duplication
 					keymap("n", "<leader>d", "<cmd>Lspsaga show_line_diagnostics<CR>", { buffer = ev.buf, desc = "Line diagnostics" })
-					keymap("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", { buffer = ev.buf, desc = "Buffer diagnostics" })
+					keymap("n", "<leader>D", function()
+						require("telescope.builtin").diagnostics({
+							bufnr = 0,
+							attach_mappings = function(prompt_bufnr, map_func)
+								local actions = require("telescope.actions")
+								map_func("i", "<Esc>", actions.close)
+								map_func("n", "<Esc>", actions.close)
+								map_func("n", "q", actions.close)
+								return true
+							end,
+						})
+					end, { buffer = ev.buf, desc = "Buffer diagnostics" })
 					keymap("n", "<leader>dj", "<cmd>Lspsaga diagnostic_jump_next<CR>", { buffer = ev.buf, desc = "Next diagnostic" })
 					keymap("n", "<leader>dk", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { buffer = ev.buf, desc = "Previous diagnostic" })
 					keymap("n", "<D-]>", "<cmd>Lspsaga diagnostic_jump_next<CR>", { buffer = ev.buf, desc = "Next diagnostic" })

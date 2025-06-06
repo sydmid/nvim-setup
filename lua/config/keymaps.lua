@@ -626,6 +626,61 @@ map("n", "<D-1>", ":NvimTreeToggle<CR>", { desc = "Toggle file explorer", silent
 -- map({ "n", "v" }, "<D-1>", ":NvimTreeToggle<CR>", { desc = "Toggle file explorer", silent = true })
 map({ "n", "v" }, "<D-e>", ":NvimTreeFindFile<CR>", { desc = "Reveal current file in tree", silent = true })
 
+-- Diagnostics with Telescope
+map("n", "<D-6>", function()
+	require("telescope.builtin").diagnostics({
+		bufnr = 0, -- Current buffer only
+		theme = "ivy", -- Use ivy theme for a beautiful compact container
+		layout_config = {
+			height = 0.5, -- Take 50% of screen height for better visibility
+			preview_cutoff = 120,
+		},
+		-- Enhanced diagnostic display
+		severity_sort = true, -- Group by severity (errors first)
+		no_sign = false, -- Show diagnostic signs
+		line_width = "full", -- Full line width for better readability
+		previewer = true, -- Enable preview for context
+		show_line = true, -- Show line numbers
+		attach_mappings = function(prompt_bufnr, map_func)
+			local actions = require("telescope.actions")
+			-- Override ESC to close telescope instead of going to normal mode
+			map_func("i", "<Esc>", actions.close)
+			map_func("n", "<Esc>", actions.close)
+			map_func("n", "q", actions.close)
+			return true
+		end,
+	})
+end, { desc = "Show buffer diagnostics in telescope", silent = true })
+
+-- Buffers with Telescope
+map("n", "<D-2>", function()
+	require("telescope.builtin").buffers({
+		theme = "ivy", -- Consistent theme with diagnostics
+		layout_config = {
+			height = 0.5,
+			preview_cutoff = 120,
+		},
+		-- Enhanced buffer display
+		show_all_buffers = true,
+		sort_mru = true, -- Sort by most recently used
+		sort_lastused = true,
+		previewer = true,
+		attach_mappings = function(prompt_bufnr, map_func)
+			local actions = require("telescope.actions")
+			-- Override ESC to close telescope instead of going to normal mode
+			map_func("i", "<Esc>", actions.close)
+			map_func("n", "<Esc>", actions.close)
+			map_func("n", "q", actions.close)
+			return true
+		end,
+	})
+end, { desc = "Show buffers in telescope", silent = true })
+
+-- Harpoon quick menu
+map("n", "<D-3>", function()
+	require("harpoon.ui").toggle_quick_menu()
+end, { desc = "Toggle Harpoon menu", silent = true })
+
 -- Normal + Visual mode
 map({ "n", "v" }, "<D-S-j>", function()
   -- If in visual mode, move the entire selected block
