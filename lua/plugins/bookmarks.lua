@@ -38,8 +38,8 @@ return {
       },
       -- Sign appearance
       signs = {
-        add = { hl = "BookMarksAdd", text = "●", numhl = "BookMarksAddNr", linehl = "BookMarksAddLn" },
-        ann = { hl = "BookMarksAnn", text = "●", numhl = "BookMarksAnnNr", linehl = "BookMarksAnnLn" },
+        add = { hl = "BookMarksAdd", text = "🔵", numhl = "BookMarksAddNr", linehl = "BookMarksAddLn" },
+        ann = { hl = "BookMarksAnn", text = "🟢", numhl = "BookMarksAnnNr", linehl = "BookMarksAnnLn" },
       },
       -- Mappings
       on_attach = function()
