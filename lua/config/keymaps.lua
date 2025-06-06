@@ -558,6 +558,18 @@ vim.keymap.set("n", "<Esc>", function()
 	-- Get current buffer details
 	local current = vim.api.nvim_get_current_buf()
 
+	-- Get current buffer filetype safely
+	local ft_ok, current_ft = pcall(function()
+		return vim.bo[current].filetype
+	end)
+
+	-- Special handling: Let telescope handle its own Esc mappings
+	-- Don't intercept Esc for telescope buffers
+	if ft_ok and (current_ft == "TelescopePrompt" or current_ft == "TelescopeResults") then
+		-- Do nothing - let telescope's attach_mappings handle Esc
+		return
+	end
+
 	-- Only redirect focus if we're in an auxiliary buffer in normal mode
 	if not is_main_buffer(current) then
 		-- If in auxiliary buffer, go back to last main buffer if exists

@@ -348,6 +348,11 @@ return {
 							["<C-j>"] = actions.move_selection_next, -- move to next result
 							["<C-q>"] = actions.send_selected_to_qflist + custom_actions.open_trouble_qflist,
 							["<C-t>"] = trouble_telescope.open,
+							["<Esc>"] = actions.close, -- Single Esc to close telescope
+						},
+						n = {
+							["<Esc>"] = actions.close, -- Single Esc to close telescope in normal mode
+							["q"] = actions.close, -- q to close telescope in normal mode
 						},
 					},
 				},
@@ -731,7 +736,10 @@ return {
 				end, "Blame line")
 				map("n", "<leader>hB", gs.toggle_current_line_blame, "Toggle line blame")
 
-				map("n", "<leader>hd", gs.diffthis, "Diff this")
+				map("n", "<leader>hd", function()
+					-- Show diff in a single buffer using floating window instead of split
+					gs.preview_hunk()
+				end, "Diff this (inline)")
 				map("n", "<leader>hD", function()
 					gs.diffthis("~")
 				end, "Diff this ~")
