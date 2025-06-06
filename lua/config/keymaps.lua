@@ -92,7 +92,19 @@ end, { noremap = true, silent = true })
 -- File navigation
 map("n", "\\e", ":e ~/.config/nvim/init.lua<CR>", { desc = "Edit init.lua" })
 map("n", "\\r", ":source ~/.config/nvim/init.lua<CR>", { desc = "Reload config" })
-map("n", "<leader>t", ":ToggleTerm<CR>", { desc = "Toggle terminal" })
+map("n", "<D-`>", function()
+  local terminals = require('config.terminals')
+  terminals.toggle_or_create_terminal("default", "fish")
+end, { desc = "Toggle terminal" })
+
+-- Terminal mode keymaps for better terminal interaction
+map("t", "<Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+map("t", "<D-`>", function()
+  -- Exit terminal mode and toggle the terminal
+  vim.cmd("stopinsert")
+  local terminals = require('config.terminals')
+  terminals.toggle_or_create_terminal("default", "fish")
+end, { desc = "Toggle terminal from terminal mode" })
 
 -- Better navigation
 map("v", "<S-J>", "5gj", { desc = "Move down 5 lines", silent = true })
@@ -671,11 +683,11 @@ map("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" }) -- spli
 map("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" }) -- make split windows equal width & height
 map("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" }) -- close current split window
 
-map("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "Open new tab" }) -- open new tab
-map("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" }) -- close current tab
-map("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
-map("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
-map("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
+map("n", "<leader>wo", "<cmd>tabnew<CR>", { desc = "Open new tab" }) -- open new tab
+map("n", "<leader>wx", "<cmd>tabclose<CR>", { desc = "Close current tab" }) -- close current tab
+map("n", "<leader>wn", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
+map("n", "<leader>wp", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
+map("n", "<leader>wf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
 
 -- Smart find and replace function
 local function get_visual_selection()
@@ -770,6 +782,137 @@ vim.keymap.set("i", "<C-^>", function()
 	end
 end, { desc = "Toggle Arabic keymap" })
 
+-- Terminal management system using the terminals.lua module
+-- Load the terminal management module
+local terminals = require('config.terminals')
+
+-- Basic terminal keymaps
+-- map("n", "<leader>tt", function() terminals.toggle_or_create_terminal("default", "fish") end, { desc = "Toggle default terminal" })
+-- map("n", "<leader>tf", function() terminals.run_in_terminal("default", "fish", { direction = "float" }) end, { desc = "Toggle floating terminal" })
+-- map("n", "<leader>tv", function() terminals.run_in_terminal("default", "fish", { direction = "vertical" }) end, { desc = "Toggle vertical terminal" })
+-- map("n", "<leader>th", function() terminals.run_in_terminal("default", "fish", { direction = "horizontal" }) end, { desc = "Toggle horizontal terminal" })
+
+-- Service terminals (moved to 't' group - numbers 1-9)
+map("n", "<leader>t1", function() terminals.run_in_terminal("web", "just web") end, { desc = "Run web service" })
+map("n", "<leader>t2", function() terminals.run_in_terminal("api", "just api") end, { desc = "Run API service" })
+map("n", "<leader>t3", function() terminals.run_in_terminal("database", "just db") end, { desc = "Run database" })
+map("n", "<leader>t4", function() terminals.run_in_terminal("worker", "just worker") end, { desc = "Run worker" })
+map("n", "<leader>t5", function() terminals.run_in_terminal("test", "just test") end, { desc = "Run tests" })
+map("n", "<leader>t6", function() terminals.run_in_terminal("build", "just build") end, { desc = "Run build" })
+map("n", "<leader>t7", function() terminals.run_in_terminal("dev", "just dev") end, { desc = "Run dev server" })
+map("n", "<leader>t8", function() terminals.run_in_terminal("logs", "just logs") end, { desc = "View logs" })
+map("n", "<leader>t9", function() terminals.run_in_terminal("monitor", "just monitor") end, { desc = "Run monitor" })
+
+-- Terminal focus keymaps (ta = terminal a, tb = terminal b, etc.)
+map("n", "<leader>ta", function() terminals.focus_terminal("web") end, { desc = "Focus web terminal" })
+map("n", "<leader>tb", function() terminals.focus_terminal("api") end, { desc = "Focus API terminal" })
+map("n", "<leader>tc", function() terminals.focus_terminal("database") end, { desc = "Focus database terminal" })
+map("n", "<leader>td", function() terminals.focus_terminal("worker") end, { desc = "Focus worker terminal" })
+map("n", "<leader>te", function() terminals.focus_terminal("test") end, { desc = "Focus test terminal" })
+map("n", "<leader>tg", function() terminals.focus_terminal("build") end, { desc = "Focus build terminal" })
+map("n", "<leader>ti", function() terminals.focus_terminal("dev") end, { desc = "Focus dev terminal" })
+map("n", "<leader>tl", function() terminals.focus_terminal("logs") end, { desc = "Focus logs terminal" })
+map("n", "<leader>tm", function() terminals.focus_terminal("monitor") end, { desc = "Focus monitor terminal" })
+
+-- Terminal cycling and management
+map("n", "<leader>tn", function() terminals.cycle_terminals("next") end, { desc = "Next terminal" })
+map("n", "<leader>tp", function() terminals.cycle_terminals("previous") end, { desc = "Previous terminal" })
+map("n", "<leader>ts", terminals.terminal_picker, { desc = "Select terminal (Telescope)" })
+map("n", "<leader>tr", function()
+  local name = vim.fn.input("Terminal name to restart: ")
+  if name ~= "" then terminals.restart_terminal(name) end
+end, { desc = "Restart terminal" })
+map("n", "<leader>tk", terminals.kill_all_terminals, { desc = "Kill all terminals" })
+map("n", "<leader>tq", function()
+  local current_buf = vim.api.nvim_get_current_buf()
+  local terminals_module = require('config.terminals')
+  local active_terminals = terminals_module.list_terminals()
+
+  for _, term_data in ipairs(active_terminals) do
+    if term_data.bufnr == current_buf then
+      terminals_module.close_terminal(term_data.name)
+      return
+    end
+  end
+  vim.notify("Current buffer is not a managed terminal", vim.log.levels.WARN)
+end, { desc = "Close current terminal" })
+
+-- Debug cursor state for troubleshooting
+map("n", "<leader>td", function() terminals.debug_cursor_state() end, { desc = "Debug terminal cursor state" })
+
+-- Register terminal commands with which-key
+vim.defer_fn(function()
+  local wk_ok, wk = pcall(require, "which-key")
+  if wk_ok then
+    wk.add({
+      { "<leader>t", group = "Terminal" },
+      { "<leader>tt", desc = "Toggle default terminal" },
+      { "<leader>tf", desc = "Toggle floating terminal" },
+      { "<leader>tv", desc = "Toggle vertical terminal" },
+      { "<leader>th", desc = "Toggle horizontal terminal" },
+      { "<leader>ts", desc = "Select terminal (Telescope)" },
+      { "<leader>tn", desc = "Next terminal" },
+      { "<leader>tp", desc = "Previous terminal" },
+      { "<leader>tr", desc = "Restart terminal" },
+      { "<leader>tk", desc = "Kill all terminals" },
+      { "<leader>tq", desc = "Close current terminal" },
+
+      -- Service terminals (moved to 't' prefix with numbers)
+      { "<leader>t1", desc = "🌐 Run Web Server" },
+      { "<leader>t2", desc = "🔗 Run API Server" },
+      { "<leader>t3", desc = "🗃️ Run Database" },
+      { "<leader>t4", desc = "⚙️ Run Worker" },
+      { "<leader>t5", desc = "🧪 Run Tests" },
+      { "<leader>t6", desc = "🔨 Run Build" },
+      { "<leader>t7", desc = "💻 Run Dev Server" },
+      { "<leader>t8", desc = "📋 View Logs" },
+      { "<leader>t9", desc = "📊 Run Monitor" },
+
+      -- Terminal focus
+      { "<leader>ta", desc = "🌐 Focus Web Terminal" },
+      { "<leader>tb", desc = "🔗 Focus API Terminal" },
+      { "<leader>tc", desc = "🗃️ Focus Database Terminal" },
+      { "<leader>td", desc = "⚙️ Focus Worker Terminal" },
+      { "<leader>te", desc = "🧪 Focus Test Terminal" },
+      { "<leader>tg", desc = "🔨 Focus Build Terminal" },
+      { "<leader>ti", desc = "💻 Focus Dev Terminal" },
+      { "<leader>tl", desc = "📋 Focus Logs Terminal" },
+      { "<leader>tm", desc = "📊 Focus Monitor Terminal" },
+      { "<leader>tx", desc = "󰈈 Toggle cursor follow (lock/unlock)" },
+      { "<leader>tL", desc = "󰌾 Lock cursor (disable auto-scroll)" },
+      { "<leader>tU", desc = "󰚰 Unlock cursor (enable auto-scroll)" },
+      { "<leader>td", desc = "󰃤 Debug terminal cursor state" },
+
+      -- Basic toggle terminal (moved to Cmd+`)
+      { "<D-`>", desc = "󰆍 Toggle terminal" },
+
+      -- Tab/Workspace management
+      { "<leader>w", group = "Workspace/Tabs" },
+      { "<leader>wo", desc = "󰓩 Open new tab" },
+      { "<leader>wx", desc = "󰅖 Close current tab" },
+      { "<leader>wn", desc = "󰒭 Go to next tab" },
+      { "<leader>wp", desc = "󰒮 Go to previous tab" },
+      { "<leader>wf", desc = "󰏫 Open current buffer in new tab" },
+
+      -- Harpoon (original configuration)
+      { "<leader>1", desc = "󰼏 Navigate to harpoon 1" },
+      { "<leader>2", desc = "󰼐 Navigate to harpoon 2" },
+      { "<leader>3", desc = "󰼑 Navigate to harpoon 3" },
+      { "<leader>4", desc = "󰼒 Navigate to harpoon 4" },
+      { "<leader>5", desc = "󰼓 Navigate to harpoon 5" },
+      { "<leader>h", group = "Harpoon" },
+      { "<leader>h", desc = "󰛢 Harpoon Menu" },
+      { "<leader>hm", desc = "󰛢 Harpoon Menu (fallback)" },
+      { "<leader>ha", desc = "󰃀 Add to harpoon" },
+    })
+  end
+end, 100)
+
 -- Buffer navigation with Cmd+Left/Right arrows (similar to IDE tab navigation)
 map("n", "<D-Left>", ":bprevious<CR>", { desc = "Navigate to previous buffer", silent = true })
 map("n", "<D-Right>", ":bnext<CR>", { desc = "Navigate to next buffer", silent = true })
+
+-- Terminal cursor control for live logs (avoiding conflict with <leader>tl for logs focus)
+map("n", "<leader>tx", function() terminals.toggle_follow_output() end, { desc = "Toggle cursor follow (lock/unlock)" })
+map("n", "<leader>tL", function() terminals.lock_cursor() end, { desc = "Lock cursor (disable auto-scroll)" })
+map("n", "<leader>tU", function() terminals.unlock_cursor() end, { desc = "Unlock cursor (enable auto-scroll)" })

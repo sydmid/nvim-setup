@@ -610,35 +610,51 @@ return {
 		opts = {},
 	},
 
-	-- Terminal integration
+	-- Terminal integration with management system
 	{
 		"akinsho/toggleterm.nvim",
 		version = "*",
-		keys = {
-			{ "<leader>t", ":ToggleTerm<CR>", desc = "Toggle terminal" },
+		dependencies = {
+			"nvim-telescope/telescope.nvim",
 		},
-		opts = {
-			size = 20,
-			open_mapping = [[<leader>t]],
-			hide_numbers = true,
-			shade_filetypes = {},
-			shade_terminals = true,
-			shading_factor = 2,
-			start_in_insert = true,
-			insert_mappings = true,
-			persist_size = true,
-			direction = "float",
-			close_on_exit = true,
-			shell = vim.o.shell,
-			float_opts = {
-				border = "curved",
-				winblend = 0,
-				highlights = {
-					border = "Normal",
-					background = "Normal",
+		config = function()
+			require("toggleterm").setup({
+				size = 20,
+				hide_numbers = true,
+				shade_filetypes = {},
+				shade_terminals = true,
+				shading_factor = 2,
+				start_in_insert = true,
+				insert_mappings = true,
+				persist_size = true,
+				direction = "float",
+				close_on_exit = true,
+				shell = vim.o.shell,
+				auto_scroll = false, -- Disable auto-scroll to allow manual cursor control
+				float_opts = {
+					border = "curved",
+					winblend = 0,
+					highlights = {
+						border = "Normal",
+						background = "Normal",
+					},
+					width = math.floor(vim.o.columns * 0.85),
+					height = math.floor(vim.o.lines * 0.85),
 				},
-			},
-		},
+			})
+
+			-- Initialize terminal management system
+			require("config.terminals").setup({
+				terminal_size = 20,
+				direction = "float",
+				float_opts = {
+					border = "curved",
+					winblend = 0,
+					width = math.floor(vim.o.columns * 0.85),
+					height = math.floor(vim.o.lines * 0.85),
+				},
+			})
+		end,
 	},
 
 	-- Trouble (diagnostics, references, etc.)
