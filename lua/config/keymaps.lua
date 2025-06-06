@@ -53,9 +53,9 @@ end, { noremap = true, silent = true })
 -- Buffer management commands (which-key compatible)
 map("n", "<leader>bb", "<cmd>e #<CR>", { desc = "Switch to other buffer" })
 map("n", "<leader>`", "<cmd>e #<CR>", { desc = "Switch to other buffer" })
-map("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Delete buffer" })
+map("n", "<leader>bd", "<cmd>bdelete!<CR>", { desc = "Delete buffer and window" })
 map("n", "<leader>bo", "<cmd>%bd|e#|bd#<CR>", { desc = "Delete other buffers" })
-map("n", "<leader>bD", "<cmd>bdelete!<CR>", { desc = "Delete buffer and window" })
+-- map("n", "<leader>bD", "<cmd>bdelete!<CR>", { desc = "Delete buffer and window" })
 
 -- Register buffer commands with which-key explicitly
 vim.defer_fn(function()
@@ -64,9 +64,9 @@ vim.defer_fn(function()
     wk.register({
       ["<leader>b"] = { name = "Buffer" },
       ["<leader>bb"] = { "<cmd>e #<CR>", "Switch to other buffer" },
-      ["<leader>bd"] = { "<cmd>bdelete<CR>", "Delete buffer" },
+      ["<leader>bd"] = { "<cmd>bdelete<CR>", "Delete buffer and window" },
       ["<leader>bo"] = { "<cmd>%bd|e#|bd#<CR>", "Delete other buffers" },
-      ["<leader>bD"] = { "<cmd>bdelete!<CR>", "Delete buffer and window" },
+      ["<leader>bh"] = { "<cmd>hide<CR>", "Hide current buffer" },
     })
   end
 end, 100)
@@ -131,17 +131,15 @@ map("n", "d", '"_d', { desc = "d: Delete without yanking" })
 map("n", "D", '"_D', { desc = "D: Delete to EOL without yanking" })
 map("v", "d", '"_d', { desc = "d: Delete without yanking" })
 
--- Try standard Ctrl+Tab (may not work in all terminals)
--- vim.keymap.set('n', '<C-Tab>', ':bnext<CR>', { noremap = true, silent = true })
--- vim.keymap.set('n', '<C-S-Tab>', ':bprevious<CR>', { noremap = true, silent = true })
--- Map Ctrl-Tab
-vim.keymap.set('n', '<Esc>[27;5I', ':bnext<CR>', { noremap = true, silent = true })
--- Map Ctrl-Shift-Tab
-vim.keymap.set('n', '<Esc>[27;6I', ':bprevious<CR>', { noremap = true, silent = true })
--- map('n', '\27[27;5I', ':bnext<CR>', { noremap = true, silent = true })
--- map('n', '\27[27;6I', ':bprevious<CR>', { noremap = true, silent = true })
--- vim.api.nvim_set_keymap('n', '<Esc>[1;5I', ':bnext<CR>', { noremap = true, silent = true })
--- vim.api.nvim_set_keymap('n', '<Esc>[1;6I', ':bprevious<CR>', { noremap = true, silent = true })
+-- Tab navigation using correct VT sequences (0x09 = tab character)
+-- Map Ctrl-Tab (Ctrl modifier = 5, Tab = 0x09)
+vim.keymap.set('n', '<Esc>[27;5;9~', ':bnext<CR>', { noremap = true, silent = true })
+-- Map Ctrl-Shift-Tab (Ctrl+Shift modifier = 6, Tab = 0x09)
+vim.keymap.set('n', '<Esc>[27;6;9~', ':bprevious<CR>', { noremap = true, silent = true })
+
+-- Alternative formats that might work in different terminals
+vim.keymap.set('n', '<C-Tab>', ':bnext<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<C-S-Tab>', ':bprevious<CR>', { noremap = true, silent = true })
 
 -- Code formatting
 map("n", "<leader>fd", function()
@@ -656,6 +654,7 @@ end, { desc = "Show buffer diagnostics in telescope", silent = true })
 map("n", "<D-2>", function()
 	require("telescope.builtin").buffers({
 		theme = "ivy", -- Consistent theme with diagnostics
+		initial_mode = "normal", -- Start in normal mode instead of insert mode
 		layout_config = {
 			height = 0.5,
 			preview_cutoff = 120,
