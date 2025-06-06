@@ -231,7 +231,8 @@ end, { desc = "Format document" })
 -- Use <D-S-i> (Cmd+Shift+I) to manually trigger signature help when needed.
 
 -- Harpoon mappings
-map("n", "<leader>a1", ":lua require('harpoon.mark').add_file()<CR>", { desc = "Add to harpoon" })
+map("n", "<leader>aa", ":lua require('harpoon.mark').add_file()<CR>", { desc = "Add to harpoon" })
+map("n", "<leader>a1", ":lua require('harpoon.mark').add_file(1)<CR>", { desc = "Add to harpoon 1" })
 map("n", "<leader>a2", ":lua require('harpoon.mark').add_file(2)<CR>", { desc = "Add to harpoon 2" })
 map("n", "<leader>a3", ":lua require('harpoon.mark').add_file(3)<CR>", { desc = "Add to harpoon 3" })
 map("n", "<leader>a4", ":lua require('harpoon.mark').add_file(4)<CR>", { desc = "Add to harpoon 4" })
@@ -243,26 +244,6 @@ map("n", "<leader>3", ":lua require('harpoon.ui').nav_file(3)<CR>", { desc = "Na
 map("n", "<leader>4", ":lua require('harpoon.ui').nav_file(4)<CR>", { desc = "Navigate to harpoon 4" })
 map("n", "<leader>5", ":lua require('harpoon.ui').nav_file(5)<CR>", { desc = "Navigate to harpoon 5" })
 
--- Eagerly load harpoon modules at startup to ensure instant response
--- This is more effective than the previous lazy-loading approach
-vim.defer_fn(function()
-  -- Pre-require all harpoon modules at startup
-  local harpoon = require('harpoon')
-  local ui = require('harpoon.ui')
-  local mark = require('harpoon.mark')
-
-  -- Set up an optimized toggle function that doesn't need to load modules on each call
-  vim.keymap.set('n', '<leader>h', function()
-    ui.toggle_quick_menu()
-  end, { noremap = true, silent = true, nowait = true, desc = "Harpoon Menu" })
-end, 100) -- Small delay to prioritize critical startup tasks first
-
--- Backup keybinding in case eager loading fails
-map('n', '<leader>hh', function()
-  require("harpoon.ui").toggle_quick_menu()
-end, { noremap = true, silent = true, nowait = true, desc = "Harpoon Menu (fallback)" })
-
-map("n", "<leader>aa", ":lua require('harpoon.mark').add_file()<CR>", { desc = "Add to harpoon" })
 
 -- Additional IDE-like actions
 -- map("n", "<leader>db", ":lua require('dap').toggle_breakpoint()<CR>", { desc = "Toggle breakpoint" })
@@ -629,6 +610,7 @@ map("n", "<D-6>", function()
 	require("telescope.builtin").diagnostics({
 		bufnr = 0, -- Current buffer only
 		theme = "ivy", -- Use ivy theme for a beautiful compact container
+        initial_mode = "normal", -- Start in normal mode instead of insert mode
 		layout_config = {
 			height = 0.5, -- Take 50% of screen height for better visibility
 			preview_cutoff = 120,
@@ -954,17 +936,9 @@ vim.defer_fn(function()
       { "<leader>3", desc = "󰼑 Navigate to harpoon 3" },
       { "<leader>4", desc = "󰼒 Navigate to harpoon 4" },
       { "<leader>5", desc = "󰼓 Navigate to harpoon 5" },
-      { "<leader>h", group = "Harpoon" },
-      { "<leader>h", desc = "󰛢 Harpoon Menu" },
-      { "<leader>hm", desc = "󰛢 Harpoon Menu (fallback)" },
-      { "<leader>ha", desc = "󰃀 Add to harpoon" },
     })
   end
 end, 100)
-
--- Buffer navigation with Cmd+Left/Right arrows (similar to IDE tab navigation)
-map("n", "<D-Left>", ":bprevious<CR>", { desc = "Navigate to previous buffer", silent = true })
-map("n", "<D-Right>", ":bnext<CR>", { desc = "Navigate to next buffer", silent = true })
 
 -- Terminal cursor control for live logs (avoiding conflict with <leader>tl for logs focus)
 map("n", "<leader>tx", function() terminals.toggle_follow_output() end, { desc = "Toggle cursor follow (lock/unlock)" })

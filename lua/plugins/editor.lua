@@ -192,6 +192,10 @@ return {
 				git = {
 					ignore = false,
 				},
+				live_filter = {
+					prefix = "[FILTER]: ",
+					always_show_folders = true,
+				},
 				on_attach = function(bufnr)
 					local api = require("nvim-tree.api")
 
@@ -272,6 +276,11 @@ return {
 					vim.keymap.set("n", "<2-LeftMouse>", api.node.open.edit, opts("Open"))
 					vim.keymap.set("n", "<2-RightMouse>", api.tree.change_root_to_node, opts("CD"))
 					-- END_DEFAULT_ON_ATTACH
+
+					-- Custom mapping: Use `/` for live filter instead of global search
+					vim.keymap.set("n", "/", api.live_filter.start, opts("Live Filter: Start"))
+					-- Custom mapping: Use `//` for clearing live filter
+					vim.keymap.set("n", "//", api.live_filter.clear, opts("Live Filter: Clear"))
 				end,
 			})
 
@@ -608,64 +617,6 @@ return {
 	{
 		"ThePrimeagen/harpoon",
 		dependencies = { "nvim-lua/plenary.nvim" },
-		keys = {
-			{
-				"<leader>a1",
-				function()
-					require("harpoon.mark").add_file()
-				end,
-				desc = "Add to Harpoon",
-			},
-			{
-				"<leader>h",
-				function()
-					require("harpoon.ui").toggle_quick_menu()
-				end,
-				desc = "Harpoon Menu",
-			},
-			{
-				"<leader>1",
-				function()
-					require("harpoon.ui").nav_file(1)
-				end,
-				desc = "Harpoon 1",
-			},
-			{
-				"<leader>2",
-				function()
-					require("harpoon.ui").nav_file(2)
-				end,
-				desc = "Harpoon 2",
-			},
-			{
-				"<leader>3",
-				function()
-					require("harpoon.ui").nav_file(3)
-				end,
-				desc = "Harpoon 3",
-			},
-			{
-				"<leader>4",
-				function()
-					require("harpoon.ui").nav_file(4)
-				end,
-				desc = "Harpoon 4",
-			},
-			{
-				"<leader>5",
-				function()
-					require("harpoon.ui").nav_file(5)
-				end,
-				desc = "Harpoon 5",
-			},
-			{
-				"<leader>aa",
-				function()
-					require("harpoon.mark").add_file()
-				end,
-				desc = "Add to Harpoon",
-			},
-		},
 	},
 
 	-- Surround text
