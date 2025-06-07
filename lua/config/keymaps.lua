@@ -956,3 +956,17 @@ end, 100)
 map("n", "<leader>tx", function() terminals.toggle_follow_output() end, { desc = "Toggle cursor follow (lock/unlock)" })
 map("n", "<leader>tL", function() terminals.lock_cursor() end, { desc = "Lock cursor (disable auto-scroll)" })
 map("n", "<leader>tU", function() terminals.unlock_cursor() end, { desc = "Unlock cursor (enable auto-scroll)" })
+
+-- System clipboard keymaps (macOS style)
+map({ "n", "v" }, "<D-c>", '"+y', { desc = "Copy to system clipboard", silent = true })
+map({ "n", "v" }, "<D-x>", '"+x', { desc = "Cut to system clipboard", silent = true })
+map({ "n", "v", "i" }, "<D-v>", function()
+  if vim.fn.mode() == "i" then
+    return '<C-r>+'
+  else
+    return '"+p'
+  end
+end, { desc = "Paste from system clipboard", expr = true, silent = true })
+
+-- Configure word boundaries to treat hyphens as separators
+vim.opt.iskeyword:remove("-")
