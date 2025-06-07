@@ -433,10 +433,46 @@ return {
 			end
 
 			keymap.set("n", "<leader>ff", telescope_with_esc(builtin.find_files), { desc = "Fuzzy find files in cwd" })
-			keymap.set("n", "<leader>fo", telescope_with_esc(builtin.oldfiles), { desc = "Fuzzy find recent files" })
-			keymap.set("n", "<D-p>", telescope_with_esc(builtin.find_files), { desc = "Fuzzy find files in cwd" })
-			-- keymap.set("n", "<D-p>", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
-			-- keymap.set("n", "<D-S-p>", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
+            keymap.set("n", "<D-p>", telescope_with_esc(builtin.find_files), { desc = "Fuzzy find files in cwd" })
+			keymap.set("n", "<D-S-p>", function()
+				-- Get current working directory
+				local cwd = vim.fn.getcwd()
+
+				-- Try to find git root first, fallback to cwd
+				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel")[1]
+				local project_root = (vim.v.shell_error == 0 and git_root) or cwd
+
+				telescope_with_esc(builtin.oldfiles, {
+					cwd = project_root,
+					initial_mode = "normal",
+					-- Filter to only show files within the current project
+					attach_mappings = function(prompt_bufnr, map_func)
+						local actions = require("telescope.actions")
+						local action_state = require("telescope.actions.state")
+
+						-- Override the default selection to ensure we stay within project
+						actions.select_default:replace(function()
+							local selection = action_state.get_selected_entry()
+							if selection then
+								local file_path = selection.path or selection.value
+								-- Only open if file is within project root
+								if vim.startswith(file_path, project_root) then
+									actions.close(prompt_bufnr)
+									vim.cmd("edit " .. vim.fn.fnameescape(file_path))
+								else
+									vim.notify("File is outside current project", vim.log.levels.WARN)
+								end
+							end
+						end)
+
+						map_func("i", "<Esc>", actions.close)
+						map_func("n", "<Esc>", actions.close)
+						map_func("n", "q", actions.close)
+						return true
+					end,
+				})()
+			end, { desc = "Fuzzy find recent files in project" })
+
 			keymap.set("n", "<leader>fp", function()
 				find_files_with_priority()
 			end, { desc = "Find files with priority for recent" })
