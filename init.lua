@@ -110,34 +110,16 @@ for key, func in pairs(keymap) do
 	vim.keymap.set(modes, key, func)
 end
 
--- Normal mode: ⌘ + /
+-- Normal mode: ⌘+/ (comment line and move down)
 vim.keymap.set("n", "<D-/>", function()
-	return require("Comment.api").call("toggle.linewise." .. (vim.v.count == 0 and "current" or "count_repeat"), "g@$")()
-end, { expr = true, silent = true, desc = "Toggle comment line" })
-
--- Visual mode: ⌘ + /
-vim.keymap.set(
-	"x",
-	"<D-/>",
-	"<Esc><Cmd>lua require('Comment.api').locked('toggle.linewise')(vim.fn.visualmode())<CR>",
-	{
-		silent = true,
-		desc = "Toggle comment (visual)",
-	}
-)
-
--- Normal mode: Shift+⌘+/ (comment line and move down)
-vim.keymap.set("n", "<D-?>", function()
-	require("Comment.api").call("toggle.linewise." .. (vim.v.count == 0 and "current" or "count_repeat"), "g@$")()
+	require("Comment.api").toggle.linewise.current()
 	vim.cmd("normal! j") -- move down a line
 end, { silent = true, desc = "Toggle comment line and move down" })
 
--- Visual mode: Shift+⌘+/ (comment selection and move to next line)
-vim.keymap.set("x", "<D-?>", function()
-	vim.cmd("normal! <Esc>")
-	require("Comment.api").locked("toggle.linewise")(vim.fn.visualmode())
-	vim.cmd("normal! j") -- move down after commenting
-end, { silent = true, desc = "Toggle comment (visual) and move down" })
+-- Visual mode: ⌘ + / (comment selected block)
+vim.keymap.set("v", "<D-/>", function()
+	require("Comment.api").toggle.linewise(vim.fn.visualmode())
+end, { silent = true, desc = "Toggle comment (visual)" })
 
 -- NerdTree
 -- vim.g.NerdTreeWinPos = "right"
