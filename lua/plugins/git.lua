@@ -41,12 +41,53 @@ return {
 				end, "Blame line")
 				map("n", "<leader>hB", gs.toggle_current_line_blame, "Toggle line blame")
 
-				map("n", "<leader>hd", function()
+				map("n", "<leader>gd", function()
 					-- Show diff in a single buffer using floating window instead of split
 					gs.preview_hunk()
 				end, "Diff this (inline)")
-				map("n", "<leader>hD", function()
+				map("n", "<leader>gD", function()
+					-- Store the original buffer number before starting diff
+					local original_buf = vim.api.nvim_get_current_buf()
+					local original_win = vim.api.nvim_get_current_win()
+
 					gs.diffthis("~")
+
+					-- Set up buffer-local mapping for Esc to close diff
+					vim.defer_fn(function()
+						-- Only set the mapping if we're still in a diff buffer
+						if vim.wo.diff then
+							vim.keymap.set("n", "<Esc>", function()
+								-- Turn off diff mode for all windows
+								vim.cmd("windo diffoff")
+
+								-- Close any temporary diff buffers and return to original
+								local current_buf = vim.api.nvim_get_current_buf()
+								local buffers = vim.api.nvim_list_bufs()
+
+								-- Find and close temporary git buffers (usually unnamed or with git-related names)
+								for _, buf in ipairs(buffers) do
+									local buf_name = vim.api.nvim_buf_get_name(buf)
+									if buf ~= original_buf and vim.api.nvim_buf_is_loaded(buf) then
+										-- Check if it's a temporary buffer (no name or git-related)
+										if buf_name == "" or buf_name:match("%.git/") or buf_name:match("fugitive://") then
+											pcall(vim.api.nvim_buf_delete, buf, { force = true })
+										end
+									end
+								end
+
+								-- Ensure we're back in the original buffer and window
+								if vim.api.nvim_buf_is_valid(original_buf) then
+									if vim.api.nvim_win_is_valid(original_win) then
+										vim.api.nvim_set_current_win(original_win)
+									end
+									vim.api.nvim_set_current_buf(original_buf)
+								end
+
+								-- Remove the mapping
+								pcall(vim.keymap.del, "n", "<Esc>", { buffer = 0 })
+							end, { buffer = 0, silent = true, desc = "Close diff" })
+						end
+					end, 100) -- Small delay to ensure diff is set up
 				end, "Diff this ~")
 
 				-- Text object
