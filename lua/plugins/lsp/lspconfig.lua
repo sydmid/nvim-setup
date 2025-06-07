@@ -209,6 +209,7 @@ return {
 						keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>", { buffer = ev.buf, desc = "Peek definition" })
 						keymap("n", "<leader>us", function()
 							require("telescope.builtin").lsp_references({
+								initial_mode = "normal",
 								attach_mappings = function(prompt_bufnr, map_func)
 									local actions = require("telescope.actions")
 									map_func("i", "<Esc>", actions.close)
@@ -220,6 +221,7 @@ return {
 						end, { buffer = ev.buf, desc = "Find references" })
 						keymap("n", "<leader>ii", function()
 							require("telescope.builtin").lsp_implementations({
+								initial_mode = "normal",
 								attach_mappings = function(prompt_bufnr, map_func)
 									local actions = require("telescope.actions")
 									map_func("i", "<Esc>", actions.close)

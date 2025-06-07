@@ -123,6 +123,10 @@ map({"n","v"}, "<D-l>", "$", { desc = "End of line", silent = true })
 -- Improved redo
 map("n", "U", "<C-r>", { desc = "Redo", silent = true })
 
+-- Jump list navigation (fix Ctrl+i being overridden by Tab mapping)
+-- Ctrl+o (backward) works by default, but Ctrl+i (forward) is overridden by the Tab mapping
+map("n", "<C-i>", "<C-i>", { desc = "Jump forward in jump list", silent = true })
+
 -- Deletion without yanking
 map("n", "<leader>dd", "d", { desc = "Delete with yanking" })
 map("n", "c", '"_c', { desc = "c: Change without yanking" })
@@ -360,7 +364,7 @@ map("v", "<D-S-f>", function()
 	-- Escape special characters
 	selected_text = selected_text:gsub("([%[%]%^%$%(%)])", "\\%1")
 	-- Call telescope with the selected text as the default search term
-	require("telescope.builtin").live_grep({ default_text = selected_text })
+	require("telescope.builtin").live_grep({ default_text = selected_text, initial_mode = "normal" })
 end, { desc = "telescope find selected text in all files", silent = true })
 
 -- Enhanced search function that searches for word under cursor

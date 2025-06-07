@@ -250,6 +250,7 @@ return {
 			vim.keymap.set("n", "<leader>gS", function()
 				telescope_builtin.git_status({
 					prompt_title = "󰊢 Git Status",
+					initial_mode = "normal",
 					theme = "ivy",
 					layout_config = { height = 0.6 },
 					attach_mappings = function(prompt_bufnr, map)

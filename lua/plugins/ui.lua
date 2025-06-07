@@ -674,6 +674,7 @@ return {
 								}),
 								sorter = conf.generic_sorter({}),
 								previewer = conf.grep_previewer({}), -- Use grep_previewer for line-aware preview
+								initial_mode = "normal",
 								attach_mappings = function(prompt_bufnr, map)
 									-- Enhanced toggle between hierarchical and flat view
 									map("i", "<C-h>", function()
@@ -946,6 +947,7 @@ return {
 								}),
 								sorter = conf.generic_sorter({}),
 								previewer = conf.grep_previewer({}), -- Use grep_previewer for line-aware preview
+								initial_mode = "normal",
 								attach_mappings = function(prompt_bufnr, map)
 									actions.select_default:replace(function()
 										local selection = action_state.get_selected_entry()
@@ -998,7 +1000,8 @@ return {
 									}
 								end,
 							}),
-							sorter = conf.generic_sorter({}),							attach_mappings = function(prompt_bufnr, map)
+							sorter = conf.generic_sorter({}),
+							initial_mode = "normal",							attach_mappings = function(prompt_bufnr, map)
 								-- Add proper Esc handling
 								map("i", "<Esc>", actions.close)
 								map("n", "<Esc>", actions.close)
@@ -1019,25 +1022,6 @@ return {
 					symbol_type_filter_picker()
 				end,
 				desc = "Filter Document Symbols by Type",
-			},
-			{
-				"<D-S-w>", -- Cmd+Shift+W for workspace symbols
-				function()
-					require("telescope.builtin").lsp_workspace_symbols({
-						symbol_width = 50,
-						symbol_type_width = 15,
-						show_line = true,
-						previewer = true,
-						attach_mappings = function(prompt_bufnr, map_func)
-							local actions = require("telescope.actions")
-							map_func("i", "<Esc>", actions.close)
-							map_func("n", "<Esc>", actions.close)
-							map_func("n", "q", actions.close)
-							return true
-						end,
-					})
-				end,
-				desc = "Workspace Symbols (Telescope)",
 			},
 		},
 	},
