@@ -49,11 +49,11 @@ return {
 
 					gs.diffthis("~")
 
-					-- Set up buffer-local mapping for Esc to close diff
+					-- Set up buffer-local mappings for Esc and q to close diff
 					vim.defer_fn(function()
 						-- Only set the mapping if we're still in a diff buffer
 						if vim.wo.diff then
-							vim.keymap.set("n", "<Esc>", function()
+							local function close_diff()
 								-- Turn off diff mode for all windows
 								vim.cmd("windo diffoff")
 
@@ -80,9 +80,14 @@ return {
 									vim.api.nvim_set_current_buf(original_buf)
 								end
 
-								-- Remove the mapping
+								-- Remove both mappings
 								pcall(vim.keymap.del, "n", "<Esc>", { buffer = 0 })
-							end, { buffer = 0, silent = true, desc = "Close diff" })
+								pcall(vim.keymap.del, "n", "q", { buffer = 0 })
+							end
+
+							-- Set up both Esc and q key mappings
+							vim.keymap.set("n", "<Esc>", close_diff, { buffer = 0, silent = true, desc = "Close diff" })
+							vim.keymap.set("n", "q", close_diff, { buffer = 0, silent = true, desc = "Close diff" })
 						end
 					end, 100) -- Small delay to ensure diff is set up
 				end, "Diff this ~")

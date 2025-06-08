@@ -490,7 +490,7 @@ return {
 			keymap.set("n", "<leader>fs", telescope_with_esc(builtin.live_grep), { desc = "Find string in cwd" })
 			keymap.set(
 				"n",
-				"<leader>fc",
+				"<leader>fC",
 				telescope_with_esc(builtin.grep_string),
 				{ desc = "Find string under cursor in cwd" }
 			)
@@ -598,14 +598,13 @@ return {
 			end, { desc = "Find bookmark annotations" })
 
 			-- Additional Telescope mappings (converted from FZF)
-			keymap.set("n", "<leader>fj", telescope_with_esc(builtin.jumplist), { desc = "Find jumps" })
-			keymap.set("n", "<leader>fm", telescope_with_esc(builtin.marks), { desc = "Find marks" })
-			keymap.set("n", "<leader>fw", telescope_with_esc(builtin.buffers), { desc = "Find windows" })
 			keymap.set("n", "<leader>fh", telescope_with_esc(builtin.help_tags), { desc = "Find help tags" })
-			keymap.set("n", "<leader>fb", telescope_with_esc(builtin.buffers), { desc = "Find buffers" })
+			keymap.set("n", "<leader>fj", telescope_with_esc(builtin.jumplist, {initial_mode = "normal"}), { desc = "Find jumps" })
+			keymap.set("n", "<leader>fm", telescope_with_esc(builtin.marks ,{initial_mode = "normal"}), { desc = "Find marks" })
+			keymap.set("n", "<leader>fb", telescope_with_esc(builtin.buffers ,{initial_mode = "normal"}), { desc = "Find buffers" })
 			keymap.set(
 				"n",
-				"<leader>fl",
+				"<leader>fw",
 				function()
 					require("telescope.builtin").current_buffer_fuzzy_find({
 						previewer = false,
@@ -620,7 +619,7 @@ return {
 				end,
 				{ desc = "Find in current buffer (no preview)" }
 			)
-			keymap.set("n", "<leader>fC", telescope_with_esc(builtin.command_history), { desc = "Find command history" })
+			keymap.set("n", "<leader>fc", telescope_with_esc(builtin.command_history), { desc = "Find command history" })
 
 			-- LSP symbols with telescope
 			keymap.set("n", "<leader>fs", telescope_with_esc(builtin.lsp_document_symbols), { desc = "Find document symbols" })

@@ -117,9 +117,7 @@ vim.keymap.set("n", "<D-/>", function()
 end, { silent = true, desc = "Toggle comment line and move down" })
 
 -- Visual mode: ⌘ + / (comment selected block)
-vim.keymap.set("v", "<D-/>", function()
-	require("Comment.api").toggle.linewise(vim.fn.visualmode())
-end, { silent = true, desc = "Toggle comment (visual)" })
+vim.keymap.set("v", "<D-/>", "<ESC><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<CR>", { silent = true, desc = "Toggle comment (visual)" })
 
 -- NerdTree
 -- vim.g.NerdTreeWinPos = "right"
