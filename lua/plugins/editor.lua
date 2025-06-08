@@ -100,53 +100,40 @@ return {
 
 			nvimtree.setup({
 				view = {
-					width = 45,
-					relativenumber = true,
+					width = 40,
+					relativenumber = false,
+					number = false,
+					signcolumn = "no",
 					side = "right",
 				},
 				-- Enhanced icons with Catppuccin-style aesthetics
 				renderer = {
-					indent_markers = {
-						enable = true,
-						inline_arrows = true,
-						icons = {
-							corner = "└",
-							edge = "│",
-							item = "│",
-							bottom = "─",
-							none = " ",
-						},
-					},
-					root_folder_label = ":~:s?$?/..?",
+					add_trailing = false,
+					group_empty = true,
 					highlight_git = "icon",
-					highlight_diagnostics = "icon",
+					full_name = false,
 					highlight_opened_files = "icon",
-					highlight_modified = "icon",
+					highlight_modified = "none",
+					highlight_clipboard = "none",
+					root_folder_modifier = ":t",
+					indent_width = 1,
+					indent_markers = {
+						enable = false,
+					},
 					icons = {
-						web_devicons = {
-							file = {
-								enable = true,
-								color = true,
-							},
-							folder = {
-								enable = false,
-								color = true,
-							},
-						},
-						git_placement = "before",
+						webdev_colors = true,
+						git_placement = "after",
 						modified_placement = "after",
-						diagnostics_placement = "signcolumn",
-						bookmarks_placement = "signcolumn",
-						padding = " ",
-						symlink_arrow = " ➛ ",
+						padding = "",
+						symlink_arrow = "→",
 						show = {
 							file = true,
-							folder = true,
+							folder = false,
 							folder_arrow = true,
 							git = true,
-							modified = true,
-							diagnostics = true,
-							bookmarks = true,
+							modified = false,
+							diagnostics = false,
+							bookmarks = false,
 						},
 						glyphs = {
 							default = "󰈔",
@@ -165,13 +152,13 @@ return {
 								symlink_open = "󰉒", -- Open symlinked folder
 							},
 							git = {
-								unstaged = "✗",      -- Modified files (yellow)
-								staged = "✓",        -- Staged files (green)
-								unmerged = "",       -- Merge conflicts (red)
-								renamed = "➜",       -- Renamed files (blue)
-								untracked = "★",     -- New files (green)
-								deleted = "",       -- Deleted files (red)
-								ignored = "",       -- Ignored files (gray)
+								unstaged = "✗",
+								staged = "✓",
+								unmerged = "≠",
+								renamed = "→",
+								untracked = "?",
+								deleted = "✖",
+								ignored = "◌",
 							},
 						},
 					},
@@ -194,9 +181,33 @@ return {
 				},
 				live_filter = {
 					prefix = "[FILTER]: ",
-					always_show_folders = true,
+					always_show_folders = false,
 				},
+				-- Custom window options for smaller font
 				on_attach = function(bufnr)
+					-- Set smaller font size for nvim-tree window (30% smaller)
+					vim.api.nvim_create_autocmd("BufWinEnter", {
+						buffer = bufnr,
+						callback = function()
+							local win = vim.fn.bufwinid(bufnr)
+							if win ~= -1 then
+								-- Get current global font size
+								local current_font = vim.o.guifont
+								if current_font and current_font ~= "" then
+									-- Extract size from font string (e.g., "Source Code Pro:h14" -> 14)
+									local size = current_font:match(":h(%d+)")
+									if size then
+										local new_size = math.floor(tonumber(size) * 0.7) -- 30% smaller
+										local new_font = current_font:gsub(":h%d+", ":h" .. new_size)
+										vim.api.nvim_win_call(win, function()
+											vim.opt_local.guifont = new_font
+										end)
+									end
+								end
+							end
+						end,
+					})
+
 					local api = require("nvim-tree.api")
 
 					local function opts(desc)
