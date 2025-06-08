@@ -346,7 +346,23 @@ return {
 					-- Exclude problematic shell config files
 					-- Use a function for more complex exclusion logic
 					filter = function(bufnr)
-						local filename = vim.api.nvim_buf_get_name(bufnr)
+						-- Robust validation with error handling
+						local ok, is_valid = pcall(function()
+							if not bufnr or type(bufnr) ~= "number" then
+								return false
+							end
+							return vim.api.nvim_buf_is_valid(bufnr)
+						end)
+
+						if not ok or not is_valid then
+							return false
+						end
+
+						local filename_ok, filename = pcall(vim.api.nvim_buf_get_name, bufnr)
+						if not filename_ok then
+							return false
+						end
+
 						-- Skip formatting shell config files that have complex parameter expansions
 						if filename:match("%.zshrc$") or
 						   filename:match("%.zsh_") or

@@ -52,10 +52,7 @@ end, { noremap = true, silent = true })
 
 -- Buffer management commands (which-key compatible)
 map("n", "<leader>bb", "<cmd>e #<CR>", { desc = "Switch to other buffer" })
-map("n", "<leader>`", "<cmd>e #<CR>", { desc = "Switch to other buffer" })
-map("n", "<leader>bd", "<cmd>bdelete!<CR>", { desc = "Delete buffer and window" })
 map("n", "<leader>bo", "<cmd>%bd|e#|bd#<CR>", { desc = "Delete other buffers" })
--- map("n", "<leader>bD", "<cmd>bdelete!<CR>", { desc = "Delete buffer and window" })
 
 -- Register buffer commands with which-key explicitly
 vim.defer_fn(function()
@@ -391,7 +388,7 @@ map("n", "<D-f>", search_word_under_cursor, { desc = "search word under cursor i
 
 -- Miscellaneous
 map({ "n", "i", "v" }, "<D-s>", "<Cmd>w<CR>", { noremap = true, silent = true })
-map({ "n", "i", "v" }, "<D-S-s>", "<Cmd>wa<CR>", { noremap = true, silent = true })
+
 -- Examples of non-main filetypes
 local ignored_filetypes = {
 	"NvimTree",
@@ -977,3 +974,85 @@ end, { desc = "Paste from system clipboard", expr = true, silent = true })
 
 -- Configure word boundaries to treat hyphens as separators
 vim.opt.iskeyword:remove("-")
+
+-- Smart buffer deletion with confirmation for modified buffers
+local function smart_buffer_delete()
+  local current_buf = vim.api.nvim_get_current_buf()
+
+  -- Check if buffer is valid and loaded
+  if not vim.api.nvim_buf_is_valid(current_buf) or not vim.api.nvim_buf_is_loaded(current_buf) then
+    return
+  end
+
+  local modified = vim.api.nvim_buf_get_option(current_buf, 'modified')
+  local bufname = vim.api.nvim_buf_get_name(current_buf)
+  local filename = vim.fn.fnamemodify(bufname, ':t')
+
+  if filename == '' then
+    filename = '[No Name]'
+  end
+
+  if modified then
+    local choice = vim.fn.confirm(
+      'Buffer "' .. filename .. '" has unsaved changes. Save before closing?',
+      '&Save and close\n&Discard changes\n&Cancel',
+      1
+    )
+
+    if choice == 1 then
+      -- Save and close - use pcall to handle any formatting errors gracefully
+      local ok, err = pcall(function()
+        vim.cmd('write')
+      end)
+      if ok then
+        vim.cmd('bdelete')
+      else
+        vim.notify('Error saving file: ' .. tostring(err), vim.log.levels.ERROR)
+      end
+    elseif choice == 2 then
+      -- Discard changes and close
+      vim.cmd('bdelete!')
+    end
+    -- choice == 3 or 0 means cancel, do nothing
+  else
+    -- Buffer not modified, safe to delete
+    vim.cmd('bdelete')
+  end
+end
+
+-- Save all modified buffers only
+local function save_all_modified()
+  local modified_count = 0
+  local buffers = vim.api.nvim_list_bufs()
+
+  for _, buf in ipairs(buffers) do
+    if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_buf_get_option(buf, 'modified') then
+      local buftype = vim.api.nvim_buf_get_option(buf, 'buftype')
+      if buftype == '' then -- Only save normal file buffers
+        local ok, err = pcall(function()
+          vim.api.nvim_buf_call(buf, function()
+            vim.cmd('write')
+          end)
+        end)
+        if ok then
+          modified_count = modified_count + 1
+        else
+          local bufname = vim.api.nvim_buf_get_name(buf)
+          local filename = vim.fn.fnamemodify(bufname, ':t')
+          vim.notify('Error saving ' .. filename .. ': ' .. tostring(err), vim.log.levels.WARN)
+        end
+      end
+    end
+  end
+
+  if modified_count > 0 then
+    vim.notify('Saved ' .. modified_count .. ' modified buffer(s)', vim.log.levels.INFO)
+  else
+    vim.notify('No modified buffers to save', vim.log.levels.INFO)
+  end
+end
+
+-- Map the smart buffer delete function to <leader>bd
+map("n", "<D-w>", smart_buffer_delete, { desc = "Close buffer (with confirmation if modified)", noremap = true, silent = true })
+map("n", "<leader>bd", smart_buffer_delete, { desc = "Smart delete buffer", silent = true })
+map({ "n", "i", "v" }, "<D-S-s>", save_all_modified, { desc = "Save all modified buffers", noremap = true, silent = true })
