@@ -619,6 +619,72 @@ return {
 				end,
 				{ desc = "Find in current buffer (no preview)" }
 			)
+			keymap.set(
+				"v",
+				"<leader>fw",
+				function()
+					-- Get the selected text using vim.fn.getline and cursor positions
+					local selected_text = ""
+
+					-- Get current visual selection boundaries using vim.fn.getpos
+					local start_pos = vim.fn.getpos("v")  -- Start of visual selection
+					local end_pos = vim.fn.getpos(".")    -- Current cursor position (end of selection)
+
+					local start_line = start_pos[2]
+					local start_col = start_pos[3]
+					local end_line = end_pos[2]
+					local end_col = end_pos[3]
+
+					-- Ensure start is before end
+					if start_line > end_line or (start_line == end_line and start_col > end_col) then
+						start_line, end_line = end_line, start_line
+						start_col, end_col = end_col, start_col
+					end
+
+					-- Get the selected text
+					if start_line == end_line then
+						-- Single line selection
+						local line = vim.fn.getline(start_line)
+						selected_text = string.sub(line, start_col, end_col)
+					else
+						-- Multi-line selection
+						local lines = {}
+						for i = start_line, end_line do
+							local line = vim.fn.getline(i)
+							if i == start_line then
+								line = string.sub(line, start_col)
+							elseif i == end_line then
+								line = string.sub(line, 1, end_col)
+							end
+							table.insert(lines, line)
+						end
+						selected_text = table.concat(lines, " ")
+					end
+
+					-- Clean up the selected text (remove extra whitespace)
+					selected_text = selected_text:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+
+					-- Escape the visual mode
+					vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+
+					-- Use vim.schedule to ensure we're out of visual mode before opening telescope
+					vim.schedule(function()
+						require("telescope.builtin").current_buffer_fuzzy_find({
+							previewer = true,
+							default_text = selected_text,
+							initial_mode = "normal",
+							attach_mappings = function(prompt_bufnr, map_func)
+								local actions = require("telescope.actions")
+								map_func("i", "<Esc>", actions.close)
+								map_func("n", "<Esc>", actions.close)
+								map_func("n", "q", actions.close)
+								return true
+							end,
+						})
+					end)
+				end,
+				{ desc = "Find selected text in current buffer (no preview)" }
+			)
 			keymap.set("n", "<leader>fc", telescope_with_esc(builtin.command_history), { desc = "Find command history" })
 
 			-- LSP symbols with telescope
