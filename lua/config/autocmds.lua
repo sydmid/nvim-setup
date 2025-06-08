@@ -10,13 +10,13 @@ autocmd("TextYankPost", {
   end,
 })
 
--- Remove whitespace on save
-augroup("TrimWhitespace", { clear = true })
-autocmd("BufWritePre", {
-  group = "TrimWhitespace",
-  pattern = "*",
-  command = ":%s/\\s\\+$//e",
-})
+-- DISABLED: Remove whitespace on save
+-- augroup("TrimWhitespace", { clear = true })
+-- autocmd("BufWritePre", {
+--   group = "TrimWhitespace",
+--   pattern = "*",
+--   command = ":%s/\\s\\+$//e",
+-- })
 
 -- Set up terminal mode mappings for window navigation
 autocmd("TermOpen", {

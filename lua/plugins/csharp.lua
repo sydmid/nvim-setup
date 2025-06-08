@@ -33,10 +33,12 @@ return {
             -- Look for common .NET output paths
             local cwd = vim.fn.getcwd()
             local common_paths = {
-              cwd .. "/bin/Debug/net8.0/",
-              cwd .. "/bin/Debug/net7.0/",
-              cwd .. "/bin/Debug/net6.0/",
-              cwd .. "/bin/Debug/netcoreapp3.1/",
+            cwd .. "/bin/Debug/net9.0/",
+            cwd .. "/bin/Debug/net8.0/",
+            cwd .. "/bin/Debug/net7.0/",
+            cwd .. "/bin/Debug/net6.0/",
+            cwd .. "/bin/Debug/net5.0/",
+            cwd .. "/bin/Debug/netcoreapp3.1/",
             }
 
             -- Find the first existing path

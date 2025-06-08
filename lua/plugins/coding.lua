@@ -340,39 +340,40 @@ return {
 						end,
 					}
 				},
-				format_on_save = {
-					lsp_format = "fallback",
-					timeout_ms = 1000,
-					-- Exclude problematic shell config files
-					-- Use a function for more complex exclusion logic
-					filter = function(bufnr)
-						-- Robust validation with error handling
-						local ok, is_valid = pcall(function()
-							if not bufnr or type(bufnr) ~= "number" then
-								return false
-							end
-							return vim.api.nvim_buf_is_valid(bufnr)
-						end)
+				-- DISABLED: Auto format on save
+				-- format_on_save = {
+				-- 	lsp_format = "fallback",
+				-- 	timeout_ms = 1000,
+				-- 	-- Exclude problematic shell config files
+				-- 	-- Use a function for more complex exclusion logic
+				-- 	filter = function(bufnr)
+				-- 		-- Robust validation with error handling
+				-- 		local ok, is_valid = pcall(function()
+				-- 			if not bufnr or type(bufnr) ~= "number" then
+				-- 				return false
+				-- 			end
+				-- 			return vim.api.nvim_buf_is_valid(bufnr)
+				-- 		end)
 
-						if not ok or not is_valid then
-							return false
-						end
+				-- 		if not ok or not is_valid then
+				-- 			return false
+				-- 		end
 
-						local filename_ok, filename = pcall(vim.api.nvim_buf_get_name, bufnr)
-						if not filename_ok then
-							return false
-						end
+				-- 		local filename_ok, filename = pcall(vim.api.nvim_buf_get_name, bufnr)
+				-- 		if not filename_ok then
+				-- 			return false
+				-- 		end
 
-						-- Skip formatting shell config files that have complex parameter expansions
-						if filename:match("%.zshrc$") or
-						   filename:match("%.zsh_") or
-						   filename:match("%.bashrc$") or
-						   filename:match("%.bash_") then
-							return false
-						end
-						return true
-					end,
-				},
+				-- 		-- Skip formatting shell config files that have complex parameter expansions
+				-- 		if filename:match("%.zshrc$") or
+				-- 		   filename:match("%.zsh_") or
+				-- 		   filename:match("%.bashrc$") or
+				-- 		   filename:match("%.bash_") then
+				-- 			return false
+				-- 		end
+				-- 		return true
+				-- 	end,
+				-- },
 			})
 
 			vim.keymap.set({ "n", "v" }, "<leader>mp", function()
