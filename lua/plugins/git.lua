@@ -29,15 +29,12 @@ return {
 					gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
 				end, "Reset hunk")
 
-				map("n", "<leader>hS", gs.stage_buffer, "Stage buffer")
 				map("n", "<leader>hR", gs.reset_buffer, "Reset buffer")
 
+				map("n", "<leader>hS", gs.stage_buffer, "Stage buffer")
 				map("n", "<leader>hu", gs.undo_stage_hunk, "Undo stage hunk")
-
-				map("n", "<leader>hp", gs.preview_hunk, "Preview hunk")
-
+				map("n", "<leader>hh", gs.preview_hunk, "Preview hunk")
 				map("n", "<leader>gb", gs.toggle_current_line_blame, "Toggle git blame")
-
 				map("n", "<leader>gd", function()
 					-- Show diff in a single buffer using floating window instead of split
 					gs.preview_hunk()

@@ -1201,17 +1201,18 @@ return {
 			-- Register all the key groups
 			wk.add({
 				-- { '<leader>b', group = 'Bookmarks' },
+				{ "<leader>b", group = "Buffer" },
+				{ "<leader>c", group = "Context/Code-Actions" },
 				{ "<leader>d", group = "Diagnostics/Debug" },
 				{ "<leader>f", group = "File/Find" },
 				{ "<leader>g", group = "Git/Goto" },
-				{ "<leader>h", group = "Hunks" },
+				{ "<leader>h", group = "Hunks/Git-Stage" },
 				{ "<leader>i", group = "Info" },
 				{ "<leader>m", group = "Bookmarks" },
 				{ "<leader>n", group = "Navigation" },
 				{ "<leader>r", group = "Rename/Refactor" },
 				{ "<leader>s", group = "Split" },
 				{ "<leader>t", group = "Terminal/Tabs" },
-				{ "<leader>b", group = "Buffer" },
 				{ "<leader>x", group = "Diagnostics" },
 				{ "g", group = "Goto" },
 			})

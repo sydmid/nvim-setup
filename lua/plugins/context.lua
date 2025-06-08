@@ -114,14 +114,14 @@ return {
       })
 
       -- Context control keymaps in <leader>h group
-      vim.keymap.set("n", "<leader>hc", function()
+      vim.keymap.set("n", "<leader>cj", function()
         require("treesitter-context").go_to_context(vim.v.count1)
       end, {
         silent = true,
         desc = "Jump to context (breadcrumb)"
       })
 
-      vim.keymap.set("n", "<leader>ht", function()
+      vim.keymap.set("n", "<leader>ch", function()
         local tsc = require("treesitter-context")
         tsc.toggle()
         vim.notify(
@@ -132,7 +132,7 @@ return {
         desc = "Toggle treesitter context"
       })
 
-      vim.keymap.set("n", "<leader>hd", function()
+      vim.keymap.set("n", "<leader>cd", function()
         local tsc = require("treesitter-context")
         local has_parser = pcall(vim.treesitter.get_parser)
         local ft = vim.bo.filetype
@@ -297,18 +297,6 @@ return {
     --     desc = "Toggle breadcrumbs bar"
     --   })
 
-      -- Register with which-key
-      vim.defer_fn(function()
-        local wk_ok, wk = pcall(require, "which-key")
-        if wk_ok then
-          wk.add({
-            { "<leader>h", group = "Headers/Hunks/Help" },
-            { "<leader>hc", desc = "Jump to context" },
-            { "<leader>ht", desc = "Toggle context headers" },
-            { "<leader>hd", desc = "Debug context" },
-          })
-        end
-      end, 100)
     end,
   },
 }

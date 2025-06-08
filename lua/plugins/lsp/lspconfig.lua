@@ -342,7 +342,6 @@ return {
 
 					-- Standard actions (maintaining backward compatibility)
 					keymap("n", "<leader>r", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename symbol" })
-					keymap({"n", "v"}, "<leader>c", vim.lsp.buf.code_action, { buffer = ev.buf, desc = "Code actions" })
 
 					-- Diagnostics with enhanced Lspsaga UI
 					-- Use ONLY Lspsaga for diagnostics UI to avoid duplication
