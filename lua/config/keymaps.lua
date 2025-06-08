@@ -134,6 +134,8 @@ map({"n","v"}, "H", "b", { desc = "Previous word", silent = true })
 map({"n","v"}, "L", "e", { desc = "Next word", silent = true })
 map({"n","v"}, "<D-h>", "_", { desc = "Start of line", silent = true })
 map({"n","v"}, "<D-l>", "$", { desc = "End of line", silent = true })
+map("i", "<D-h>", "<C-o>_", { desc = "Start of line", silent = true })
+map("i", "<D-l>", "<C-o>$", { desc = "End of line", silent = true })
 
 -- Improved redo
 map("n", "U", "<C-r>", { desc = "Redo", silent = true })

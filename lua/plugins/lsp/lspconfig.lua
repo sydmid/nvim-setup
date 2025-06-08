@@ -129,6 +129,10 @@ return {
 
 			-- Setup LSP
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+			-- Disable signature help capability to prevent auto-suggestions
+			capabilities.textDocument.signatureHelp = nil
+
 			local lspconfig = require("lspconfig")
 			local mason_lspconfig = require("mason-lspconfig")
 
@@ -144,35 +148,35 @@ return {
 			-- This ensures the keymaps are only active when an LSP server is attached to the buffer
 			-- Prevents errors when trying to use LSP features in buffers without LSP support
 
-			-- Auto-trigger signature help autocmd
-			vim.api.nvim_create_autocmd("LspAttach", {
-				group = vim.api.nvim_create_augroup("UserLspSignatureHelp", {}),
-				callback = function(ev)
-					local client = vim.lsp.get_client_by_id(ev.data.client_id)
-					if client and client.server_capabilities.signatureHelpProvider then
-						-- Auto-trigger signature help on specific events
-						vim.api.nvim_create_autocmd({ "TextChangedI" }, {
-							buffer = ev.buf,
-							group = vim.api.nvim_create_augroup("SignatureHelpAutoTrigger", { clear = false }),
-							callback = function()
-								local line = vim.api.nvim_get_current_line()
-								local col = vim.api.nvim_win_get_cursor(0)[2]
-								local char_before = col > 0 and line:sub(col, col) or ""
-								local char_current = line:sub(col + 1, col + 1)
-
-								-- Trigger on function call characters
-								if char_before == "(" or char_before == "," or char_current == "(" then
-									vim.defer_fn(function()
-										if vim.fn.pumvisible() == 0 then
-											vim.lsp.buf.signature_help()
-										end
-									end, 150)
-								end
-							end,
-						})
-					end
-				end,
-			})
+			-- Auto-trigger signature help autocmd (DISABLED - use manual trigger <D-S-i> instead)
+			-- vim.api.nvim_create_autocmd("LspAttach", {
+			-- 	group = vim.api.nvim_create_augroup("UserLspSignatureHelp", {}),
+			-- 	callback = function(ev)
+			-- 		local client = vim.lsp.get_client_by_id(ev.data.client_id)
+			-- 		if client and client.server_capabilities.signatureHelpProvider then
+			-- 			-- Auto-trigger signature help on specific events
+			-- 			vim.api.nvim_create_autocmd({ "TextChangedI" }, {
+			-- 				buffer = ev.buf,
+			-- 				group = vim.api.nvim_create_augroup("SignatureHelpAutoTrigger", { clear = false }),
+			-- 				callback = function()
+			-- 					local line = vim.api.nvim_get_current_line()
+			-- 					local col = vim.api.nvim_win_get_cursor(0)[2]
+			-- 					local char_before = col > 0 and line:sub(col, col) or ""
+			-- 					local char_current = line:sub(col + 1, col + 1)
+			--
+			-- 					-- Trigger on function call characters
+			-- 					if char_before == "(" or char_before == "," or char_current == "(" then
+			-- 						vim.defer_fn(function()
+			-- 							if vim.fn.pumvisible() == 0 then
+			-- 								vim.lsp.buf.signature_help()
+			-- 							end
+			-- 						end, 150)
+			-- 					end
+			-- 				end,
+			-- 			})
+			-- 		end
+			-- 	end,
+			-- })
 
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -238,15 +242,15 @@ return {
 					keymap("n", "gD", vim.lsp.buf.declaration, { buffer = ev.buf, desc = "Go to declaration" })
 					keymap("n", "<leader>pt", "<cmd>Lspsaga peek_type_definition<CR>", { buffer = ev.buf, desc = "Peek type definition" })
 
-					-- Signature help keymaps with auto-trigger and enhanced functionality
-					-- Manual signature help triggers
+					-- Manual signature help triggers (auto-suggestions disabled)
+					-- Use <D-S-i> (Cmd+Shift+I) to manually show function signatures when needed
 					keymap("n", "<D-S-i>", function()
 						show_signature_help()
-					end, { buffer = ev.buf, desc = "Show method signature", silent = true })
+					end, { buffer = ev.buf, desc = "Show method signature (manual)", silent = true })
 
 					keymap("i", "<D-S-i>", function()
 						show_signature_help()
-					end, { buffer = ev.buf, desc = "Show method signature", silent = true })
+					end, { buffer = ev.buf, desc = "Show method signature (manual)", silent = true })
 
 					-- Signature help navigation between overloads
 					keymap("i", "<C-k>", function()
@@ -309,23 +313,23 @@ return {
 						end
 					end, { buffer = ev.buf, desc = "Next signature overload or completion", silent = true })
 
-					-- Auto-trigger signature help when typing function parameters
-					local function auto_signature_help()
-						if vim.fn.pumvisible() == 0 then
-							show_signature_help()
-						end
-					end
+					-- Auto-trigger signature help when typing function parameters (DISABLED)
+					-- local function auto_signature_help()
+					-- 	if vim.fn.pumvisible() == 0 then
+					-- 		show_signature_help()
+					-- 	end
+					-- end
 
-					-- Auto-trigger on opening parentheses and commas
-					keymap("i", "(", function()
-						vim.api.nvim_feedkeys("(", "n", false)
-						vim.defer_fn(auto_signature_help, 100)
-					end, { buffer = ev.buf, desc = "Auto-trigger signature help", silent = true })
+					-- Auto-trigger on opening parentheses and commas (DISABLED - use manual trigger <D-S-i> instead)
+					-- keymap("i", "(", function()
+					-- 	vim.api.nvim_feedkeys("(", "n", false)
+					-- 	vim.defer_fn(auto_signature_help, 100)
+					-- end, { buffer = ev.buf, desc = "Auto-trigger signature help", silent = true })
 
-					keymap("i", ",", function()
-						vim.api.nvim_feedkeys(",", "n", false)
-						vim.defer_fn(auto_signature_help, 100)
-					end, { buffer = ev.buf, desc = "Auto-trigger signature help", silent = true })
+					-- keymap("i", ",", function()
+					-- 	vim.api.nvim_feedkeys(",", "n", false)
+					-- 	vim.defer_fn(auto_signature_help, 100)
+					-- end, { buffer = ev.buf, desc = "Auto-trigger signature help", silent = true })
 
 					-- Enhanced hover with Lspsaga for better UI
 					keymap("n", "<D-i>", "<cmd>Lspsaga hover_doc<CR>", { buffer = ev.buf, desc = "Show documentation (Lspsaga)", silent = true })
