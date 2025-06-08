@@ -513,15 +513,45 @@ vim.keymap.set("n", "<D-b>", function()
 	-- Create a list of buffers to close
 	local buffers_to_close = {}
 
-	-- First pass: identify buffers to close (avoiding symbols-outline)
+	-- First pass: identify buffers to close (avoiding symbols-outline and treesitter-context)
 	for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
 		if vim.api.nvim_buf_is_valid(bufnr) then
 			-- Skip the current buffer if it's a main buffer
 			if bufnr ~= current_buf or not is_main_buffer(current_buf) then
 				if not is_main_buffer(bufnr) then
 					local name_ok, buf_name = pcall(vim.api.nvim_buf_get_name, bufnr)
+
 					-- Skip symbols-outline buffer which needs special handling
-					if not (name_ok and buf_name:match("symbols%-outline")) then
+					-- Skip treesitter-context buffer (sticky header)
+					local should_skip = false
+
+					if name_ok and (buf_name:match("symbols%-outline") or buf_name:match("treesitter%-context")) then
+						should_skip = true
+					end
+
+					-- Additional check for treesitter-context by buffer properties
+					if not should_skip then
+						local ft_ok, ft = pcall(function() return vim.bo[bufnr].filetype end)
+						if ft_ok and ft == "treesitter-context" then
+							should_skip = true
+						end
+					end
+
+					-- Check if buffer is used by any floating windows (likely treesitter-context)
+					if not should_skip then
+						for _, win in ipairs(vim.api.nvim_list_wins()) do
+							if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == bufnr then
+								local win_config = vim.api.nvim_win_get_config(win)
+								-- Skip buffers in floating windows with zindex (treesitter-context uses zindex)
+								if win_config.relative ~= "" and win_config.zindex and win_config.zindex >= 20 then
+									should_skip = true
+									break
+								end
+							end
+						end
+					end
+
+					if not should_skip then
 						table.insert(buffers_to_close, bufnr)
 					end
 				end
