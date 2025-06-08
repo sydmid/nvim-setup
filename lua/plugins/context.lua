@@ -286,16 +286,16 @@ return {
       })
 
       -- Toggle breadcrumbs (moved to <leader>h group)
-      vim.keymap.set("n", "<leader>hb", function()
-        local config = require("barbecue.config")
-        require("barbecue.ui").toggle()
-        vim.notify(
-          config.user.show and "Breadcrumbs enabled" or "Breadcrumbs disabled",
-          vim.log.levels.INFO
-        )
-      end, {
-        desc = "Toggle breadcrumbs bar"
-      })
+    --   vim.keymap.set("n", "<leader>hb", function()
+    --     local config = require("barbecue.config")
+    --     require("barbecue.ui").toggle()
+    --     vim.notify(
+    --       config.user.show and "Breadcrumbs enabled" or "Breadcrumbs disabled",
+    --       vim.log.levels.INFO
+    --     )
+    --   end, {
+    --     desc = "Toggle breadcrumbs bar"
+    --   })
 
       -- Register with which-key
       vim.defer_fn(function()
@@ -305,7 +305,6 @@ return {
             { "<leader>h", group = "Headers/Hunks/Help" },
             { "<leader>hc", desc = "Jump to context" },
             { "<leader>ht", desc = "Toggle context headers" },
-            { "<leader>hb", desc = "Toggle breadcrumbs" },
             { "<leader>hd", desc = "Debug context" },
           })
         end

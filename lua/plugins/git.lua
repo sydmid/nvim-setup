@@ -36,10 +36,7 @@ return {
 
 				map("n", "<leader>hp", gs.preview_hunk, "Preview hunk")
 
-				map("n", "<leader>hb", function()
-					gs.blame_line({ full = true })
-				end, "Blame line")
-				map("n", "<leader>hB", gs.toggle_current_line_blame, "Toggle line blame")
+				map("n", "<leader>gb", gs.toggle_current_line_blame, "Toggle git blame")
 
 				map("n", "<leader>gd", function()
 					-- Show diff in a single buffer using floating window instead of split
@@ -141,11 +138,10 @@ return {
 			})
 
 			-- Neogit keymaps for comprehensive Git workflow
-			vim.keymap.set("n", "<leader>gs", neogit.open, { desc = "Git status (Neogit)" })
+			vim.keymap.set("n", "<leader>gS", neogit.open, { desc = "Git status (Neogit)" })
 			vim.keymap.set("n", "<leader>gc", function() neogit.open({ "commit" }) end, { desc = "Git commit" })
 			vim.keymap.set("n", "<leader>gp", function() neogit.open({ "push" }) end, { desc = "Git push" })
 			vim.keymap.set("n", "<leader>gl", function() neogit.open({ "log" }) end, { desc = "Git log" })
-			vim.keymap.set("n", "<leader>gb", function() neogit.open({ "branch" }) end, { desc = "Git branch" })
 
 			-- Enhanced Telescope Git pickers for "Holy Grail" Git workflow
 			local telescope_builtin = require("telescope.builtin")
@@ -154,6 +150,7 @@ return {
 			vim.keymap.set("n", "<leader>gB", function()
 				telescope_builtin.git_branches({
 					prompt_title = "󰘬 Git Branches",
+                    initial_mode = "normal",
 					theme = "ivy",
 					layout_config = { height = 0.6 },
 					-- Show both local and remote branches
@@ -247,7 +244,7 @@ return {
 			end, { desc = "Git commits (Telescope)" })
 
 			-- Git file status picker
-			vim.keymap.set("n", "<leader>gS", function()
+			vim.keymap.set("n", "<leader>gs", function()
 				telescope_builtin.git_status({
 					prompt_title = "󰊢 Git Status",
 					initial_mode = "normal",
@@ -353,10 +350,11 @@ return {
 			end, { desc = "Create Git stash" })
 
 			-- Git file browser - Browse files in any commit/branch
-			vim.keymap.set("n", "<leader>gF", function()
+			vim.keymap.set("n", "<leader>gf", function()
 				-- First select a commit/branch, then browse files
 				telescope_builtin.git_commits({
 					prompt_title = "󰜘 Select Commit to Browse Files",
+                    initial_mode = "normal",
 					theme = "ivy",
 					layout_config = { height = 0.6 },
 					attach_mappings = function(prompt_bufnr, map)
@@ -391,74 +389,9 @@ return {
 				})
 			end, { desc = "Browse Git files in commit" })
 
-			-- Git blame for current file with telescope
-			vim.keymap.set("n", "<leader>gf", function()
-				local file = vim.fn.expand("%")
-				if file == "" then
-					vim.notify("No file in current buffer", vim.log.levels.WARN)
-					return
-				end
-
-				-- Get git blame info and show in telescope
-				local handle = io.popen("git blame --porcelain " .. file)
-				if not handle then
-					vim.notify("Failed to run git blame", vim.log.levels.ERROR)
-					return
-				end
-
-				local blame_data = {}
-				local current_commit = nil
-				local line_num = 1
-
-				for line in handle:lines() do
-					if line:match("^%x+") then
-						current_commit = line:sub(1, 8)
-					elseif line:match("^author ") then
-						local author = line:sub(8)
-						table.insert(blame_data, {
-							line = line_num,
-							commit = current_commit,
-							author = author,
-							display = string.format("%3d │ %s │ %s", line_num, current_commit, author),
-						})
-						line_num = line_num + 1
-					end
-				end
-				handle:close()
-
-				require("telescope.pickers").new({}, {
-					prompt_title = "󰙃 Git Blame: " .. vim.fn.fnamemodify(file, ":t"),
-					finder = require("telescope.finders").new_table({
-						results = blame_data,
-						entry_maker = function(entry)
-							return {
-								value = entry,
-								display = entry.display,
-								ordinal = entry.display,
-							}
-						end,
-					}),
-					sorter = require("telescope.config").values.generic_sorter({}),
-					attach_mappings = function(prompt_bufnr, map)
-						local actions = require("telescope.actions")
-						local action_state = require("telescope.actions.state")
-
-						actions.select_default:replace(function()
-							local selection = action_state.get_selected_entry()
-							actions.close(prompt_bufnr)
-							if selection then
-								-- Jump to line and show commit details
-								vim.cmd(selection.value.line)
-								vim.cmd("DiffviewOpen " .. selection.value.commit .. "^!")
-							end
-						end)
-						return true
-					end,
-				}):find()
-			end, { desc = "Git blame current file (Telescope)" })
 
 			-- Git remotes management
-			vim.keymap.set("n", "<leader>gR", function()
+			vim.keymap.set("n", "<leader>gr", function()
 				local handle = io.popen("git remote -v")
 				if not handle then
 					vim.notify("Failed to get git remotes", vim.log.levels.ERROR)

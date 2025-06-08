@@ -444,8 +444,8 @@ return {
 			end
 
 			keymap.set("n", "<leader>ff", telescope_with_esc(builtin.find_files), { desc = "Fuzzy find files in cwd" })
-            keymap.set("n", "<D-p>", telescope_with_esc(builtin.find_files), { desc = "Fuzzy find files in cwd" })
-			keymap.set("n", "<D-S-p>", function()
+            keymap.set("n", "<D-S-p>", telescope_with_esc(builtin.find_files), { desc = "Fuzzy find files in cwd" })
+			keymap.set("n", "<D-p>", function()
 				-- Get current working directory
 				local cwd = vim.fn.getcwd()
 

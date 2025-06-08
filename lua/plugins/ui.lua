@@ -1204,7 +1204,7 @@ return {
 				{ "<leader>d", group = "Diagnostics/Debug" },
 				{ "<leader>f", group = "File/Find" },
 				{ "<leader>g", group = "Git/Goto" },
-				{ "<leader>h", group = "Hunks/Help" },
+				{ "<leader>h", group = "Hunks" },
 				{ "<leader>i", group = "Info" },
 				{ "<leader>m", group = "Bookmarks" },
 				{ "<leader>n", group = "Navigation" },

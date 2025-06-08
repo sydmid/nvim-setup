@@ -355,20 +355,6 @@ map("n", "gmb", "mB", { desc = "Set global mark B" })
 map("n", "gma", "`A", { desc = "Go to global mark A" })
 map("n", "gmb", "`B", { desc = "Go to global mark B" })
 
--- Fuzzy finding (Telescope equivalents)
--- map({ "n", "v" }, "<D-p>", function()
--- 	require("telescope.builtin").find_files({
--- 		sort_mru = true,
--- 		sorter = require("telescope.sorters").get_fuzzy_file(),
--- 		previewer = true, -- Enable file preview
--- 		layout_config = {
--- 			height = 0.8, -- Increase height for better visibility
--- 			width = 0.9,
--- 			preview_width = 0.5, -- Allocate half the width to preview
--- 		},
--- 	})
--- end, { desc = "telescope find files sorted by proximity and recency", silent = true })
-
 -- Separate normal and visual mode mappings for D-S-f
 map("n", "<D-S-f>", ":Telescope live_grep<CR>", { desc = "telescope find string in all files", silent = true })
 map("v", "<D-S-f>", function()
