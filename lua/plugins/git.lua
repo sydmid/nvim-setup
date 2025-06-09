@@ -34,7 +34,6 @@ return {
 				map("n", "<leader>hS", gs.stage_buffer, "Stage buffer")
 				map("n", "<leader>hu", gs.undo_stage_hunk, "Undo stage hunk")
 				map("n", "<leader>hh", gs.preview_hunk, "Preview hunk")
-				map("n", "<leader>gb", gs.toggle_current_line_blame, "Toggle git blame")
 				map("n", "<leader>gd", function()
 					-- Show diff in a single buffer using floating window instead of split
 					gs.preview_hunk()
@@ -95,63 +94,114 @@ return {
 		},
 	},
 
-	-- Neogit - Comprehensive Git interface within Neovim
+	-- Fugitive-based Git workflow - Advanced yet easy-to-use Git integration
 	{
-		"TimUntersberger/neogit",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			"sindrets/diffview.nvim",
-			"nvim-telescope/telescope.nvim",
-		},
+		"tpope/vim-fugitive",
+		event = { "BufReadPre", "BufNewFile" },
 		config = function()
-			local neogit = require("neogit")
-
-			neogit.setup({
-				-- Disable signs in the buffer
-				signs = {
-					-- Default symbols for neogit buffer
-					hunk = { "", "" },
-					item = { "▸", "▾" },
-					section = { "▸", "▾" },
-				},
-				-- Integrations
-				integrations = {
-					telescope = true,
-					diffview = true,
-				},
-				-- Use telescope for branch/commit selection
-				use_telescope = true,
-				-- Auto-refresh when git state changes
-				auto_refresh = true,
-				-- Disable notifications for common operations
-				disable_hint = false,
-				-- Git command timeout
-				git_timeout = 30000,
-				-- Use per-project settings if .git/neogit exists
-				use_per_project_settings = true,
-				-- Remember window sizes between sessions
-				remember_settings = true,
-				-- Auto-show console for commands that produce output
-				auto_show_console = true,
-				-- Console timeout
-				console_timeout = 2000,
-				-- Auto-close console on success
-				auto_close_console = true,
+			-- Auto-setup 'q' to quit in all fugitive buffers
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = { "fugitive", "git", "fugitiveblame" },
+				callback = function()
+					local function close_buffer()
+						local success = pcall(vim.cmd, "close")
+						if not success then
+							pcall(vim.cmd, "bdelete")
+						end
+					end
+					vim.keymap.set("n", "q", close_buffer, { buffer = true, silent = true })
+					vim.keymap.set("n", "<Esc>", close_buffer, { buffer = true, silent = true })
+				end,
 			})
 
-			-- Neogit keymaps for comprehensive Git workflow
-			vim.keymap.set("n", "<leader>gS", neogit.open, { desc = "Git status (Neogit)" })
-			vim.keymap.set("n", "<leader>gc", function() neogit.open({ "commit" }) end, { desc = "Git commit" })
-			vim.keymap.set("n", "<leader>gp", function() neogit.open({ "push" }) end, { desc = "Git push" })
-			vim.keymap.set("n", "<leader>gl", function() neogit.open({ "log" }) end, { desc = "Git log" })
+			-- Auto-setup 'q' and 'Esc' to quit in fugitive:// buffers
+			vim.api.nvim_create_autocmd("BufEnter", {
+				pattern = "fugitive://*",
+				callback = function()
+					local function close_buffer()
+						local success = pcall(vim.cmd, "close")
+						if not success then
+							pcall(vim.cmd, "bdelete")
+						end
+					end
+					vim.keymap.set("n", "q", close_buffer, { buffer = true, silent = true })
+					vim.keymap.set("n", "<Esc>", close_buffer, { buffer = true, silent = true })
+				end,
+			})
 
-			-- Enhanced Telescope Git pickers for "Holy Grail" Git workflow
+			-- Fugitive keymaps for comprehensive Git workflow
+			vim.keymap.set("n", "<leader>gs", "<cmd>Git<cr>", { desc = "Git status " })
+
+			-- Git commit with enhanced workflow
+			vim.keymap.set("n", "<leader>gc", function()
+				-- Open git status first, then commit
+				vim.cmd("Git")
+				vim.defer_fn(function()
+					-- If we're in the git status buffer, trigger commit
+					local buf_name = vim.api.nvim_buf_get_name(0)
+					if buf_name:match("%.git/index$") or vim.bo.filetype == "fugitive" then
+						vim.cmd("Git commit")
+					end
+				end, 100)
+			end, { desc = "Git commit " })
+
+			-- Git push
+			vim.keymap.set("n", "<leader>gp", "<cmd>Git push<cr>", { desc = "Git push " })
+
+			-- Git pull
+			vim.keymap.set("n", "<leader>gP", "<cmd>Git pull<cr>", { desc = "Git pull " })
+
+			-- Git log
+			-- vim.keymap.set("n", "<leader>gl", "<cmd>Git log --oneline --graph --decorate --all<cr>", { desc = "Git log " })
+
+			-- Enhanced Telescope Git pickers with Fugitive backend
 			local telescope_builtin = require("telescope.builtin")
 
-			-- Git branches picker with enhanced UI
+			-- Git blame in telescope-style interface
+			vim.keymap.set("n", "<leader>gb", function()
+				-- Get current file and line
+				local current_file = vim.fn.expand("%")
+				if current_file == "" then
+					vim.notify("No file open for blame", vim.log.levels.WARN)
+					return
+				end
+
+				-- Use fugitive's blame with better UI
+				vim.cmd("Git blame")
+
+				-- Add keymaps for the blame buffer with improved detection
+				vim.defer_fn(function()
+					local buf = vim.api.nvim_get_current_buf()
+					local buf_name = vim.api.nvim_buf_get_name(buf)
+					local filetype = vim.bo[buf].filetype
+
+					-- Check for fugitive blame buffer by name pattern or filetype
+					if buf_name:match("fugitive://") or filetype == "fugitiveblame" then
+						-- Function to properly close blame buffer
+						local function close_blame()
+							-- Try multiple methods to close the blame buffer
+							local success = pcall(vim.cmd, "close")
+							if not success then
+								pcall(vim.cmd, "bdelete")
+							end
+						end
+
+						-- Add convenient keymaps for blame navigation
+						vim.keymap.set("n", "<CR>", "<CR>", { buffer = buf, silent = true, desc = "Show commit" })
+						vim.keymap.set("n", "q", close_blame, { buffer = buf, silent = true, desc = "Close blame" })
+						vim.keymap.set("n", "<Esc>", close_blame, { buffer = buf, silent = true, desc = "Close blame" })
+						vim.keymap.set("n", "o", function()
+							-- Open commit in new split
+							vim.cmd("normal! o")
+						end, { buffer = buf, silent = true, desc = "Open commit in split" })
+					end
+				end, 150) -- Slightly longer delay to ensure buffer is fully loaded
+			end, { desc = "Git blame " })
+
+			-- Git branches picker with fugitive backend
 			vim.keymap.set("n", "<leader>gB", function()
 				telescope_builtin.git_branches({
-					prompt_title = "󰘬 Git Branches",
+					prompt_title = "󰘬 Git Branches ",
                     initial_mode = "normal",
 					theme = "ivy",
 					layout_config = { height = 0.6 },
@@ -163,7 +213,7 @@ return {
 						local actions = require("telescope.actions")
 						local action_state = require("telescope.actions.state")
 
-						-- Enter to checkout branch
+						-- Enter to checkout branch using fugitive
 						actions.select_default:replace(function()
 							local selection = action_state.get_selected_entry()
 							actions.close(prompt_bufnr)
@@ -173,7 +223,7 @@ return {
 							end
 						end)
 
-						-- Ctrl+D to delete branch
+						-- Ctrl+D to delete branch using fugitive
 						map("i", "<C-d>", function()
 							local selection = action_state.get_selected_entry()
 							if selection then
@@ -196,45 +246,49 @@ return {
 							end
 						end)
 
+						-- q or Esc to close
+						map("n", "q", actions.close)
+						map("i", "<Esc>", actions.close)
+						map("n", "<Esc>", actions.close)
+
 						return true
 					end,
 				})
-			end, { desc = "Git branches (Telescope)" })
+			end, { desc = "Git branches " })
 
-			-- Git commits picker with enhanced functionality
-			vim.keymap.set("n", "<leader>gC", function()
-				telescope_builtin.git_commits({
-					prompt_title = "󰜘 Git Commits",
+			-- Git stashes picker
+			vim.keymap.set("n", "<leader>gT", function()
+				telescope_builtin.git_stash({
+					prompt_title = "󰜦 Git Stashes",
 					theme = "ivy",
-					layout_config = {
-						height = 0.8,
-						preview_cutoff = 120,
-					},
-					-- Show diff in preview
-					git_command = { "git", "log", "--pretty=oneline", "--abbrev-commit", "--graph" },
+					layout_config = { height = 0.6 },
 					attach_mappings = function(prompt_bufnr, map)
 						local actions = require("telescope.actions")
 						local action_state = require("telescope.actions.state")
 
-						-- Enter to show commit details in diffview
+						-- Enter to apply stash
 						actions.select_default:replace(function()
 							local selection = action_state.get_selected_entry()
 							actions.close(prompt_bufnr)
 							if selection then
-								vim.cmd("DiffviewOpen " .. selection.value .. "^!")
+								vim.cmd("Git stash apply " .. selection.value)
+								vim.notify("Applied stash: " .. selection.value, vim.log.levels.INFO)
 							end
 						end)
 
-						-- Ctrl+R to reset to this commit
-						map("i", "<C-r>", function()
+						-- Ctrl+D to drop stash
+						map("i", "<C-d>", function()
 							local selection = action_state.get_selected_entry()
 							if selection then
 								vim.ui.input({
-									prompt = "Reset to commit " .. selection.value .. "? (soft/hard/mixed): ",
+									prompt = "Drop stash " .. selection.value .. "? (y/N): ",
 								}, function(input)
-									if input and (input == "soft" or input == "hard" or input == "mixed") then
-										vim.cmd("Git reset --" .. input .. " " .. selection.value)
-										vim.notify("Reset to commit: " .. selection.value, vim.log.levels.INFO)
+									if input and input:lower() == "y" then
+										vim.cmd("Git stash drop " .. selection.value)
+										vim.notify("Dropped stash: " .. selection.value, vim.log.levels.INFO)
+										-- Refresh the picker
+										actions.close(prompt_bufnr)
+										telescope_builtin.git_stash()
 									end
 								end)
 							end
@@ -243,12 +297,12 @@ return {
 						return true
 					end,
 				})
-			end, { desc = "Git commits (Telescope)" })
+			end, { desc = "Git stashes (Telescope)" })
 
-			-- Git file status picker
-			vim.keymap.set("n", "<leader>gs", function()
+			-- Enhanced git status files picker with fugitive backend
+			vim.keymap.set("n", "<leader>gf", function()
 				telescope_builtin.git_status({
-					prompt_title = "󰊢 Git Status",
+					prompt_title = "󰊢  Changed Files",
 					initial_mode = "normal",
 					theme = "ivy",
 					layout_config = { height = 0.6 },
@@ -256,16 +310,16 @@ return {
 						local actions = require("telescope.actions")
 						local action_state = require("telescope.actions.state")
 
-						-- Enter to open file
+						-- Enter to open file using fugitive
 						actions.select_default:replace(function()
 							local selection = action_state.get_selected_entry()
 							actions.close(prompt_bufnr)
 							if selection then
-								vim.cmd("edit " .. selection.value)
+								vim.cmd("Gedit " .. selection.value)
 							end
 						end)
 
-						-- Ctrl+S to stage file
+						-- Ctrl+S to stage file using fugitive
 						map("i", "<C-s>", function()
 							local selection = action_state.get_selected_entry()
 							if selection then
@@ -277,7 +331,7 @@ return {
 							end
 						end)
 
-						-- Ctrl+U to unstage file
+						-- Ctrl+U to unstage file using fugitive
 						map("i", "<C-u>", function()
 							local selection = action_state.get_selected_entry()
 							if selection then
@@ -289,10 +343,24 @@ return {
 							end
 						end)
 
+						-- Ctrl+D to diff file using fugitive
+						map("i", "<C-d>", function()
+							local selection = action_state.get_selected_entry()
+							if selection then
+								actions.close(prompt_bufnr)
+								vim.cmd("Git diff " .. selection.value)
+							end
+						end)
+
+						-- q or Esc to close
+						map("n", "q", actions.close)
+						map("i", "<Esc>", actions.close)
+						map("n", "<Esc>", actions.close)
+
 						return true
 					end,
 				})
-			end, { desc = "Git status files (Telescope)" })
+			end, { desc = "Git status files " })
 
 			-- Git stashes picker
 			vim.keymap.set("n", "<leader>gT", function()
@@ -351,11 +419,11 @@ return {
 				end)
 			end, { desc = "Create Git stash" })
 
-			-- Git file browser - Browse files in any commit/branch
-			vim.keymap.set("n", "<leader>gf", function()
+			-- Enhanced git file browser with fugitive backend
+			vim.keymap.set("n", "<leader>gl", function()
 				-- First select a commit/branch, then browse files
 				telescope_builtin.git_commits({
-					prompt_title = "󰜘 Select Commit to Browse Files",
+					prompt_title = "󰜘 Enhanced Explorable Logs",
                     initial_mode = "normal",
 					theme = "ivy",
 					layout_config = { height = 0.6 },
@@ -367,103 +435,56 @@ return {
 							local selection = action_state.get_selected_entry()
 							actions.close(prompt_bufnr)
 							if selection then
-								-- Browse files in that commit
+								local commit_hash = selection.value:match("^(%w+)")
+								-- Browse files in that commit using fugitive
 								telescope_builtin.git_files({
-									prompt_title = "󰈞 Files in " .. selection.value:sub(1, 8),
+									prompt_title = "󰈞 Files in " .. commit_hash:sub(1, 8) .. " ",
+									initial_mode = "normal",
 									theme = "ivy",
-									git_command = { "git", "ls-tree", "-r", "--name-only", selection.value },
+									git_command = { "git", "ls-tree", "-r", "--name-only", commit_hash },
 									attach_mappings = function(prompt_bufnr2, map2)
 										actions.select_default:replace(function()
 											local file_selection = action_state.get_selected_entry()
 											actions.close(prompt_bufnr2)
 											if file_selection then
-												-- Show file content from that commit
-												vim.cmd("Git show " .. selection.value .. ":" .. file_selection.value)
+												-- Show file content from that commit using fugitive
+												vim.cmd("Git show " .. commit_hash .. ":" .. file_selection.value)
 											end
 										end)
+
+										-- Ctrl+D to diff file against current version
+										map2("i", "<C-d>", function()
+											local file_selection = action_state.get_selected_entry()
+											if file_selection then
+												actions.close(prompt_bufnr2)
+												vim.cmd("Git diff " .. commit_hash .. " -- " .. file_selection.value)
+											end
+										end)
+
+										-- q or Esc to close
+										map2("n", "q", actions.close)
+										map2("i", "<Esc>", actions.close)
+										map2("n", "<Esc>", actions.close)
+
 										return true
 									end,
 								})
 							end
 						end)
+
+						-- q or Esc to close
+						map("n", "q", actions.close)
+						map("i", "<Esc>", actions.close)
+						map("n", "<Esc>", actions.close)
+
 						return true
 					end,
 				})
-			end, { desc = "Browse Git files in commit" })
+			end, { desc = "Browse Git files in commit " })
 
-
-			-- Git remotes management
-			vim.keymap.set("n", "<leader>gr", function()
-				local handle = io.popen("git remote -v")
-				if not handle then
-					vim.notify("Failed to get git remotes", vim.log.levels.ERROR)
-					return
-				end
-
-				local remotes = {}
-				local seen = {}
-				for line in handle:lines() do
-					local name, url, type_info = line:match("([^%s]+)%s+([^%s]+)%s+%(([^%)]+)%)")
-					if name and url and type_info and not seen[name] then
-						seen[name] = true
-						table.insert(remotes, {
-							name = name,
-							url = url,
-							type = type_info,
-							display = string.format("%-10s │ %s │ (%s)", name, url, type_info),
-						})
-					end
-				end
-				handle:close()
-
-				if #remotes == 0 then
-					vim.notify("No git remotes found", vim.log.levels.INFO)
-					return
-				end
-
-				require("telescope.pickers").new({}, {
-					prompt_title = "󰞶 Git Remotes",
-					finder = require("telescope.finders").new_table({
-						results = remotes,
-						entry_maker = function(entry)
-							return {
-								value = entry,
-								display = entry.display,
-								ordinal = entry.name .. " " .. entry.url,
-							}
-						end,
-					}),
-					sorter = require("telescope.config").values.generic_sorter({}),
-					attach_mappings = function(prompt_bufnr, map)
-						local actions = require("telescope.actions")
-						local action_state = require("telescope.actions.state")
-
-						-- Enter to fetch from remote
-						actions.select_default:replace(function()
-							local selection = action_state.get_selected_entry()
-							actions.close(prompt_bufnr)
-							if selection then
-								vim.cmd("Git fetch " .. selection.value.name)
-								vim.notify("Fetched from: " .. selection.value.name, vim.log.levels.INFO)
-							end
-						end)
-
-						-- Ctrl+P to push to remote
-						map("i", "<C-p>", function()
-							local selection = action_state.get_selected_entry()
-							if selection then
-								actions.close(prompt_bufnr)
-								vim.cmd("Git push " .. selection.value.name)
-								vim.notify("Pushed to: " .. selection.value.name, vim.log.levels.INFO)
-							end
-						end)
-
-						return true
-					end,
-				}):find()
-			end, { desc = "Git remotes management" })
 		end,
 	},
+
 	-- LazyGit integration - Full-featured Git TUI for complex operations
 	{
 		"kdheepak/lazygit.nvim",
@@ -491,7 +512,6 @@ return {
 
 			-- Additional keymaps for comprehensive Git workflow
 			vim.keymap.set("n", "<leader>gg", "<cmd>LazyGit<cr>", { desc = "Open LazyGit" })
-			vim.keymap.set("n", "<leader>gl", "<cmd>LazyGit<cr>", { desc = "LazyGit (duplicate mapping)" })
 		end,
 	},
 }
