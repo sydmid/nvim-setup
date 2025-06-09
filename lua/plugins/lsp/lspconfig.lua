@@ -212,16 +212,7 @@ return {
 						keymap("n", "gd", "<cmd>Lspsaga goto_definition<CR>", { buffer = ev.buf, desc = "Go to definition" })
 						keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>", { buffer = ev.buf, desc = "Peek definition" })
 						keymap("n", "<leader>us", function()
-							require("telescope.builtin").lsp_references({
-								initial_mode = "normal",
-								attach_mappings = function(prompt_bufnr, map_func)
-									local actions = require("telescope.actions")
-									map_func("i", "<Esc>", actions.close)
-									map_func("n", "<Esc>", actions.close)
-									map_func("n", "q", actions.close)
-									return true
-								end,
-							})
+							_G.telescope_lsp_references_with_dynamic_title()
 						end, { buffer = ev.buf, desc = "Find references" })
 						keymap("n", "<leader>ii", function()
 							require("telescope.builtin").lsp_implementations({

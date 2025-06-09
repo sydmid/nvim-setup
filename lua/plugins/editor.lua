@@ -401,6 +401,7 @@ return {
 					prompt_prefix = " > ",
 					selection_caret = " > ",
 					path_display = { "smart" },
+					dynamic_preview_title = true,
 					mappings = {
 						i = {
 							["<C-k>"] = actions.move_selection_previous, -- move to prev result
@@ -439,6 +440,298 @@ return {
 			if has_csharpls_extended then
 				telescope.load_extension("csharpls_definition")
 			end
+
+			-- Custom telescope functions with dynamic preview titles
+			local function lsp_references_with_dynamic_title()
+				local previewers = require("telescope.previewers")
+				local builtin = require("telescope.builtin")
+
+				builtin.lsp_references({
+					initial_mode = "normal",
+					path_display = { "smart" },
+					entry_maker = function(entry)
+						local make_entry = require("telescope.make_entry")
+						local default_entry = make_entry.gen_from_quickfix({})(entry)
+
+						-- Override the display to only show the smart path
+						if default_entry then
+							default_entry.display = function(ent)
+								local path_display = require("telescope.utils").path_smart(ent.filename)
+								return path_display .. ":" .. ent.lnum .. ":" .. ent.col
+							end
+						end
+
+						return default_entry
+					end,
+					attach_mappings = function(prompt_bufnr, map_func)
+						local actions = require("telescope.actions")
+						map_func("i", "<Esc>", actions.close)
+						map_func("n", "<Esc>", actions.close)
+						map_func("n", "q", actions.close)
+						return true
+					end,
+					previewer = previewers.new_buffer_previewer({
+						title = "LSP References",
+						dyn_title = function(_, entry)
+							return vim.fn.fnamemodify(entry.filename, ":t")
+						end,
+						get_buffer_by_name = function(_, entry)
+							return entry.filename
+						end,
+						define_preview = function(self, entry, status)
+							previewers.buffer_previewer_maker(entry.filename, self.state.bufnr, {
+								bufname = self.state.bufname,
+								winid = self.state.winid,
+								preview = {
+									mime_type = vim.filetype.match({ filename = entry.filename }),
+								},
+							})
+
+							-- Jump to the line and highlight the referenced symbol
+							if entry.lnum then
+								vim.api.nvim_buf_call(self.state.bufnr, function()
+									pcall(vim.api.nvim_win_set_cursor, self.state.winid, { entry.lnum, (entry.col or 1) - 1 })
+
+									-- Clear any existing highlights
+									vim.api.nvim_buf_clear_namespace(self.state.bufnr, -1, 0, -1)
+
+									-- Function to apply highlighting
+									local function apply_highlighting()
+										-- Get the symbol name under cursor for LSP references
+										local symbol_name = ""
+
+										-- Try to get the current word/symbol at the reference location
+										if entry.text then
+											-- Extract the word around the column position
+											local line_text = vim.api.nvim_buf_get_lines(self.state.bufnr, entry.lnum - 1, entry.lnum, false)[1] or ""
+											if line_text and entry.col then
+												-- Find word boundaries around the column
+												local col = entry.col - 1 -- Convert to 0-based
+												local start_col = col
+												local end_col = col
+
+												-- Find start of word
+												while start_col > 0 and line_text:sub(start_col, start_col):match("[%w_]") do
+													start_col = start_col - 1
+												end
+												if not line_text:sub(start_col + 1, start_col + 1):match("[%w_]") then
+													start_col = start_col + 1
+												end
+
+												-- Find end of word
+												while end_col < #line_text and line_text:sub(end_col + 1, end_col + 1):match("[%w_]") do
+													end_col = end_col + 1
+												end
+
+												symbol_name = line_text:sub(start_col + 1, end_col)
+											end
+										end
+
+										-- Fallback: try to get symbol from LSP if we have access to it
+										if symbol_name == "" then
+											-- Get the current word under cursor in the original buffer
+											local current_word = vim.fn.expand("<cword>")
+											if current_word and current_word ~= "" then
+												symbol_name = current_word
+											end
+										end
+
+										-- Highlight the symbol in the preview
+										if symbol_name and symbol_name ~= "" and entry.lnum then
+											local line_text = vim.api.nvim_buf_get_lines(self.state.bufnr, entry.lnum - 1, entry.lnum, false)[1] or ""
+											local escaped_symbol = vim.pesc(symbol_name)
+
+											-- Find all occurrences of the symbol in the line
+											local start_pos = 1
+											while true do
+												local start_col, end_col = string.find(line_text, escaped_symbol, start_pos)
+												if not start_col then break end
+
+												vim.api.nvim_buf_add_highlight(
+													self.state.bufnr,
+													-1,
+													"TelescopeMatching",
+													entry.lnum - 1,
+													start_col - 1,
+													end_col
+												)
+
+												start_pos = end_col + 1
+											end
+										end
+									end
+
+									-- Apply highlighting immediately
+									apply_highlighting()
+
+									-- Also schedule it to run after telescope is fully loaded
+									vim.schedule(function()
+										if vim.api.nvim_buf_is_valid(self.state.bufnr) then
+											apply_highlighting()
+										end
+									end)
+								end)
+							end
+						end
+					})
+				})
+			end
+
+			local function live_grep_with_dynamic_title(opts)
+				local previewers = require("telescope.previewers")
+				local builtin = require("telescope.builtin")
+
+				opts = opts or {}
+
+				local config = vim.tbl_extend("force", opts, {
+					path_display = { "smart" },
+					entry_maker = function(entry)
+						local make_entry = require("telescope.make_entry")
+						local default_entry = make_entry.gen_from_vimgrep({})(entry)
+
+						-- Override the display to only show the smart path
+						if default_entry then
+							default_entry.display = function(ent)
+								local path_display = require("telescope.utils").path_smart(ent.filename)
+								return path_display .. ":" .. ent.lnum .. ":" .. ent.col
+							end
+						end
+
+						return default_entry
+					end,
+					previewer = previewers.new_buffer_previewer({
+						title = "Live Grep",
+						dyn_title = function(_, entry)
+							return vim.fn.fnamemodify(entry.filename, ":t")
+						end,
+						get_buffer_by_name = function(_, entry)
+							return entry.filename
+						end,
+						define_preview = function(self, entry, status)
+							previewers.buffer_previewer_maker(entry.filename, self.state.bufnr, {
+								bufname = self.state.bufname,
+								winid = self.state.winid,
+								preview = {
+									mime_type = vim.filetype.match({ filename = entry.filename }),
+								},
+							})
+
+							-- Jump to the line and highlight the search term
+							if entry.lnum then
+								vim.api.nvim_buf_call(self.state.bufnr, function()
+									pcall(vim.api.nvim_win_set_cursor, self.state.winid, { entry.lnum, (entry.col or 1) - 1 })
+
+									-- Clear any existing highlights
+									vim.api.nvim_buf_clear_namespace(self.state.bufnr, -1, 0, -1)
+
+									-- Function to apply highlighting
+									local function apply_highlighting()
+										-- Try to get the current search query from multiple sources
+										local search_query = opts.default_text or ""
+
+										if search_query == "" then
+											-- Try to get from telescope picker state
+											local picker = require("telescope.actions.state").get_current_picker()
+											if picker then
+												-- Try multiple methods to get the prompt
+												if picker._get_prompt then
+													search_query = picker:_get_prompt() or ""
+												elseif picker.prompt_bufnr then
+													local prompt_lines = vim.api.nvim_buf_get_lines(picker.prompt_bufnr, 0, 1, false)
+													if prompt_lines[1] then
+														-- Remove the prompt prefix to get just the search query
+														search_query = prompt_lines[1]:gsub("^.*> ", "")
+													end
+												end
+											end
+										end
+
+										-- Extract search query from the grep result text if still empty
+										if search_query == "" and entry.text then
+											-- For live_grep, the search term is what was found in the file
+											-- We can extract it from the entry, but it's better to use the actual search term
+											-- This is a fallback - try to get it from the entry's text
+											local line_text = vim.api.nvim_buf_get_lines(self.state.bufnr, entry.lnum - 1, entry.lnum, false)[1] or ""
+											-- This is imperfect but better than no highlighting
+											local words = vim.split(entry.text, "%s+")
+											for _, word in ipairs(words) do
+												if #word > 2 and string.find(line_text:lower(), word:lower()) then
+													search_query = word
+													break
+												end
+											end
+										end
+
+										-- Highlight the search term in the preview
+										if search_query and search_query ~= "" then
+											local line_text = vim.api.nvim_buf_get_lines(self.state.bufnr, entry.lnum - 1, entry.lnum, false)[1] or ""
+											local escaped_query = vim.pesc(search_query)
+											local start_col = string.find(line_text:lower(), escaped_query:lower())
+											if start_col then
+												vim.api.nvim_buf_add_highlight(
+													self.state.bufnr,
+													-1,
+													"TelescopeMatching",
+													entry.lnum - 1,
+													start_col - 1,
+													start_col - 1 + string.len(search_query)
+												)
+											end
+										end
+									end
+
+									-- Apply highlighting immediately
+									apply_highlighting()
+
+									-- Also schedule it to run after telescope is fully loaded
+									vim.schedule(function()
+										if vim.api.nvim_buf_is_valid(self.state.bufnr) then
+											apply_highlighting()
+										end
+									end)
+								end)
+							end
+						end
+					})
+				})
+
+				builtin.live_grep(config)
+			end
+
+			local function oldfiles_with_dynamic_title(opts)
+				local previewers = require("telescope.previewers")
+				local builtin = require("telescope.builtin")
+
+				opts = opts or {}
+
+				local config = vim.tbl_extend("force", opts, {
+					previewer = previewers.new_buffer_previewer({
+						title = "Recent Files",
+						dyn_title = function(_, entry)
+							return vim.fn.fnamemodify(entry.value, ":t")
+						end,
+						get_buffer_by_name = function(_, entry)
+							return entry.value
+						end,
+						define_preview = function(self, entry, status)
+							previewers.buffer_previewer_maker(entry.value, self.state.bufnr, {
+								bufname = self.state.bufname,
+								winid = self.state.winid,
+								preview = {
+									mime_type = vim.filetype.match({ filename = entry.value }),
+								},
+							})
+						end
+					})
+				})
+
+				builtin.oldfiles(config)
+			end
+
+			-- Make custom functions globally accessible
+			_G.telescope_lsp_references_with_dynamic_title = lsp_references_with_dynamic_title
+			_G.telescope_live_grep_with_dynamic_title = live_grep_with_dynamic_title
+			_G.telescope_oldfiles_with_dynamic_title = oldfiles_with_dynamic_title
 
 			-- Custom function to show all files with priority for recently opened ones
 			local function find_files_with_priority()
@@ -501,7 +794,7 @@ return {
 				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel")[1]
 				local project_root = (vim.v.shell_error == 0 and git_root) or cwd
 
-				telescope_with_esc(builtin.oldfiles, {
+				_G.telescope_oldfiles_with_dynamic_title({
 					cwd = project_root,
 					initial_mode = "normal",
 					-- Filter to only show files within the current project
@@ -529,7 +822,7 @@ return {
 						map_func("n", "q", actions.close)
 						return true
 					end,
-				})()
+				})
 			end, { desc = "Fuzzy find recent files in project" })
 
 			keymap.set("n", "<leader>fp", function()

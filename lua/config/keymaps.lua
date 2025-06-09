@@ -357,7 +357,9 @@ map("n", "gma", "`A", { desc = "Go to global mark A" })
 map("n", "gmb", "`B", { desc = "Go to global mark B" })
 
 -- Separate normal and visual mode mappings for D-S-f
-map("n", "<D-S-f>", ":Telescope live_grep<CR>", { desc = "telescope find string in all files", silent = true })
+map("n", "<D-S-f>", function()
+	_G.telescope_live_grep_with_dynamic_title()
+end, { desc = "telescope find string in all files", silent = true })
 map("v", "<D-S-f>", function()
 	-- Yank the selected text to the unnamed register
 	vim.cmd("normal! y")
@@ -366,7 +368,7 @@ map("v", "<D-S-f>", function()
 	-- Escape special characters
 	selected_text = selected_text:gsub("([%[%]%^%$%(%)])", "\\%1")
 	-- Call telescope with the selected text as the default search term
-	require("telescope.builtin").live_grep({ default_text = selected_text, initial_mode = "normal" })
+	_G.telescope_live_grep_with_dynamic_title({ default_text = selected_text, initial_mode = "normal" })
 end, { desc = "telescope find selected text in all files", silent = true })
 
 -- Enhanced search function that searches for word under cursor
