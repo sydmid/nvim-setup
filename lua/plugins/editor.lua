@@ -489,11 +489,11 @@ return {
 
 							-- Jump to the line and highlight the referenced symbol
 							if entry.lnum then
-								vim.api.nvim_buf_call(self.state.bufnr, function()
+								pcall(vim.api.nvim_buf_call, self.state.bufnr, function()
 									pcall(vim.api.nvim_win_set_cursor, self.state.winid, { entry.lnum, (entry.col or 1) - 1 })
 
-									-- Clear any existing highlights
-									vim.api.nvim_buf_clear_namespace(self.state.bufnr, -1, 0, -1)
+									-- Clear any existing highlights (wrapped in pcall for safety)
+									pcall(vim.api.nvim_buf_clear_namespace, self.state.bufnr, -1, 0, -1)
 
 									-- Function to apply highlighting
 									local function apply_highlighting()
@@ -547,7 +547,7 @@ return {
 												local start_col, end_col = string.find(line_text, escaped_symbol, start_pos)
 												if not start_col then break end
 
-												vim.api.nvim_buf_add_highlight(
+												pcall(vim.api.nvim_buf_add_highlight,
 													self.state.bufnr,
 													-1,
 													"TelescopeMatching",
@@ -562,12 +562,12 @@ return {
 									end
 
 									-- Apply highlighting immediately
-									apply_highlighting()
+									pcall(apply_highlighting)
 
-									-- Also schedule it to run after telescope is fully loaded
-									vim.schedule(function()
-										if vim.api.nvim_buf_is_valid(self.state.bufnr) then
-											apply_highlighting()
+									-- Schedule highlighting to run after telescope is fully loaded, with proper error handling
+									pcall(vim.schedule, function()
+										if vim.api.nvim_buf_is_valid(self.state.bufnr) and vim.api.nvim_win_is_valid(self.state.winid) then
+											pcall(apply_highlighting)
 										end
 									end)
 								end)
@@ -618,11 +618,11 @@ return {
 
 							-- Jump to the line and highlight the search term
 							if entry.lnum then
-								vim.api.nvim_buf_call(self.state.bufnr, function()
+								pcall(vim.api.nvim_buf_call, self.state.bufnr, function()
 									pcall(vim.api.nvim_win_set_cursor, self.state.winid, { entry.lnum, (entry.col or 1) - 1 })
 
-									-- Clear any existing highlights
-									vim.api.nvim_buf_clear_namespace(self.state.bufnr, -1, 0, -1)
+									-- Clear any existing highlights (wrapped in pcall for safety)
+									pcall(vim.api.nvim_buf_clear_namespace, self.state.bufnr, -1, 0, -1)
 
 									-- Function to apply highlighting
 									local function apply_highlighting()
@@ -668,7 +668,7 @@ return {
 											local escaped_query = vim.pesc(search_query)
 											local start_col = string.find(line_text:lower(), escaped_query:lower())
 											if start_col then
-												vim.api.nvim_buf_add_highlight(
+												pcall(vim.api.nvim_buf_add_highlight,
 													self.state.bufnr,
 													-1,
 													"TelescopeMatching",
@@ -681,12 +681,12 @@ return {
 									end
 
 									-- Apply highlighting immediately
-									apply_highlighting()
+									pcall(apply_highlighting)
 
-									-- Also schedule it to run after telescope is fully loaded
-									vim.schedule(function()
-										if vim.api.nvim_buf_is_valid(self.state.bufnr) then
-											apply_highlighting()
+									-- Schedule highlighting to run after telescope is fully loaded, with proper error handling
+									pcall(vim.schedule, function()
+										if vim.api.nvim_buf_is_valid(self.state.bufnr) and vim.api.nvim_win_is_valid(self.state.winid) then
+											pcall(apply_highlighting)
 										end
 									end)
 								end)
@@ -990,7 +990,7 @@ return {
 										-- Check if buffer has a filename
 										if bufname == '' then
 											-- For unnamed buffers, prompt for a filename
-											vim.api.nvim_buf_call(bufnr, function()
+											pcall(vim.api.nvim_buf_call, bufnr, function()
 												local save_name = vim.fn.input('Save as: ', '', 'file')
 												if save_name ~= '' then
 													vim.cmd('write ' .. vim.fn.fnameescape(save_name))
@@ -1001,7 +1001,7 @@ return {
 											end)
 										else
 											-- Named buffer, save normally
-											vim.api.nvim_buf_call(bufnr, function()
+											pcall(vim.api.nvim_buf_call, bufnr, function()
 												vim.cmd('write')
 											end)
 										end

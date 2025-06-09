@@ -43,8 +43,8 @@ opt.foldenable = true             -- Enable folding
 opt.foldlevelstart = 99           -- Start with all folds open
 
 -- Timing settings
-opt.timeoutlen = 0                -- Zero timeout for key sequence (instant response)
-opt.ttimeoutlen = 0               -- Reduce escape delay
+opt.timeoutlen = 300              -- Reasonable timeout for key sequences (300ms for telescope stability)
+opt.ttimeoutlen = 10              -- Reduce escape delay but not to zero
 
 -- Additional settings
 opt.matchpairs:append("<:>")      -- Add <> to matching pairs
