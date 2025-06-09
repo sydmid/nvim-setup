@@ -649,7 +649,110 @@ return {
 			keymap.set("n", "<leader>fh", telescope_with_esc(builtin.help_tags), { desc = "Find help tags" })
 			keymap.set("n", "<leader>fj", telescope_with_esc(builtin.jumplist, {initial_mode = "normal"}), { desc = "Find jumps" })
 			keymap.set("n", "<leader>fm", telescope_with_esc(builtin.marks ,{initial_mode = "normal"}), { desc = "Find marks" })
-			keymap.set("n", "<leader>fb", telescope_with_esc(builtin.buffers ,{initial_mode = "normal"}), { desc = "Find buffers" })
+			keymap.set("n", "<leader>fb", function()
+				-- Create a reusable function for buffer deletion
+				local function create_buffer_picker()
+					builtin.buffers({
+						initial_mode = "normal",
+						attach_mappings = function(prompt_bufnr, map_func)
+							local actions = require("telescope.actions")
+							local action_state = require("telescope.actions.state")
+
+							-- Function to delete buffer with smart handling
+							local function delete_buffer()
+								local selection = action_state.get_selected_entry()
+								if not selection then
+									return
+								end
+
+								-- Get all listed buffers
+								local all_buffers = vim.tbl_filter(function(buf)
+									return vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_buf_get_option(buf, 'buflisted')
+								end, vim.api.nvim_list_bufs())
+
+								-- Don't delete if it's the only buffer left
+								if #all_buffers <= 1 then
+									vim.notify("Cannot delete the last buffer", vim.log.levels.WARN)
+									return
+								end
+
+								local bufnr = selection.bufnr
+								local bufname = vim.api.nvim_buf_get_name(bufnr)
+
+								-- Check if buffer is modified
+								if vim.api.nvim_buf_get_option(bufnr, 'modified') then
+									-- Show confirmation dialog for modified buffer
+									local filename = vim.fn.fnamemodify(bufname, ':t')
+									if filename == '' then
+										filename = '[No Name]'
+									end
+
+									local choice = vim.fn.confirm(
+										string.format('Buffer "%s" has unsaved changes. Save before closing?', filename),
+										'&Save\n&Discard\n&Cancel',
+										1
+									)
+
+									if choice == 1 then -- Save
+										-- Check if buffer has a filename
+										if bufname == '' then
+											-- For unnamed buffers, prompt for a filename
+											vim.api.nvim_buf_call(bufnr, function()
+												local save_name = vim.fn.input('Save as: ', '', 'file')
+												if save_name ~= '' then
+													vim.cmd('write ' .. vim.fn.fnameescape(save_name))
+												else
+													-- User cancelled save, abort deletion
+													return
+												end
+											end)
+										else
+											-- Named buffer, save normally
+											vim.api.nvim_buf_call(bufnr, function()
+												vim.cmd('write')
+											end)
+										end
+									elseif choice == 3 then -- Cancel
+										return
+									end
+									-- choice == 2 means Discard, continue with deletion
+								end
+
+								-- Delete the buffer
+								vim.api.nvim_buf_delete(bufnr, { force = true })
+
+								-- Check how many buffers are left after deletion
+								local remaining_buffers = vim.tbl_filter(function(buf)
+									return vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_buf_get_option(buf, 'buflisted')
+								end, vim.api.nvim_list_bufs())
+
+								-- If only one buffer left, close telescope entirely
+								if #remaining_buffers <= 1 then
+									actions.close(prompt_bufnr)
+									return
+								end
+
+								-- Otherwise, close and reopen buffer picker
+								actions.close(prompt_bufnr)
+								vim.schedule(create_buffer_picker)
+							end
+
+							-- Map x to delete buffer in normal mode
+							map_func("n", "x", delete_buffer)
+
+							-- Standard telescope mappings
+							map_func("i", "<Esc>", actions.close)
+							map_func("n", "<Esc>", actions.close)
+							map_func("n", "q", actions.close)
+
+							return true
+						end,
+					})
+				end
+
+				-- Start the buffer picker
+				create_buffer_picker()
+			end, { desc = "Find buffers" })
 			keymap.set(
 				"n",
 				"<leader>fw",
