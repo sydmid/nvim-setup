@@ -3,6 +3,13 @@ local opt = vim.opt
 -- System clipboard integration
 opt.clipboard = "unnamedplus"
 
+-- File handling settings
+opt.fixendofline = false          -- Don't automatically add newline at end of file
+opt.endofline = false             -- Don't enforce final newline
+opt.binary = false                -- Keep as text file but preserve exact content
+opt.bomb = false                  -- Don't add BOM (Byte Order Mark)
+opt.fileformat = "unix"           -- Use Unix line endings consistently
+
 -- UI settings
 opt.cursorline = true
 opt.showmode = true               -- Show current mode

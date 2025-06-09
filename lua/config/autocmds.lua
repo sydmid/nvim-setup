@@ -18,6 +18,35 @@ autocmd("TextYankPost", {
 --   command = ":%s/\\s\\+$//e",
 -- })
 
+-- Prevent unwanted file modifications on save
+augroup("PreserveFileState", { clear = true })
+autocmd("BufWritePre", {
+  group = "PreserveFileState",
+  pattern = "*",
+  callback = function()
+    -- Save original file state to prevent unwanted modifications
+    vim.b.original_eol = vim.bo.endofline
+    vim.b.original_fixeol = vim.bo.fixendofline
+    -- Ensure no automatic line ending modifications
+    vim.bo.fixendofline = false
+    vim.bo.endofline = false
+  end,
+})
+
+autocmd("BufWritePost", {
+  group = "PreserveFileState",
+  pattern = "*",
+  callback = function()
+    -- Restore original settings after save
+    if vim.b.original_eol ~= nil then
+      vim.bo.endofline = vim.b.original_eol
+    end
+    if vim.b.original_fixeol ~= nil then
+      vim.bo.fixendofline = vim.b.original_fixeol
+    end
+  end,
+})
+
 -- Set up terminal mode mappings for window navigation
 autocmd("TermOpen", {
   pattern = "*",
