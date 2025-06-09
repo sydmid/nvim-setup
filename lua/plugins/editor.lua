@@ -230,7 +230,21 @@ return {
 					vim.keymap.set("n", "<C-v>", api.node.open.vertical, opts("Open: Vertical Split"))
 					vim.keymap.set("n", "<C-x>", api.node.open.horizontal, opts("Open: Horizontal Split"))
 					vim.keymap.set("n", "<BS>", api.node.navigate.parent_close, opts("Close Directory"))
-					vim.keymap.set("n", "<CR>", api.node.open.edit, opts("Open"))
+
+					-- Custom Enter behavior: Open file and close nvim-tree
+					vim.keymap.set("n", "<CR>", function()
+						local node = api.tree.get_node_under_cursor()
+						if node and node.type == "file" then
+							-- Open the file
+							api.node.open.edit()
+							-- Close nvim-tree
+							api.tree.close()
+						else
+							-- For directories, use default behavior (expand/collapse)
+							api.node.open.edit()
+						end
+					end, opts("Open file and close tree"))
+
 					-- vim.keymap.set("n", "<Tab>",          api.node.open.preview,              opts("Open Preview")) -- Disabled to use global Tab mapping
 					vim.keymap.set("n", ">", api.node.navigate.sibling.next, opts("Next Sibling"))
 					vim.keymap.set("n", "<", api.node.navigate.sibling.prev, opts("Previous Sibling"))
@@ -269,8 +283,42 @@ return {
 					vim.keymap.set("n", "L", api.node.open.toggle_group_empty, opts("Toggle Group Empty"))
 					vim.keymap.set("n", "M", api.tree.toggle_no_bookmark_filter, opts("Toggle Filter: No Bookmark"))
 					vim.keymap.set("n", "m", api.marks.toggle, opts("Toggle Bookmark"))
-					vim.keymap.set("n", "o", api.node.open.edit, opts("Open"))
-					vim.keymap.set("n", "O", api.node.open.no_window_picker, opts("Open: No Window Picker"))
+
+					-- Custom 'o' behavior: Open file, keep tree open and focused on tree
+					vim.keymap.set("n", "o", function()
+						local node = api.tree.get_node_under_cursor()
+						if node and node.type == "file" then
+							-- Open the file but don't change focus
+							api.node.open.edit()
+							-- Keep focus on nvim-tree by explicitly focusing it
+							vim.defer_fn(function()
+								-- Find nvim-tree window and focus it
+								for _, win in ipairs(vim.api.nvim_list_wins()) do
+									local buf = vim.api.nvim_win_get_buf(win)
+									local buf_name = vim.api.nvim_buf_get_name(buf)
+									if buf_name:match("NvimTree_") then
+										vim.api.nvim_set_current_win(win)
+										break
+									end
+								end
+							end, 10)
+						else
+							-- For directories, use default behavior
+							api.node.open.edit()
+						end
+					end, opts("Open file, keep tree open and focused"))
+
+					-- Custom 'O' behavior: Open file, keep tree open but focus main buffer
+					vim.keymap.set("n", "O", function()
+						local node = api.tree.get_node_under_cursor()
+						if node and node.type == "file" then
+							-- Open the file and let focus go to the opened file (default behavior)
+							api.node.open.edit()
+						else
+							-- For directories, use no_window_picker behavior
+							api.node.open.no_window_picker()
+						end
+					end, opts("Open file, keep tree open, focus main buffer"))
 					vim.keymap.set("n", "p", api.fs.paste, opts("Paste"))
 					vim.keymap.set("n", "P", api.node.navigate.parent, opts("Parent Directory"))
 					vim.keymap.set("n", "q", api.tree.close, opts("Close"))
