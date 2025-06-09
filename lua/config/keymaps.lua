@@ -12,6 +12,8 @@ vim.o.scrolloff = 5
 -- Git navigation:
 --   <leader>gC - Next git change (was ]c)
 --   <leader>gc - Previous git change (was [c)
+--   ]c - Next git change (current document → workspace fallback)
+--   [c - Previous git change (current document → workspace fallback)
 --
 -- Diagnostic navigation:
 --   <leader>dj - Next diagnostic (was ]e or <D-S-]>) - ALSO: CMD+] (<D-]>)
@@ -707,6 +709,85 @@ end, { desc = "Show buffers in telescope", silent = true })
 map("n", "<D-3>", function()
 	require("harpoon.ui").toggle_quick_menu()
 end, { desc = "Toggle Harpoon menu", silent = true })
+
+-- Buffer-only Git Navigation (]c,) -- Remember [c is for jump to context
+-- Function to navigate git changes only within current buffer
+local function buffer_git_navigation(direction)
+	local gitsigns = package.loaded.gitsigns
+	if not gitsigns then
+		vim.notify("Gitsigns not loaded", vim.log.levels.WARN)
+		return
+	end
+
+	-- Simple navigation within current buffer only
+	if direction == "next" then
+		gitsigns.next_hunk()
+	else
+		gitsigns.prev_hunk()
+	end
+end
+
+-- Workspace Git Navigation with Telescope (]C, [C)
+-- Function for workspace-wide git change navigation
+local function workspace_git_navigation(direction)
+	local telescope_builtin = require("telescope.builtin")
+	if not telescope_builtin then
+		vim.notify("Telescope not available for workspace git navigation", vim.log.levels.WARN)
+		return
+	end
+
+	telescope_builtin.git_status({
+		prompt_title = direction == "next" and "󰊢 Next Git Changes (Workspace)" or "󰊢 Previous Git Changes (Workspace)",
+		initial_mode = "normal",
+		theme = "ivy",
+		layout_config = { height = 0.6 },
+		attach_mappings = function(prompt_bufnr, map)
+			local actions = require("telescope.actions")
+			local action_state = require("telescope.actions.state")
+
+			-- Enter to open file at first change
+			actions.select_default:replace(function()
+				local selection = action_state.get_selected_entry()
+				actions.close(prompt_bufnr)
+				if selection then
+					vim.cmd("edit " .. selection.value)
+					-- Jump to first/last hunk in the opened file
+					vim.defer_fn(function()
+						local gitsigns = package.loaded.gitsigns
+						if gitsigns then
+							if direction == "next" then
+								pcall(gitsigns.next_hunk)
+							else
+								-- For previous, go to last hunk
+								pcall(function()
+									-- Move to end of file then find previous hunk
+									vim.cmd("normal! G")
+									gitsigns.prev_hunk()
+								end)
+							end
+						end
+					end, 100)
+				end
+			end)
+
+			return true
+		end,
+	})
+end
+
+-- Buffer-only git navigation (]c,) - Remember !!! c[ is for jump to context
+vim.keymap.set("n", "]c", function()
+	buffer_git_navigation("next")
+end, { desc = "Next git change (buffer only)", silent = true })
+
+-- Workspace git navigation (]C, [C)
+vim.keymap.set("n", "]C", function()
+	workspace_git_navigation("next")
+end, { desc = "Next git change (workspace)", silent = true })
+
+vim.keymap.set("n", "[C", function()
+	workspace_git_navigation("prev")
+end, { desc = "Previous git change (workspace)", silent = true })
 
 -- Normal + Visual mode
 map({ "n", "v" }, "<D-S-j>", function()
