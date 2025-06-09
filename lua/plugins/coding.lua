@@ -57,7 +57,11 @@ return {
 					},
 				},
 				-- Enable folding with treesitter
-				fold = { enable = true },
+				fold = {
+					enable = true,
+					-- Disable for HTML initially to allow custom folding
+					disable = {},
+				},
 				textobjects = {
 					select = {
 						enable = true,

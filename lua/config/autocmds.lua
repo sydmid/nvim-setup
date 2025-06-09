@@ -39,6 +39,99 @@ autocmd("FileType", {
   end,
 })
 
+-- HTML-specific folding configuration
+-- Fix for HTML folding not working with treesitter
+autocmd("FileType", {
+  pattern = "html",
+  callback = function()
+    -- Ensure folding is enabled
+    vim.wo.foldenable = true
+
+    -- Enhanced HTML folding using treesitter with fallback
+    vim.defer_fn(function()
+      -- Check if treesitter parser is available and working
+      local has_parser = pcall(vim.treesitter.get_parser, 0, "html")
+      local has_queries = pcall(vim.treesitter.query.get, "html", "folds")
+
+      if has_parser and has_queries then
+        -- Use treesitter folding
+        vim.wo.foldmethod = "expr"
+        vim.wo.foldexpr = "v:lua.enhanced_html_foldexpr()"
+        vim.notify("HTML: Using enhanced treesitter folding", vim.log.levels.DEBUG)
+      else
+        -- Fallback to indent-based folding
+        vim.wo.foldmethod = "indent"
+        vim.wo.foldlevel = 99  -- Start with all folds open
+        vim.notify("HTML: Using indent-based folding (treesitter unavailable)", vim.log.levels.DEBUG)
+      end
+
+      -- Set appropriate fold levels for HTML (start with all folds open)
+      vim.wo.foldlevel = 99
+      vim.opt.foldlevelstart = 99  -- Use vim.opt for global options
+
+      -- Enhanced fold text for HTML
+      vim.wo.foldtext = "v:lua.html_fold_text()"
+    end, 50)
+  end,
+})
+
+-- Custom fold text function for HTML
+function _G.html_fold_text()
+  local line = vim.fn.getline(vim.v.foldstart)
+  local line_count = vim.v.foldend - vim.v.foldstart + 1
+
+  -- Clean up the line (remove extra spaces)
+  line = line:gsub("^%s*", ""):gsub("%s*$", "")
+
+  -- Extract tag name for better display
+  local tag = line:match("<(%w+)")
+  if tag then
+    return string.format("󰗀 <%s...> (%d lines)", tag, line_count)
+  else
+    return string.format("󰘍 %s... (%d lines)", line:sub(1, 50), line_count)
+  end
+end
+
+-- Enhanced fold expression for HTML that combines treesitter with manual fixes
+function _G.enhanced_html_foldexpr()
+  local line = vim.v.lnum
+
+  -- Try treesitter first
+  local ts_status, ts_fold = pcall(function()
+    return vim.treesitter.foldexpr(line)
+  end)
+
+  if ts_status and ts_fold and ts_fold ~= "0" then
+    return ts_fold
+  end
+
+  -- Manual folding logic for HTML when treesitter fails
+  local line_content = vim.fn.getline(line)
+  local prev_line = line > 1 and vim.fn.getline(line - 1) or ""
+  local next_line = vim.fn.getline(line + 1) or ""
+
+  -- Increase fold level for opening tags
+  if line_content:match("<%s*[^/][^>]*>%s*$") and not line_content:match("<%s*[^/][^>]*/>") then
+    -- Self-closing tags don't increase fold level
+    if not line_content:match("<%s*[^>]*/%s*>") then
+      return "a1"
+    end
+  end
+
+  -- Decrease fold level for closing tags
+  if line_content:match("<%s*/%s*[^>]*>") then
+    return "s1"
+  end
+
+  -- HTML doctype and html tag handling
+  if line_content:match("<!DOCTYPE") then
+    return "0"
+  end
+
+  -- Default fold level
+  return "="
+end
+
 -- Auto-reload files when changed on disk
 autocmd({ "FocusGained", "BufEnter" }, {
   pattern = "*",
