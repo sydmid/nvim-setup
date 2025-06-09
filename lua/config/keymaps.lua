@@ -1012,7 +1012,6 @@ vim.defer_fn(function()
   if wk_ok then
     wk.add({
       { "<leader>t", group = "Terminal" },
-      { "<leader>tt", desc = "Toggle default terminal" },
       { "<leader>tf", desc = "Toggle floating terminal" },
       { "<leader>tv", desc = "Toggle vertical terminal" },
       { "<leader>th", desc = "Toggle horizontal terminal" },
@@ -1170,3 +1169,8 @@ end
 map("n", "<D-w>", smart_buffer_delete, { desc = "Close buffer (with confirmation if modified)", noremap = true, silent = true })
 map("n", "<leader>bd", smart_buffer_delete, { desc = "Smart delete buffer", silent = true })
 map({ "n", "i", "v" }, "<D-S-s>", save_all_modified, { desc = "Save all modified buffers", noremap = true, silent = true })
+
+-- Theme toggle keymap
+map("n", "<leader>tt", function()
+	_G.toggle_theme()
+end, { desc = "Toggle between themes (no-clown-fiesta ⟷ catppuccin)", silent = true })

@@ -9,7 +9,25 @@
 -- - Completion menu (nvim-cmp) styled with theme colors
 -- - LSP Saga windows themed consistently
 -- - Auto-persistence of custom highlights after theme changes via ColorScheme autocmd
+-- - Theme toggle functionality with <leader>tt (switches between no-clown-fiesta and Catppuccin)
 --
+
+-- Global variable to track current theme
+_G.current_theme = "no-clown-fiesta"
+
+-- Theme toggle function (made global for keymap access)
+function _G.toggle_theme()
+	if _G.current_theme == "no-clown-fiesta" then
+		_G.current_theme = "catppuccin"
+		vim.cmd.colorscheme("catppuccin-mocha")
+		vim.notify("Switched to Catppuccin Mocha theme", vim.log.levels.INFO)
+	else
+		_G.current_theme = "no-clown-fiesta"
+		vim.cmd.colorscheme("no-clown-fiesta")
+		vim.notify("Switched to No Clown Fiesta theme", vim.log.levels.INFO)
+	end
+end
+
 local theme_opts = {
 	styles = {
 		type = { bold = true },
@@ -197,6 +215,64 @@ local function config_theme()
 	end)
 end
 return {
+	-- Alternative colorscheme for toggle (Catppuccin - colorful yet professional)
+	{
+		"catppuccin/nvim",
+		name = "catppuccin",
+		priority = 999, -- Load before no-clown-fiesta but after it
+		config = function()
+			require("catppuccin").setup({
+				flavour = "mocha", -- latte, frappe, macchiato, mocha
+				background = { -- :h background
+				light = "latte",
+				dark = "mocha",
+				},
+				transparent_background = false,
+				show_end_of_buffer = false,
+				term_colors = true,
+				dim_inactive = {
+				enabled = false,
+				shade = "dark",
+				percentage = 0.15,
+				},
+				no_italic = false,
+				no_bold = false,
+				no_underline = false,
+				styles = {
+				comments = { "italic" },
+				conditionals = { "italic" },
+				loops = {},
+				functions = { "bold" },
+				keywords = { "bold" },
+				strings = {},
+				variables = {},
+				numbers = {},
+				booleans = {},
+				properties = {},
+				types = { "bold" },
+				operators = {},
+				},
+				integrations = {
+				cmp = true,
+				gitsigns = true,
+				nvimtree = true,
+				treesitter = true,
+				notify = true,
+				mini = {
+					enabled = true,
+					indentscope_color = "",
+				},
+				telescope = {
+					enabled = true,
+					style = "nvchad"
+				},
+				lsp_saga = true,
+				which_key = true,
+				},
+			})
+		end,
+	},
+
 	-- Colorscheme
 	{
 		"aktersnurra/no-clown-fiesta.nvim",
@@ -1200,21 +1276,25 @@ return {
 
 			-- Register all the key groups
 			wk.add({
-				-- { '<leader>b', group = 'Bookmarks' },
-				{ "<leader>b", group = "Buffer" },
-				{ "<leader>c", group = "Context/Code-Actions" },
-				{ "<leader>d", group = "Diagnostics/Debug" },
-				{ "<leader>f", group = "File/Find" },
-				{ "<leader>g", group = "Git/Goto" },
-				{ "<leader>h", group = "Hunks/Git-Stage" },
-				{ "<leader>i", group = "Info" },
-				{ "<leader>m", group = "Bookmarks" },
-				{ "<leader>n", group = "Navigation" },
-				{ "<leader>r", group = "Rename/Refactor" },
-				{ "<leader>s", group = "Split" },
-				{ "<leader>t", group = "Terminal/Tabs" },
-				{ "<leader>x", group = "Diagnostics" },
-				{ "g", group = "Goto" },
+				{ "<leader>b", group = " Buffer" },
+				{ "<leader>c", group = " Context/Code-Actions" },
+				{ "<leader>d", group = " Diagnostics/Debug" },
+				{ "<leader>f", group = " File/Find" },
+				{ "<leader>g", group = " Git/Goto" },
+				{ "<leader>h", group = " Hunks/Git-Stage" },
+				{ "<leader>i", group = " Info" },
+				{ "<leader>l", group = " LSP" },
+				{ "<leader>m", group = " Bookmarks" },
+				{ "<leader>n", group = " Navigation" },
+				{ "<leader>o", group = " Overseer/Tasks" },
+				{ "<leader>r", group = " Rename/Refactor" },
+				{ "<leader>s", group = " Split" },
+				{ "<leader>t", group = " Terminal/Tabs" },
+				{ "<leader>tt", desc = " Toggle themes (no-clown-fiesta ⟷ catppuccin)" },
+				{ "<leader>u", group = " Test" },
+				{ "<leader>w", group = "󰓩 Workspace/Tabs" },
+				{ "<leader>x", group = " Diagnostics" },
+				{ "g", group = " Goto" },
 			})
 		end,
 		keys = {

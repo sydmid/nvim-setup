@@ -239,11 +239,11 @@ return {
 
       -- Neotest keymaps
       local map = vim.keymap.set
-      map("n", "<leader>tt", "<cmd>lua require('neotest').run.run()<cr>", { desc = "Run nearest test" })
-      map("n", "<leader>tf", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", { desc = "Run file tests" })
-      map("n", "<leader>td", "<cmd>lua require('neotest').run.run({strategy = 'dap'})<cr>", { desc = "Debug nearest test" })
-      map("n", "<leader>ts", "<cmd>lua require('neotest').summary.toggle()<cr>", { desc = "Toggle test summary" })
-      map("n", "<leader>to", "<cmd>lua require('neotest').output.open({ enter = true })<cr>", { desc = "Show test output" })
+      map("n", "<leader>ut", "<cmd>lua require('neotest').run.run()<cr>", { desc = "Run nearest test" })
+      map("n", "<leader>uf", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", { desc = "Run file tests" })
+      map("n", "<leader>ud", "<cmd>lua require('neotest').run.run({strategy = 'dap'})<cr>", { desc = "Debug nearest test" })
+      map("n", "<leader>us", "<cmd>lua require('neotest').summary.toggle()<cr>", { desc = "Toggle test summary" })
+      map("n", "<leader>uo", "<cmd>lua require('neotest').output.open({ enter = true })<cr>", { desc = "Show test output" })
     end,
   },
 
