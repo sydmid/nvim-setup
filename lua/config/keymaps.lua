@@ -1234,3 +1234,7 @@ map("n", "<leader>c4", function()
   vim.cmd("retab")
   vim.notify("Set indentation to 4 spaces", vim.log.levels.INFO)
 end, { desc = "Set 4-space indentation" })
+
+-- Code Runner - Run code snippets and files
+map("n", "<leader>sr", "<cmd>RunCode<CR>", { desc = "Run code in current buffer" })
+map("v", "<leader>sr", "<cmd>RunCode<CR>", { desc = "Run selected code" })
