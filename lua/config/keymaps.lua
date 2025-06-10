@@ -152,10 +152,11 @@ map("n", "D", '"_D', { desc = "D: Delete to EOL without yanking" })
 map("v", "d", '"_d', { desc = "d: Delete without yanking" })
 
 -- Tab navigation using correct VT sequences (0x09 = tab character)
+-- DISABLED: These mappings cause Esc key delay issues
 -- Map Ctrl-Tab (Ctrl modifier = 5, Tab = 0x09)
-vim.keymap.set('n', '<Esc>[27;5;9~', ':bnext<CR>', { noremap = true, silent = true })
+-- vim.keymap.set('n', '<Esc>[27;5;9~', ':bnext<CR>', { noremap = true, silent = true })
 -- Map Ctrl-Shift-Tab (Ctrl+Shift modifier = 6, Tab = 0x09)
-vim.keymap.set('n', '<Esc>[27;6;9~', ':bprevious<CR>', { noremap = true, silent = true })
+-- vim.keymap.set('n', '<Esc>[27;6;9~', ':bprevious<CR>', { noremap = true, silent = true })
 
 -- Alternative formats that might work in different terminals
 vim.keymap.set('n', '<C-Tab>', ':bnext<CR>', { noremap = true, silent = true })

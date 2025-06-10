@@ -44,7 +44,7 @@ opt.foldlevelstart = 99           -- Start with all folds open
 
 -- Timing settings
 opt.timeoutlen = 300              -- Reasonable timeout for key sequences (300ms for telescope stability)
-opt.ttimeoutlen = 10              -- Reduce escape delay but not to zero
+opt.ttimeoutlen = 0               -- Eliminate escape delay completely
 
 -- Additional settings
 opt.matchpairs:append("<:>")      -- Add <> to matching pairs
