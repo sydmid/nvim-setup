@@ -1550,4 +1550,177 @@ return {
 			end)
 		end,
 	},
+
+	-- Enhanced scrollbars with decorations - satellite.nvim
+	-- Displays decorated scrollbars with marks for different kinds of decorations
+	-- Features: Cursor position, Search results, Diagnostics, Git hunks, Marks, Quickfix
+	-- Works with gitsigns.nvim for git integration and provides mouse support
+	{
+		"lewis6991/satellite.nvim",
+		event = "VeryLazy",
+		dependencies = { "lewis6991/gitsigns.nvim" }, -- For git hunks display
+		config = function()
+			require("satellite").setup({
+				current_only = false, -- Show scrollbars for all windows
+				winblend = 40, -- Slight transparency for better integration
+				zindex = 40, -- Layer ordering
+				excluded_filetypes = {
+					"dashboard", -- Exclude dashboard
+					"alpha", -- Exclude alpha dashboard
+					"TelescopePrompt", -- Exclude Telescope
+					"TelescopeResults",
+					"TelescopePreview",
+					"mason", -- Exclude Mason
+					"lazy", -- Exclude Lazy plugin manager
+					"help", -- Exclude help windows
+					"Outline", -- Exclude symbols outline
+					"NvimTree", -- Exclude file explorer
+					"neo-tree", -- Exclude neo-tree
+					"terminal", -- Exclude terminal
+					"toggleterm", -- Exclude toggleterm
+					"notify", -- Exclude notifications
+					"noice", -- Exclude noice popups
+				},
+				width = 2, -- Scrollbar width
+				handlers = {
+					cursor = {
+						enable = true,
+						-- Unicode block characters for smooth cursor indication
+						symbols = { "⎺", "⎻", "⎼", "⎽" },
+						-- Alternative minimal symbols: symbols = { "⎻", "⎼" },
+					},
+					search = {
+						enable = true,
+						-- Uses SatelliteSearch and SatelliteSearchCurrent highlights
+					},
+					diagnostic = {
+						enable = true,
+						-- Different symbols for different diagnostic severities
+						signs = { "-", "=", "≡" },
+						min_severity = vim.diagnostic.severity.HINT,
+						-- Shows all diagnostic levels including hints
+					},
+					gitsigns = {
+						enable = true,
+						signs = {
+							add = "│", -- Git addition indicator
+							change = "│", -- Git change indicator
+							delete = "-", -- Git deletion indicator
+						},
+						-- Uses SatelliteGitSignsAdd, SatelliteGitSignsChange, SatelliteGitSignsDelete
+					},
+					marks = {
+						enable = true,
+						show_builtins = false, -- Hide builtin marks like [ ] < >
+						key = "m", -- Key for setting marks
+						-- Uses SatelliteMark highlight
+					},
+					quickfix = {
+						enable = true,
+						signs = { "-", "=", "≡" },
+						-- Uses SatelliteQuickfix highlight
+					},
+				},
+			})
+
+			-- Custom highlight groups to match no-clown-fiesta theme
+			local function setup_satellite_highlights()
+				-- Cursor position indicator
+				vim.api.nvim_set_hl(0, "SatelliteCursor", {
+					fg = "#88afa2", -- Cyan color for cursor
+					bold = true,
+				})
+
+				-- Search result indicators
+				vim.api.nvim_set_hl(0, "SatelliteSearch", {
+					fg = "#F4BF75", -- Yellow for search matches
+					bold = true,
+				})
+				vim.api.nvim_set_hl(0, "SatelliteSearchCurrent", {
+					fg = "#FFA557", -- Orange for current search match
+					bold = true,
+				})
+
+				-- Diagnostic indicators with theme colors
+				vim.api.nvim_set_hl(0, "SatelliteDiagnosticError", {
+					fg = "#b46958", -- Red for errors
+					bold = true,
+				})
+				vim.api.nvim_set_hl(0, "SatelliteDiagnosticWarn", {
+					fg = "#F4BF75", -- Yellow for warnings
+					bold = true,
+				})
+				vim.api.nvim_set_hl(0, "SatelliteDiagnosticInfo", {
+					fg = "#BAD7FF", -- Blue for info
+					bold = true,
+				})
+				vim.api.nvim_set_hl(0, "SatelliteDiagnosticHint", {
+					fg = "#88afa2", -- Cyan for hints
+					bold = true,
+				})
+
+				-- Git status indicators
+				vim.api.nvim_set_hl(0, "SatelliteGitSignsAdd", {
+					fg = "#90A959", -- Green for additions
+					bold = true,
+				})
+				vim.api.nvim_set_hl(0, "SatelliteGitSignsChange", {
+					fg = "#F4BF75", -- Yellow for changes
+					bold = true,
+				})
+				vim.api.nvim_set_hl(0, "SatelliteGitSignsDelete", {
+					fg = "#b46958", -- Red for deletions
+					bold = true,
+				})
+
+				-- Mark indicators
+				vim.api.nvim_set_hl(0, "SatelliteMark", {
+					fg = "#AA749F", -- Purple for marks
+					bold = true,
+				})
+
+				-- Quickfix indicators
+				vim.api.nvim_set_hl(0, "SatelliteQuickfix", {
+					fg = "#FFA557", -- Orange for quickfix
+					bold = true,
+				})
+			end
+
+			-- Apply highlights immediately
+			setup_satellite_highlights()
+
+			-- Ensure highlights persist after theme changes
+			vim.api.nvim_create_autocmd("ColorScheme", {
+				group = vim.api.nvim_create_augroup("SatelliteTheme", { clear = true }),
+				callback = setup_satellite_highlights,
+			})
+		end,
+		keys = {
+			-- Add keymaps for satellite commands
+			{
+				"<leader>usd",
+				function()
+					vim.cmd("SatelliteDisable")
+					vim.notify("Satellite scrollbars disabled", vim.log.levels.INFO)
+				end,
+				desc = "Disable Satellite scrollbars",
+			},
+			{
+				"<leader>use",
+				function()
+					vim.cmd("SatelliteEnable")
+					vim.notify("Satellite scrollbars enabled", vim.log.levels.INFO)
+				end,
+				desc = "Enable Satellite scrollbars",
+			},
+			{
+				"<leader>usr",
+				function()
+					vim.cmd("SatelliteRefresh")
+					vim.notify("Satellite scrollbars refreshed", vim.log.levels.INFO)
+				end,
+				desc = "Refresh Satellite scrollbars",
+			},
+		},
+	},
 }
