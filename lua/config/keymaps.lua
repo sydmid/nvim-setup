@@ -112,22 +112,22 @@ end, { desc = "Toggle terminal from terminal mode" })
 -- map("n", "<S-K>", "5gk", { desc = "Move up 5 lines", silent = true })
 
 -- Custom scroll down with temporary scrolloff adjustment
--- map("n", "<D-j>", ":set scrolloff=0<CR>5j5<C-e>:set scrolloff=5<CR>", { noremap = true, silent = true })
--- map("n", "<D-k>", ":set scrolloff=0<CR>5k5<C-y>:set scrolloff=5<CR>", { noremap = true, silent = true })
+map("n", "<D-j>", ":set scrolloff=0<CR>5j5<C-e>:set scrolloff=5<CR>", { noremap = true, silent = true })
+map("n", "<D-k>", ":set scrolloff=0<CR>5k5<C-y>:set scrolloff=5<CR>", { noremap = true, silent = true })
 
--- map("v", "<D-j>", function()
---   vim.o.scrolloff = 0
---   vim.cmd("normal! 5j")
---   vim.cmd("normal! 5\23e") -- \23 is Ctrl-E
---   vim.o.scrolloff = 5
--- end, { noremap = true, silent = true })
+map("v", "<D-j>", function()
+  vim.o.scrolloff = 0
+  vim.cmd("normal! 5j")
+  vim.cmd("normal! 5\23e") -- \23 is Ctrl-E
+  vim.o.scrolloff = 5
+end, { noremap = true, silent = true })
 
--- map("v", "<D-k>", function()
---   vim.o.scrolloff = 0
---   vim.cmd("normal! 5k")
---   vim.cmd("normal! 5\23y") -- \23 is Ctrl-Y
---   vim.o.scrolloff = 5
--- end, { noremap = true, silent = true })
+map("v", "<D-k>", function()
+  vim.o.scrolloff = 0
+  vim.cmd("normal! 5k")
+  vim.cmd("normal! 5\23y") -- \23 is Ctrl-Y
+  vim.o.scrolloff = 5
+end, { noremap = true, silent = true })
 
 map({"n","v"}, "H", "b", { desc = "Previous word", silent = true })
 map({"n","v"}, "L", "e", { desc = "Next word", silent = true })

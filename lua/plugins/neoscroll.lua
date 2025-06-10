@@ -24,21 +24,17 @@ return {
 
 		-- Custom smooth scrolling keymaps
 		local keymap = {
-			-- Cmd+j: Smooth scroll down (similar to <C-d> but customized)
-			["<D-j>"] = function()
-				neoscroll.scroll(vim.wo.scroll, { duration = 200, easing = "sine" })
-			end,
-			-- Cmd+k: Smooth scroll up (similar to <C-u> but customized)
-			["<D-k>"] = function()
-				neoscroll.scroll(-vim.wo.scroll, { duration = 200, easing = "sine" })
-			end,
-			-- Shift+j: Smooth scroll down by fewer lines (fine scrolling)
+			-- ["<D-j>"] = function()
+			-- 	neoscroll.scroll(vim.wo.scroll, { duration = 200, easing = "sine" })
+			-- end,
+			-- ["<D-k>"] = function()
+			-- 	neoscroll.scroll(-vim.wo.scroll, { duration = 200, easing = "sine" })
+			-- end,
 			["<S-j>"] = function()
-				neoscroll.scroll(9, { duration = 150, easing = "quadratic" })
+				neoscroll.scroll(12, { duration = 150, easing = "quadratic" })
 			end,
-			-- Shift+k: Smooth scroll up by fewer lines (fine scrolling)
 			["<S-k>"] = function()
-				neoscroll.scroll(-9, { duration = 150, easing = "quadratic" })
+				neoscroll.scroll(-12, { duration = 150, easing = "quadratic" })
 			end,
 		}
 
