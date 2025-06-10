@@ -577,6 +577,14 @@ return {
 					["CMakeLists.txt"] = "cmake . && make && ./main",
 				},
 			})
+
+			-- Add custom keymap for 'q' to close code runner floating windows
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "crunner",
+				callback = function()
+					vim.keymap.set("n", "q", "<cmd>q<CR>", { buffer = true, silent = true })
+				end,
+			})
 		end,
 	},
 }
