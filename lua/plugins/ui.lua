@@ -1353,4 +1353,201 @@ return {
 			})
 		end,
 	},
+
+	-- Dashboard - Fancy and Blazing Fast start screen
+	{
+		"nvimdev/dashboard-nvim",
+		event = "VimEnter",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		opts = {
+			theme = "hyper", -- Use hyper theme for modern look
+			disable_move = false, -- Allow movement in dashboard
+			shortcut_type = "letter", -- Use letters for shortcuts
+			shuffle_letter = false, -- Keep ordered letters
+			change_to_vcs_root = true, -- Change to VCS root when opening files
+			config = {
+				week_header = {
+					enable = true, -- Show week header
+					concat = " Have a productive coding session! ", -- Custom message
+				},
+				shortcut = {
+					{
+						desc = " Find File",
+						group = "DashboardShortCutIcon",
+						action = "Telescope find_files",
+						key = "f",
+					},
+					{
+						desc = " Recent Files",
+						group = "DashboardFiles",
+						action = "Telescope oldfiles",
+						key = "r",
+					},
+					{
+						desc = " Find Text",
+						group = "DashboardShortCutIcon",
+						action = "Telescope live_grep",
+						key = "g",
+					},
+					{
+						desc = " Config",
+						group = "DashboardShortCutIcon",
+						action = "edit ~/.config/nvim/init.lua",
+						key = "c",
+					},
+					{
+						desc = " LazyGit",
+						group = "DashboardShortCutIcon",
+						action = "LazyGit",
+						key = "l",
+					},
+					{
+						desc = " Bookmarks",
+						group = "DashboardShortCutIcon",
+						action = "Telescope bookmarks",
+						key = "b",
+					},
+					{
+						desc = " Quit",
+						group = "DashboardShortCutIcon",
+						action = "qa",
+						key = "q",
+					},
+				},
+				packages = { enable = true }, -- Show plugin count
+				project = {
+					enable = true,
+					limit = 8,
+					icon = " ",
+					label = " Recent Projects:",
+					action = function(path)
+						-- Use telescope find_files with the project path
+						require("telescope.builtin").find_files({
+							cwd = path,
+							hidden = false,
+							no_ignore = false,
+						})
+					end,
+				},
+				mru = {
+					enable = true,
+					limit = 15, -- Increased from 10 to show more recent files
+					icon = " ",
+					label = " Recent Files:",
+					cwd_only = false, -- Show files from all directories
+				},
+				footer = {
+					"",
+					"🚀 Neovim configured for maximum productivity",
+					"⚡ Powered by lazy.nvim and modern plugins",
+				},
+			},
+			hide = {
+				statusline = true, -- Hide statusline on dashboard
+				tabline = true, -- Hide tabline on dashboard
+				winbar = true, -- Hide winbar on dashboard
+			},
+		},		config = function(_, opts)
+			require("dashboard").setup(opts)
+
+			-- Enhanced project root detection function
+			local function get_project_root()
+				local cwd = vim.fn.getcwd()
+				-- Try git root first
+				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
+				if vim.v.shell_error == 0 and git_root then
+					return git_root
+				end
+				-- Fallback to current directory
+				return cwd
+			end
+
+			-- Override dashboard's default project detection if needed
+			vim.api.nvim_create_autocmd("User", {
+				pattern = "DashboardLoaded",
+				callback = function()
+					-- If no projects are showing up, you can add manual project paths here
+					-- This is useful if you want to ensure certain projects always appear
+					local home = vim.fn.expand("~")
+					local common_project_paths = {
+						home .. "/.config/nvim",  -- Your Neovim config
+						home .. "/Projects",     -- Common project directory
+						home .. "/Documents",    -- Document projects
+						get_project_root(),      -- Current project root
+					}
+
+					-- Register project paths with dashboard if they exist and are git repos
+					for _, path in ipairs(common_project_paths) do
+						if vim.fn.isdirectory(path) == 1 and vim.fn.isdirectory(path .. "/.git") == 1 then
+							-- This ensures valid git repositories are available for dashboard
+							vim.g.dashboard_custom_projects = vim.g.dashboard_custom_projects or {}
+							table.insert(vim.g.dashboard_custom_projects, path)
+						end
+					end
+				end,
+			})
+
+			-- Custom highlight groups for dashboard to match no-clown-fiesta theme
+			vim.api.nvim_create_autocmd("ColorScheme", {
+				group = vim.api.nvim_create_augroup("DashboardTheme", { clear = true }),
+				callback = function()
+					-- Dashboard header
+					vim.api.nvim_set_hl(0, "DashboardHeader", {
+						fg = "#88afa2", -- Cyan color from your theme
+						bold = true
+					})
+
+					-- Dashboard footer
+					vim.api.nvim_set_hl(0, "DashboardFooter", {
+						fg = "#727272", -- Comment color from your theme
+						italic = true
+					})
+
+					-- Project title
+					vim.api.nvim_set_hl(0, "DashboardProjectTitle", {
+						fg = "#F4BF75", -- Orange color from your theme
+						bold = true
+					})
+
+					-- Project title icon
+					vim.api.nvim_set_hl(0, "DashboardProjectTitleIcon", {
+						fg = "#BAD7FF", -- Blue color from your theme
+						bold = true
+					})
+
+					-- Project icon
+					vim.api.nvim_set_hl(0, "DashboardProjectIcon", {
+						fg = "#90A959", -- Green color from your theme
+					})
+
+					-- MRU title
+					vim.api.nvim_set_hl(0, "DashboardMruTitle", {
+						fg = "#F4BF75", -- Orange color from your theme
+						bold = true
+					})
+
+					-- MRU icon
+					vim.api.nvim_set_hl(0, "DashboardMruIcon", {
+						fg = "#AA749F", -- Purple color from your theme
+					})
+
+					-- Files
+					vim.api.nvim_set_hl(0, "DashboardFiles", {
+						fg = "#E1E1E1", -- Main text color from your theme
+					})
+
+					-- Shortcut icon
+					vim.api.nvim_set_hl(0, "DashboardShortCutIcon", {
+						fg = "#88afa2", -- Cyan color from your theme
+						bold = true
+					})
+				end,
+			})
+
+			-- Apply highlights immediately
+			vim.schedule(function()
+				vim.cmd("doautocmd ColorScheme")
+			end)
+		end,
+	},
 }
