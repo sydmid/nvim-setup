@@ -490,6 +490,33 @@ return {
 				show_end = true,
 				highlight = { "IblScope" },
 			},
+			exclude = {
+				filetypes = {
+					"help",
+					"dashboard",
+					"alpha",
+					"lazy",
+					"mason",
+					"trouble",
+					"oil",
+					"NvimTree",
+					"neo-tree",
+					"terminal",
+					"toggleterm",
+					"notify",
+					"noice",
+					"TelescopePrompt",
+					"TelescopeResults",
+					"TelescopePreview",
+				},
+				buftypes = {
+					"terminal",
+					"nofile",
+					"quickfix",
+					"prompt",
+					"help",
+				},
+			},
 		},
 		config = function(_, opts)
 			require("ibl").setup(opts)
@@ -1365,10 +1392,24 @@ return {
 			shortcut_type = "letter", -- Use letters for shortcuts
 			shuffle_letter = false, -- Keep ordered letters
 			change_to_vcs_root = true, -- Change to VCS root when opening files
+			preview = {
+				command = "", -- Disable preview command to avoid vertical lines
+				file_path = "",
+				file_height = 0,
+				file_width = 0,
+			},
 			config = {
+				header = vim.split(string.rep("\n", 8) .. [[
+███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗
+████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║
+██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║
+██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║
+██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║
+╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝
+]] .. "\n\n", "\n"),
 				week_header = {
 					enable = true, -- Show week header
-					concat = " Have a productive coding session! ", -- Custom message
+					concat = " Eyes on Target ", -- Custom message
 				},
 				shortcut = {
 					{
@@ -1487,59 +1528,170 @@ return {
 				end,
 			})
 
-			-- Custom highlight groups for dashboard to match no-clown-fiesta theme
+			-- COMPREHENSIVE dashboard cleanup to remove ALL vertical lines
+			vim.api.nvim_create_autocmd({ "FileType", "BufEnter", "BufWinEnter" }, {
+				pattern = "dashboard",
+				callback = function()
+					local bufnr = vim.api.nvim_get_current_buf()
+
+					-- Remove ANY potential line indicators/separators
+					vim.opt_local.signcolumn = "no"
+					vim.opt_local.foldcolumn = "0"
+					vim.opt_local.number = false
+					vim.opt_local.relativenumber = false
+					vim.opt_local.cursorline = false
+					vim.opt_local.cursorcolumn = false
+					vim.opt_local.colorcolumn = ""
+					vim.opt_local.list = false -- This disables whitespace characters that might show as vertical lines
+					vim.opt_local.listchars = "" -- Clear any list characters completely
+					vim.opt_local.fillchars = "" -- Clear fill characters
+
+					-- FORCEFULLY disable ALL plugins that might cause vertical lines
+					vim.b[bufnr].indent_blankline_enabled = false
+					vim.b[bufnr].miniindentscope_disable = true
+					vim.b[bufnr].visual_whitespace_enabled = false
+					vim.b[bufnr].ibl_enable = false
+					vim.b[bufnr].mini_indentscope_disable = true
+
+					-- Force disable indent-blankline for this buffer completely
+					if package.loaded["ibl"] then
+						pcall(function()
+							require("ibl").setup_buffer(bufnr, { enabled = false })
+						end)
+					end
+
+					-- Force disable visual-whitespace for this buffer
+					if package.loaded["visual-whitespace"] then
+						pcall(function()
+							require("visual-whitespace").disable()
+						end)
+					end
+
+					-- Force disable mini.indentscope if loaded
+					if package.loaded["mini.indentscope"] then
+						pcall(function()
+							vim.b[bufnr].miniindentscope_disable = true
+						end)
+					end
+
+					-- Clear any existing concealed characters that might show as lines
+					vim.opt_local.conceallevel = 0
+					vim.opt_local.concealcursor = ""
+
+					-- Set buffer background to your specified color
+					vim.cmd("setlocal winhighlight=Normal:DashboardNormal,NormalNC:DashboardNormal")
+
+					-- Force window redraw to ensure changes take effect
+					vim.schedule(function()
+						vim.cmd("redraw!")
+					end)
+				end,
+			})
+
+			-- Custom highlight groups for dashboard with your specified colors
 			vim.api.nvim_create_autocmd("ColorScheme", {
 				group = vim.api.nvim_create_augroup("DashboardTheme", { clear = true }),
 				callback = function()
-					-- Dashboard header
+					-- Set dashboard background to your specified color
+					vim.api.nvim_set_hl(0, "DashboardNormal", {
+						fg = "#A5B4FD",
+						bg = "#101827"
+					})
+
+					-- Dashboard header with your specified colors
 					vim.api.nvim_set_hl(0, "DashboardHeader", {
-						fg = "#88afa2", -- Cyan color from your theme
+						fg = "#A5B4FD",
+						bg = "#101827",
 						bold = true
 					})
 
-					-- Dashboard footer
+					-- Dashboard footer with your specified colors
 					vim.api.nvim_set_hl(0, "DashboardFooter", {
-						fg = "#727272", -- Comment color from your theme
+						fg = "#A5B4FD",
+						bg = "#101827",
 						italic = true
 					})
 
-					-- Project title
+					-- Project title with your specified colors
 					vim.api.nvim_set_hl(0, "DashboardProjectTitle", {
-						fg = "#F4BF75", -- Orange color from your theme
+						fg = "#A5B4FD",
+						bg = "#101827",
 						bold = true
 					})
 
-					-- Project title icon
+					-- Project title icon with your specified colors
 					vim.api.nvim_set_hl(0, "DashboardProjectTitleIcon", {
-						fg = "#BAD7FF", -- Blue color from your theme
+						fg = "#A5B4FD",
+						bg = "#101827",
 						bold = true
 					})
 
-					-- Project icon
+					-- Project icon with your specified colors
 					vim.api.nvim_set_hl(0, "DashboardProjectIcon", {
-						fg = "#90A959", -- Green color from your theme
+						fg = "#A5B4FD",
+						bg = "#101827"
 					})
 
-					-- MRU title
+					-- MRU title with your specified colors
 					vim.api.nvim_set_hl(0, "DashboardMruTitle", {
-						fg = "#F4BF75", -- Orange color from your theme
+						fg = "#A5B4FD",
+						bg = "#101827",
 						bold = true
 					})
 
-					-- MRU icon
+					-- MRU icon with your specified colors
 					vim.api.nvim_set_hl(0, "DashboardMruIcon", {
-						fg = "#AA749F", -- Purple color from your theme
+						fg = "#A5B4FD",
+						bg = "#101827"
 					})
 
-					-- Files
+					-- Files with your specified colors
 					vim.api.nvim_set_hl(0, "DashboardFiles", {
-						fg = "#E1E1E1", -- Main text color from your theme
+						fg = "#A5B4FD",
+						bg = "#101827"
 					})
 
-					-- Shortcut icon
+					-- Shortcut icons with your specified colors
 					vim.api.nvim_set_hl(0, "DashboardShortCutIcon", {
-						fg = "#88afa2", -- Cyan color from your theme
+						fg = "#A5B4FD",
+						bg = "#101827",
 						bold = true
+					})
+
+					-- Shortcut description text with your specified colors
+					vim.api.nvim_set_hl(0, "DashboardDesc", {
+						fg = "#A5B4FD",
+						bg = "#101827"
+					})
+
+					-- Shortcut key with your specified colors
+					vim.api.nvim_set_hl(0, "DashboardKey", {
+						fg = "#A5B4FD",
+						bg = "#101827",
+						bold = true
+					})
+
+					-- Dashboard text elements
+					vim.api.nvim_set_hl(0, "DashboardText", {
+						fg = "#A5B4FD",
+						bg = "#101827"
+					})
+
+					-- Remove any vertical separators or lines by setting them to background color
+					vim.api.nvim_set_hl(0, "DashboardSeparator", {
+						fg = "#101827",
+						bg = "#101827"
+					})
+
+					-- Ensure all dashboard highlights use consistent background
+					vim.api.nvim_set_hl(0, "DashboardCenter", {
+						fg = "#A5B4FD",
+						bg = "#101827"
+					})
+
+					vim.api.nvim_set_hl(0, "DashboardHyper", {
+						fg = "#A5B4FD",
+						bg = "#101827"
 					})
 				end,
 			})
