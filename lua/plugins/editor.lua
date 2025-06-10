@@ -778,6 +778,24 @@ return {
 			_G.telescope_live_grep_with_dynamic_title = live_grep_with_dynamic_title
 			_G.telescope_oldfiles_with_dynamic_title = oldfiles_with_dynamic_title
 
+			-- Live grep with literal search (no regex escaping needed)
+			local function live_grep_literal(opts)
+				local builtin = require("telescope.builtin")
+				opts = opts or {}
+
+				-- Use fixed-strings flag for literal search
+				local config = vim.tbl_extend("force", opts, {
+					additional_args = { "--fixed-strings" },
+					path_display = { "smart" },
+					prompt_title = "🔍 Live Grep (Literal Search)",
+				})
+
+				builtin.live_grep(config)
+			end
+
+			-- Make the literal search function globally accessible
+			_G.telescope_live_grep_literal = live_grep_literal
+
 			-- Custom function to show all files with priority for recently opened ones
 			local function find_files_with_priority()
 				require("telescope").extensions.frecency.frecency({
@@ -873,7 +891,19 @@ return {
 			keymap.set("n", "<leader>fp", function()
 				find_files_with_priority()
 			end, { desc = "Find files with priority for recent" })
-			keymap.set("n", "<leader>fs", telescope_with_esc(builtin.live_grep), { desc = "Find string in cwd" })
+			keymap.set("n", "<leader>fs", function()
+				if _G.telescope_live_grep_literal then
+					_G.telescope_live_grep_literal()
+				else
+					telescope_with_esc(builtin.live_grep)()
+				end
+			end, { desc = "Find string in cwd (literal search)" })
+			keymap.set(
+				"n",
+				"<leader>fS",
+				telescope_with_esc(builtin.live_grep),
+				{ desc = "Find string in cwd (regex search)" }
+			)
 			keymap.set(
 				"n",
 				"<leader>fC",

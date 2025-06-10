@@ -27,8 +27,12 @@ vim.o.scrolloff = 5
 --   <leader>tj - Next todo comment (was ]t)
 --   <leader>tk - Previous todo comment (was [t)
 --
+-- Bookmark navigation (bookmarks.nvim plugin):
+--   <leader>mj - Next bookmark
+--   <leader>mk - Previous bookmark
+--
 -- Bookmarks (VSCode-style):
---   <leader>m  - Toggle bookmark
+--   <leader>mm - Toggle bookmark
 --   <D-S-]>    - Jump to next bookmark (Shift+CMD+])
 --   <D-S-[>    - Jump to previous bookmark (Shift+CMD+[)
 --   <leader>ml - List all bookmarks
@@ -357,28 +361,54 @@ map("n", "gmb", "mB", { desc = "Set global mark B" })
 map("n", "gma", "`A", { desc = "Go to global mark A" })
 map("n", "gmb", "`B", { desc = "Go to global mark B" })
 
+-- Bookmark navigation (bookmarks.nvim plugin - follows the j/k navigation pattern)
+-- Navigate to next and previous bookmarks in current buffer
+map("n", "<leader>mj", function() require("bookmarks").bookmark_next() end, { desc = "Next bookmark" })
+map("n", "<leader>mk", function() require("bookmarks").bookmark_prev() end, { desc = "Previous bookmark" })
+
 -- Separate normal and visual mode mappings for D-S-f
 map("n", "<D-S-f>", function()
-	if _G.telescope_live_grep_with_dynamic_title then
-		pcall(_G.telescope_live_grep_with_dynamic_title)
+	if _G.telescope_live_grep_literal then
+		pcall(_G.telescope_live_grep_literal)
 	else
-		vim.notify("Telescope live grep not available", vim.log.levels.WARN)
+		vim.notify("Telescope literal live grep not available", vim.log.levels.WARN)
 	end
-end, { desc = "telescope find string in all files", silent = true })
+end, { desc = "telescope find string in all files (literal search)", silent = true })
 map("v", "<D-S-f>", function()
 	-- Yank the selected text to the unnamed register
 	vim.cmd("normal! y")
 	-- Get the yanked text
 	local selected_text = vim.fn.getreg('"')
-	-- Escape special characters
-	selected_text = selected_text:gsub("([%[%]%^%$%(%)])", "\\%1")
+	-- No need to escape special characters since we're using literal search
 	-- Call telescope with the selected text as the default search term
+	if _G.telescope_live_grep_literal then
+		pcall(_G.telescope_live_grep_literal, { default_text = selected_text, initial_mode = "normal" })
+	else
+		vim.notify("Telescope literal live grep not available", vim.log.levels.WARN)
+	end
+end, { desc = "telescope find selected text in all files (literal search)", silent = true })
+
+-- Alternative regex search for when you need regex patterns (⌘+⌥+Shift+F)
+map("n", "<D-A-S-f>", function()
+	if _G.telescope_live_grep_with_dynamic_title then
+		pcall(_G.telescope_live_grep_with_dynamic_title)
+	else
+		vim.notify("Telescope regex live grep not available", vim.log.levels.WARN)
+	end
+end, { desc = "telescope find string in all files (regex search)", silent = true })
+
+map("v", "<D-A-S-f>", function()
+	-- Yank the selected text to the unnamed register
+	vim.cmd("normal! y")
+	-- Get the yanked text
+	local selected_text = vim.fn.getreg('"')
+	-- Keep the text as-is for regex search (user can type regex patterns)
 	if _G.telescope_live_grep_with_dynamic_title then
 		pcall(_G.telescope_live_grep_with_dynamic_title, { default_text = selected_text, initial_mode = "normal" })
 	else
-		vim.notify("Telescope live grep not available", vim.log.levels.WARN)
+		vim.notify("Telescope regex live grep not available", vim.log.levels.WARN)
 	end
-end, { desc = "telescope find selected text in all files", silent = true })
+end, { desc = "telescope find selected text in all files (regex search)", silent = true })
 
 -- Enhanced search function that searches for word under cursor
 local function search_word_under_cursor()
