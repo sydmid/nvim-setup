@@ -1184,3 +1184,52 @@ map({ "n", "i", "v" }, "<D-S-s>", save_all_modified, { desc = "Save all modified
 map("n", "<leader>tt", function()
 	_G.toggle_theme()
 end, { desc = "Toggle between themes (no-clown-fiesta ⟷ catppuccin)", silent = true })
+
+-- Indentation management keymaps (spaces over tabs best practices)
+-- Show invisible characters (spaces, tabs, line endings)
+map("n", "<leader>ci", function()
+  -- Toggle visual-whitespace for better visual mode support
+  local ok, visual_whitespace = pcall(require, "visual-whitespace")
+  if ok then
+    visual_whitespace.toggle()
+  else
+    -- Fallback to basic list toggle if plugin not available
+    if vim.wo.list then
+      vim.wo.list = false
+      vim.notify("Hidden invisible characters", vim.log.levels.INFO)
+    else
+      vim.wo.list = true
+      vim.notify("Showing invisible characters", vim.log.levels.INFO)
+    end
+  end
+end, { desc = "Toggle invisible characters" })
+
+-- Visual whitespace toggle alternative keymap
+map({ 'n', 'v' }, "<leader>vw", function()
+  local ok, visual_whitespace = pcall(require, "visual-whitespace")
+  if ok then
+    visual_whitespace.toggle()
+    vim.notify("Visual whitespace toggled", vim.log.levels.INFO)
+  else
+    vim.notify("Visual whitespace plugin not loaded", vim.log.levels.WARN)
+  end
+end, { desc = "Toggle visual whitespace visibility" })
+
+-- Quick indentation adjustment
+map("n", "<leader>c2", function()
+  vim.bo.tabstop = 2
+  vim.bo.softtabstop = 2
+  vim.bo.shiftwidth = 2
+  vim.bo.expandtab = true
+  vim.cmd("retab")
+  vim.notify("Set indentation to 2 spaces", vim.log.levels.INFO)
+end, { desc = "Set 2-space indentation" })
+
+map("n", "<leader>c4", function()
+  vim.bo.tabstop = 4
+  vim.bo.softtabstop = 4
+  vim.bo.shiftwidth = 4
+  vim.bo.expandtab = true
+  vim.cmd("retab")
+  vim.notify("Set indentation to 4 spaces", vim.log.levels.INFO)
+end, { desc = "Set 4-space indentation" })
