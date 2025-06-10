@@ -1340,4 +1340,129 @@ return {
 			})
 		end,
 	},
+
+	-- Cybu - Enhanced buffer cycling with context window
+	{
+		"ghillb/cybu.nvim",
+		branch = "main",
+		dependencies = {
+			"nvim-tree/nvim-web-devicons",
+			"nvim-lua/plenary.nvim",
+		},
+		config = function()
+			local ok, cybu = pcall(require, "cybu")
+			if not ok then
+				return
+			end
+
+			cybu.setup({
+				position = {
+					relative_to = "win",
+					anchor = "topcenter",
+					vertical_offset = 10,
+					horizontal_offset = 0,
+					max_win_height = 5,
+					max_win_width = 0.5,
+				},
+				style = {
+					path = "relative",
+					path_abbreviation = "none",
+					border = "rounded",
+					separator = " ",
+					prefix = "…",
+					padding = 1,
+					hide_buffer_id = true,
+					devicons = {
+						enabled = true,
+						colored = true,
+						truncate = true,
+					},
+					highlights = {
+						current_buffer = "CybuFocus",
+						adjacent_buffers = "CybuAdjacent",
+						background = "CybuBackground",
+						border = "CybuBorder",
+					},
+				},
+				behavior = {
+					mode = {
+						default = {
+							switch = "immediate",
+							view = "rolling",
+						},
+						last_used = {
+							switch = "on_close",
+							view = "paging",
+						},
+						auto = {
+							view = "rolling",
+						},
+					},
+					show_on_autocmd = false,
+				},
+				display_time = 750,
+				exclude = {
+					"neo-tree",
+					"fugitive",
+					"qf",
+					"oil",
+					"NvimTree",
+					"trouble",
+					"telescope",
+					"help",
+					"alpha",
+					"dashboard",
+					"lazy",
+					"mason",
+				},
+				filter = {
+					unlisted = true,
+				},
+				fallback = function() end,
+			})
+
+			-- Set keymaps for Cybu buffer cycling
+			-- Use ]b and [b for buffer cycling (consistent with other bracket mappings)
+			vim.keymap.set("n", "]b", "<Plug>(CybuNext)", { desc = "Next buffer with context" })
+			vim.keymap.set("n", "[b", "<Plug>(CybuPrev)", { desc = "Previous buffer with context" })
+
+			-- Keep <C-i> separate from <Tab> as recommended
+			vim.keymap.set("n", "<C-i>", "<C-i>", { desc = "Jump forward" })
+
+			-- Set up autocmds for dynamic keymaps when Cybu window is visible
+			local cybu_group = vim.api.nvim_create_augroup("CybuKeymaps", { clear = true })
+
+			-- Create keymaps when Cybu opens
+			vim.api.nvim_create_autocmd("User", {
+				pattern = "CybuOpen",
+				group = cybu_group,
+				callback = function()
+					-- Tab/Shift+Tab for last used buffer cycling (only when container is visible)
+					vim.keymap.set({ "n", "v" }, "<Tab>", "<Plug>(CybuLastusedNext)",
+						{ buffer = true, desc = "Next last used buffer" })
+					vim.keymap.set({ "n", "v" }, "<S-Tab>", "<Plug>(CybuLastusedPrev)",
+						{ buffer = true, desc = "Previous last used buffer" })
+
+					-- j/k for navigation within Cybu window (only when container is visible)
+					vim.keymap.set({ "n", "v" }, "j", "<Plug>(CybuLastusedNext)",
+						{ buffer = true, desc = "Next last used buffer (j)" })
+					vim.keymap.set({ "n", "v" }, "k", "<Plug>(CybuLastusedPrev)",
+						{ buffer = true, desc = "Previous last used buffer (k)" })
+				end,
+			})
+
+			-- Remove keymaps when Cybu closes
+			vim.api.nvim_create_autocmd("User", {
+				pattern = "CybuClose",
+				group = cybu_group,
+				callback = function()
+					-- Remove buffer-local keymaps
+					pcall(vim.keymap.del, { "n", "v" }, "<Tab>", { buffer = true })
+					pcall(vim.keymap.del, { "n", "v" }, "<S-Tab>", { buffer = true })
+					pcall(vim.keymap.del, { "n", "v" }, "j", { buffer = true })
+					pcall(vim.keymap.del, { "n", "v" }, "k", { buffer = true })
+				end,
+			})
+		end,
+	},
 }
