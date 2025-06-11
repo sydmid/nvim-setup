@@ -1399,14 +1399,6 @@ return {
 				file_width = 0,
 			},
 			config = {
-				header = vim.split(string.rep("\n", 8) .. [[
-███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗
-████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║
-██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║
-██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║
-██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║
-╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝
-]] .. "\n\n", "\n"),
 				week_header = {
 					enable = true, -- Show week header
 					concat = " Eyes on Target ", -- Custom message
@@ -1443,19 +1435,13 @@ return {
 						key = "l",
 					},
 					{
-						desc = " Bookmarks",
-						group = "DashboardShortCutIcon",
-						action = "Telescope bookmarks",
-						key = "b",
-					},
-					{
 						desc = " Quit",
 						group = "DashboardShortCutIcon",
 						action = "qa",
 						key = "q",
 					},
 				},
-				packages = { enable = true }, -- Show plugin count
+				packages = { enable = false }, -- Not Show plugin count
 				project = {
 					enable = true,
 					limit = 8,
@@ -1479,8 +1465,8 @@ return {
 				},
 				footer = {
 					"",
-					"🚀 Neovim configured for maximum productivity",
-					"⚡ Powered by lazy.nvim and modern plugins",
+					-- "🚀 Neovim configured for maximum productivity",
+					-- "⚡ Powered by lazy.nvim and modern plugins",
 				},
 			},
 			hide = {
