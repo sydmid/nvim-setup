@@ -628,7 +628,14 @@ return {
 
 				opts = opts or {}
 
+				-- Get current project root
+				local cwd = vim.fn.getcwd()
+				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
+				local project_root = (vim.v.shell_error == 0 and git_root) or cwd
+
 				local config = vim.tbl_extend("force", opts, {
+					prompt_title = "🔍 Live Grep - " .. vim.fn.fnamemodify(project_root, ":t"),
+					cwd = project_root,
 					path_display = { "smart" },
 					entry_maker = function(entry)
 						local make_entry = require("telescope.make_entry")
@@ -783,11 +790,17 @@ return {
 				local builtin = require("telescope.builtin")
 				opts = opts or {}
 
-				-- Use fixed-strings flag for literal search
+				-- Get current project root
+				local cwd = vim.fn.getcwd()
+				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
+				local project_root = (vim.v.shell_error == 0 and git_root) or cwd
+
+				-- Use fixed-strings flag for literal search and scope to project
 				local config = vim.tbl_extend("force", opts, {
 					additional_args = { "--fixed-strings" },
 					path_display = { "smart" },
-					prompt_title = "🔍 Live Grep (Literal Search)",
+					prompt_title = "🔍 Live Grep (Literal Search) - " .. vim.fn.fnamemodify(project_root, ":t"),
+					cwd = project_root,
 				})
 
 				builtin.live_grep(config)

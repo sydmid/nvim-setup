@@ -777,11 +777,17 @@ local function workspace_git_navigation(direction)
 		return
 	end
 
+	-- Get current project root for scoping
+	local cwd = vim.fn.getcwd()
+	local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
+	local project_root = (vim.v.shell_error == 0 and git_root) or cwd
+
 	telescope_builtin.git_status({
-		prompt_title = direction == "next" and "󰊢 Next Git Changes (Workspace)" or "󰊢 Previous Git Changes (Workspace)",
+		prompt_title = direction == "next" and "󰊢 Next Git Changes - " .. vim.fn.fnamemodify(project_root, ":t") or "󰊢 Previous Git Changes - " .. vim.fn.fnamemodify(project_root, ":t"),
 		initial_mode = "normal",
 		theme = "ivy",
 		layout_config = { height = 0.6 },
+		cwd = project_root,
 		attach_mappings = function(prompt_bufnr, map)
 			local actions = require("telescope.actions")
 			local action_state = require("telescope.actions.state")
