@@ -16,6 +16,16 @@ vim.opt.rtp:prepend(lazypath)
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
+-- Suppress vim.validate deprecation warnings globally until plugins are updated
+local orig_notify = vim.notify
+vim.notify = function(msg, level, opts)
+	if msg and type(msg) == "string" and msg:match("vim%.validate is deprecated") then
+		-- Silently ignore vim.validate deprecation warnings
+		return
+	end
+	return orig_notify(msg, level, opts)
+end
+
 -- Load configuration modules
 require("config.options")
 require("config.keymaps")

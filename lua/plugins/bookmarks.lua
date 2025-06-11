@@ -9,17 +9,6 @@ return {
   dependencies = {
     "nvim-lua/plenary.nvim", -- Required dependency
   },
-  init = function()
-    -- Suppress the deprecation warning for vim.validate
-    local orig_notify = vim.notify
-    vim.notify = function(msg, level, opts)
-      if msg and msg:match("vim.validate is deprecated") then
-        -- Silently ignore the deprecation warning
-        return
-      end
-      return orig_notify(msg, level, opts)
-    end
-  end,
   config = function()
     local bookmarks = require("bookmarks")
 
