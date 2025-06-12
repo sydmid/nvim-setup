@@ -1220,7 +1220,7 @@ map({ "n", "i", "v" }, "<D-S-s>", save_all_modified, { desc = "Save all modified
 -- Theme toggle keymap
 map("n", "<leader>tt", function()
 	_G.toggle_theme()
-end, { desc = "Toggle between themes (no-clown-fiesta ⟷ catppuccin)", silent = true })
+end, { desc = "Toggle between themes (no-clown-fiesta ⟷ rose-pine)", silent = true })
 
 -- Indentation management keymaps (spaces over tabs best practices)
 -- Show invisible characters (spaces, tabs, line endings)

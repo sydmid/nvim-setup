@@ -18,10 +18,15 @@ return {
 			end
 
 			-- Configure diagnostics to prevent duplication with Lspsaga
+			-- Default state: warnings and info are DISABLED (only errors visible)
 			vim.diagnostic.config({
-				virtual_text = false, -- Disable virtual text since Lspsaga will handle this
-				signs = true, -- Keep signs in the gutter
-				underline = true,
+				virtual_text = false, -- Disable virtual text by default
+				signs = {
+					severity = { min = vim.diagnostic.severity.ERROR } -- Only show errors by default
+				},
+				underline = {
+					severity = { min = vim.diagnostic.severity.ERROR } -- Only underline errors by default
+				},
 				update_in_insert = false,
 				severity_sort = true,
 				float = {
