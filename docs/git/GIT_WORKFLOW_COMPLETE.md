@@ -41,7 +41,7 @@ Feature-rich Git interface with telescope integration.
 | `<leader>gs` | Git Status | Open Neogit status buffer |
 | `<leader>gc` | Git Commit | Open commit interface |
 | `<leader>gp` | Git Push | Push changes |
-| `<leader>gl` | Git Log | Show git log |
+| `<leader>gl` | Enhanced Git Log Explorer | Two-step interactive: Browse commits → Explore files (with Tab navigation) |
 | `<leader>gb` | Git Branch | Branch management |
 
 ### **Layer 3: Enhanced Telescope Git Pickers**
@@ -60,9 +60,10 @@ Beautiful, interactive Git operations through telescope.
 #### **File Operations**
 | Keymap | Action | Special Keys | Description |
 |--------|--------|--------------|-------------|
-| `<leader>gS` | Git Status Files | `Enter` = Open file<br>`Ctrl+S` = Stage<br>`Ctrl+U` = Unstage | Interactive file status |
+| `<leader>gS` | Git Status Files | `Enter` = Open file<br>`Ctrl+S` = Stage<br>`Ctrl+U` = Unstage<br>`Tab` = Switch to preview | Interactive file status |
 | `<leader>gF` | Browse Files in Commit | Two-step: Select commit → Browse files | Historical file browser |
-| `<leader>gf` | Git Blame Current File | `Enter` = Jump to line + show commit | Interactive blame viewer |
+| `<leader>gf` | Git Blame Current File | `Enter` = Jump to line + show commit<br>`Tab` = Switch to preview | Interactive blame viewer |
+| `<leader>gl` | Enhanced Git Log Explorer | `Tab` = Switch to preview<br>`Enter` = Browse files in commit | Interactive commit explorer |
 
 #### **Stash Management**
 | Keymap | Action | Special Keys | Description |

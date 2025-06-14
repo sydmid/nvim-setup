@@ -491,6 +491,24 @@ return {
 											end
 										end)
 
+										-- Tab navigation between prompt and preview for file browser
+										local focus_preview_files = function(prompt_bufnr2)
+											local action_state = require("telescope.actions.state")
+											local picker = action_state.get_current_picker(prompt_bufnr2)
+											local prompt_win = picker.prompt_win
+											local previewer = picker.previewer
+											local winid = previewer.state.winid
+											local bufnr = previewer.state.bufnr
+											vim.keymap.set("n", "<Tab>", function()
+												vim.cmd(string.format("noautocmd lua vim.api.nvim_set_current_win(%s)", prompt_win))
+											end, { buffer = bufnr })
+											vim.cmd(string.format("noautocmd lua vim.api.nvim_set_current_win(%s)", winid))
+										end
+
+										-- Bind Tab to focus preview window for file browser
+										map2("n", "<Tab>", focus_preview_files)
+										map2("i", "<Tab>", focus_preview_files)
+
 										-- q or Esc to close
 										map2("n", "q", actions.close)
 										map2("i", "<Esc>", actions.close)
@@ -501,6 +519,24 @@ return {
 								})
 							end
 						end)
+
+						-- Tab navigation between prompt and preview for commit log
+						local focus_preview_commits = function(prompt_bufnr)
+							local action_state = require("telescope.actions.state")
+							local picker = action_state.get_current_picker(prompt_bufnr)
+							local prompt_win = picker.prompt_win
+							local previewer = picker.previewer
+							local winid = previewer.state.winid
+							local bufnr = previewer.state.bufnr
+							vim.keymap.set("n", "<Tab>", function()
+								vim.cmd(string.format("noautocmd lua vim.api.nvim_set_current_win(%s)", prompt_win))
+							end, { buffer = bufnr })
+							vim.cmd(string.format("noautocmd lua vim.api.nvim_set_current_win(%s)", winid))
+						end
+
+						-- Bind Tab to focus preview window for commit log
+						map("n", "<Tab>", focus_preview_commits)
+						map("i", "<Tab>", focus_preview_commits)
 
 						-- q or Esc to close
 						map("n", "q", actions.close)

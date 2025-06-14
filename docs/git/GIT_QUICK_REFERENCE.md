@@ -31,6 +31,7 @@
 <leader>gf  │ Git Blame Current File
 <leader>gR  │ Git Remotes (Fetch/Push)
 <leader>gt  │ Create Git Stash
+<leader>gl  │ Enhanced Git Log Explorer (Tab = Preview)
 ```
 
 ### **File History & Diff**
@@ -90,6 +91,12 @@
 ### **In Git Remotes (`<leader>gR`)**
 - `Enter` → Fetch from remote
 - `Ctrl+P` → Push to remote
+
+### **In Enhanced Git Log Explorer (`<leader>gl`)**
+- `Tab` → Switch between results and preview window
+- `Enter` → Browse files in selected commit
+- In File Browser: `Tab` → Switch between results and preview
+- In File Browser: `Ctrl+D` → Diff file against current version
 
 ## 🌟 **PRO TIPS**
 
