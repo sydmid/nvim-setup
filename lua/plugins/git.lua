@@ -565,8 +565,8 @@ return {
 			"nvim-lua/plenary.nvim",
 		},
 		keys = {
-			{ "<leader>lg", "<cmd>LazyGit<cr>", desc = "Open LazyGit" },
-			{ "<leader>lf", "<cmd>LazyGitCurrentFile<cr>", desc = "LazyGit current file" },
+			{ "<leader>gg", "<cmd>LazyGit<cr>", desc = "Open LazyGit" },
+			{ "<leader>gF", "<cmd>LazyGitCurrentFile<cr>", desc = "LazyGit current file" },
 		},
 		config = function()
 			-- Configure LazyGit
@@ -577,7 +577,7 @@ return {
 			vim.g.lazygit_use_neovim_remote = 1 -- fallback to 0 if neovim-remote is not installed
 
 			-- Additional keymaps for comprehensive Git workflow
-			vim.keymap.set("n", "<leader>gg", "<cmd>LazyGit<cr>", { desc = "Open LazyGit" })
+			-- Note: <leader>gg is already defined in keys table above
 		end,
 	},
 }
