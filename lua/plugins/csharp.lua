@@ -64,11 +64,11 @@ return {
       map("n", "<F10>", "<Cmd>lua require'dap'.step_over()<CR>", opts)
       map("n", "<F11>", "<Cmd>lua require'dap'.step_into()<CR>", opts)
       map("n", "<F8>", "<Cmd>lua require'dap'.step_out()<CR>", opts)
-      map("n", "<leader>dr", "<Cmd>lua require'dap'.repl.open()<CR>", opts)
-      map("n", "<leader>dl", "<Cmd>lua require'dap'.run_last()<CR>", opts)
-      map("n", "<leader>dt", "<Cmd>lua require('neotest').run.run({strategy = 'dap'})<CR>",
+      map("n", "<leader>Dr", "<Cmd>lua require'dap'.repl.open()<CR>", opts)
+      map("n", "<leader>Dl", "<Cmd>lua require'dap'.run_last()<CR>", opts)
+      map("n", "<leader>Dt", "<Cmd>lua require('neotest').run.run({strategy = 'dap'})<CR>",
         { noremap = true, silent = true, desc = 'debug nearest test' })
-      map("n", "<leader>du", "<Cmd>lua require'dapui'.toggle()<CR>", opts)
+      map("n", "<leader>Du", "<Cmd>lua require'dapui'.toggle()<CR>", opts)
     end,
     event = "VeryLazy",
   },
@@ -242,7 +242,7 @@ return {
       map("n", "<leader>ut", "<cmd>lua require('neotest').run.run()<cr>", { desc = "Run nearest test" })
       map("n", "<leader>uf", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", { desc = "Run file tests" })
       map("n", "<leader>ud", "<cmd>lua require('neotest').run.run({strategy = 'dap'})<cr>", { desc = "Debug nearest test" })
-      map("n", "<leader>us", "<cmd>lua require('neotest').summary.toggle()<cr>", { desc = "Toggle test summary" })
+      map("n", "<leader>um", "<cmd>lua require('neotest').summary.toggle()<cr>", { desc = "Toggle test summary" })
       map("n", "<leader>uo", "<cmd>lua require('neotest').output.open({ enter = true })<cr>", { desc = "Show test output" })
     end,
   },

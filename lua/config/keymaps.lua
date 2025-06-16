@@ -256,12 +256,7 @@ end, { desc = "Format document" })
 -- Use <D-S-i> (Cmd+Shift+I) to manually trigger signature help when needed.
 
 -- Harpoon mappings
-map("n", "<leader>aa", ":lua require('harpoon.mark').add_file()<CR>", { desc = "Add to harpoon" })
-map("n", "<leader>a1", ":lua require('harpoon.mark').add_file(1)<CR>", { desc = "Add to harpoon 1" })
-map("n", "<leader>a2", ":lua require('harpoon.mark').add_file(2)<CR>", { desc = "Add to harpoon 2" })
-map("n", "<leader>a3", ":lua require('harpoon.mark').add_file(3)<CR>", { desc = "Add to harpoon 3" })
-map("n", "<leader>a4", ":lua require('harpoon.mark').add_file(4)<CR>", { desc = "Add to harpoon 4" })
-map("n", "<leader>a5", ":lua require('harpoon.mark').add_file(5)<CR>", { desc = "Add to harpoon 5" })
+map("n", "<leader>ah", ":lua require('harpoon.mark').add_file()<CR>", { desc = "Add to harpoon" })
 
 map("n", "<leader>1", ":lua require('harpoon.ui').nav_file(1)<CR>", { desc = "Navigate to harpoon 1" })
 map("n", "<leader>2", ":lua require('harpoon.ui').nav_file(2)<CR>", { desc = "Navigate to harpoon 2" })
@@ -273,7 +268,6 @@ map("n", "<leader>5", ":lua require('harpoon.ui').nav_file(5)<CR>", { desc = "Na
 -- Additional IDE-like actions
 -- map("n", "<leader>db", ":lua require('dap').toggle_breakpoint()<CR>", { desc = "Toggle breakpoint" })
 map("n", "<leader>tr", ":lua require('trouble').toggle()<CR>", { desc = "Toggle trouble" })
-map("n", "<leader>nf", ":NvimTreeFindFile<CR>", { desc = "Find in file explorer" })
 map("n", "<leader>r", ":lua vim.lsp.buf.rename()<CR>", { desc = "Rename symbol" })
 
 -- Method and property navigation - Optimized for performance
@@ -975,15 +969,6 @@ vim.keymap.set("n", "<D-r>", function()
 	end)
 end, { desc = "Find and replace dialog", silent = true })
 
--- Arabic language support
-vim.keymap.set("n", "<leader>ar", function()
-	if _G.toggle_arabic then
-		_G.toggle_arabic()
-	else
-		vim.notify("Arabic support is not loaded", vim.log.levels.WARN)
-	end
-end, { desc = "Toggle Arabic mode" })
-
 -- Toggle Arabic keyboard mapping in insert mode
 vim.keymap.set("i", "<C-^>", function()
 	if vim.bo.keymap == "arabic" then
@@ -1051,7 +1036,7 @@ map("n", "<leader>tq", function()
 end, { desc = "Close current terminal" })
 
 -- Debug cursor state for troubleshooting
-map("n", "<leader>td", function() terminals.debug_cursor_state() end, { desc = "Debug terminal cursor state" })
+map("n", "<leader>tD", function() terminals.debug_cursor_state() end, { desc = "Debug terminal cursor state" })
 
 -- Register terminal commands with which-key
 vim.defer_fn(function()
@@ -1093,7 +1078,7 @@ vim.defer_fn(function()
       { "<leader>tx", desc = "󰈈 Toggle cursor follow (lock/unlock)" },
       { "<leader>tL", desc = "󰌾 Lock cursor (disable auto-scroll)" },
       { "<leader>tU", desc = "󰚰 Unlock cursor (enable auto-scroll)" },
-      { "<leader>td", desc = "󰃤 Debug terminal cursor state" },
+      { "<leader>tD", desc = "󰃤 Debug terminal cursor state" },
 
       -- Basic toggle terminal (moved to Cmd+`)
       { "<D-`>", desc = "󰆍 Toggle terminal" },

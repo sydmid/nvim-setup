@@ -392,49 +392,6 @@ return {
 				})
 			end, { desc = "Git status files " })
 
-			-- Git stashes picker
-			vim.keymap.set("n", "<leader>gT", function()
-				telescope_builtin.git_stash({
-					prompt_title = "󰜦 Git Stashes",
-					theme = "ivy",
-					layout_config = { height = 0.6 },
-					attach_mappings = function(prompt_bufnr, map)
-						local actions = require("telescope.actions")
-						local action_state = require("telescope.actions.state")
-
-						-- Enter to apply stash
-						actions.select_default:replace(function()
-							local selection = action_state.get_selected_entry()
-							actions.close(prompt_bufnr)
-							if selection then
-								vim.cmd("Git stash apply " .. selection.value)
-								vim.notify("Applied stash: " .. selection.value, vim.log.levels.INFO)
-							end
-						end)
-
-						-- Ctrl+D to drop stash
-						map("i", "<C-d>", function()
-							local selection = action_state.get_selected_entry()
-							if selection then
-								vim.ui.input({
-									prompt = "Drop stash " .. selection.value .. "? (y/N): ",
-								}, function(input)
-									if input and input:lower() == "y" then
-										vim.cmd("Git stash drop " .. selection.value)
-										vim.notify("Dropped stash: " .. selection.value, vim.log.levels.INFO)
-										-- Refresh the picker
-										actions.close(prompt_bufnr)
-										telescope_builtin.git_stash()
-									end
-								end)
-							end
-						end)
-
-						return true
-					end,
-				})
-			end, { desc = "Git stashes (Telescope)" })
-
 			-- Quick stash creation
 			vim.keymap.set("n", "<leader>gt", function()
 				vim.ui.input({
