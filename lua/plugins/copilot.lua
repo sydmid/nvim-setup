@@ -660,6 +660,34 @@ local function show_status()
 		category = "settings",
 	})
 
+	-- Current chat mode information
+	local current_mode = "chat" -- Default mode
+	local mode_display = "💬 Chat Mode"
+	local chat_ok, chat = pcall(require, "CopilotChat")
+	if chat_ok and chat.config and chat.config.mode then
+		current_mode = chat.config.mode
+		-- Map mode names to display formats
+		local mode_displays = {
+			edit = "🎯 Edit Mode",
+			ask = "❓ Ask Mode",
+			agent = "🤖 Agent Mode",
+			chat = "💬 Chat Mode",
+			fix = "🔧 Fix Mode",
+			review = "📝 Review Mode",
+			explain = "📚 Explain Mode",
+			optimize = "⚡ Optimize Mode",
+		}
+		mode_display = mode_displays[current_mode] or ("🎭 " .. current_mode .. " Mode")
+	end
+
+	table.insert(status_items, {
+		name = "🎭 Active Chat Mode",
+		value = mode_display,
+		detail = "Current interaction mode for Copilot Chat",
+		action = "mode",
+		category = "settings",
+	})
+
 	-- Configuration status
 	local chat_ok, chat = pcall(require, "CopilotChat")
 	if chat_ok and chat.config then
@@ -1012,7 +1040,7 @@ return {
 		opts = {
 			suggestion = {
 				enabled = true,
-				auto_trigger = true,
+				auto_trigger = false,
 				hide_during_completion = true,
 				debounce = 75,
 				keymap = {
@@ -1080,6 +1108,9 @@ return {
 			return {
 				debug = false,
 				model = "gemini-2.5-pro",
+        auto_insert_mode = true,
+        references_display = 'write',
+         chat_autocomplete = false,
 				window = {
 					layout = "vertical",
 					width = 0.5,
