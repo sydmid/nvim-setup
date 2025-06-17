@@ -1344,7 +1344,6 @@ return {
 				{ "<leader>a", group = "󰧑 AI/Copilot" },
 				{ "<leader>ac", desc = "󰭻 Toggle chat" },
 				{ "<leader>ah", desc = "󰋖 Help actions" },
-				{ "<leader>ap", desc = "󰅺 Prompt actions" },
 				{ "<leader>ae", desc = "󰍉 Explain code" },
 				{ "<leader>at", desc = "󰙨 Generate tests" },
 				{ "<leader>ar", desc = "󰁨 Review code" },
@@ -1370,7 +1369,6 @@ return {
 				{ "<leader>aX", desc = "󰍉 Enhanced context chat" },
 				{ "<leader>aC", desc = "󰊢 Smart commit message" },
 				{ "<leader>aE", desc = "󰍉 Explain with context" },
-				{ "<leader>aP", desc = "󰏗 Project-aware help" },
 				-- Utility commands
 				{ "<leader>aT", desc = "󰔌 Toggle Copilot on/off" },
 				{ "<leader>as", desc = "󰓕 Check Copilot status" },

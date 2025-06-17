@@ -77,6 +77,7 @@ local function select_model_telescope()
 
 	pickers.new({}, {
 		prompt_title = "🤖 Select Copilot Chat Model (" .. #MODELS .. " available)",
+		initial_mode = "normal",
 		finder = finders.new_table({
 			results = model_entries,
 			entry_maker = function(entry)
@@ -128,6 +129,20 @@ local function select_model_telescope()
 				end
 			end)
 
+			-- Enhanced navigation with backspace support
+			map("n", "<BS>", function()
+				actions.close(prompt_bufnr)
+			end)
+
+			map("i", "<BS>", function()
+				local line = action_state.get_current_line()
+				if line == "" then
+					actions.close(prompt_bufnr)
+				else
+					vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<BS>", true, false, true), "n", false)
+				end
+			end)
+
 			map("i", "<Esc>", actions.close)
 			map("n", "<Esc>", actions.close)
 			map("n", "q", actions.close)
@@ -135,23 +150,6 @@ local function select_model_telescope()
 			return true
 		end,
 	}):find()
-end
-
--- Enhanced context-aware chat function
-local function context_aware_chat()
-	local filetype = vim.bo.filetype
-	local filename = vim.fn.expand("%:t")
-	local current_function = vim.fn.expand("<cword>")
-
-	local context = string.format(
-		"I'm working on a %s file (%s). Current context around '%s'. ",
-		filetype, filename, current_function
-	)
-
-	local input = vim.fn.input("Ask Copilot (" .. filetype .. "): ")
-	if input ~= "" then
-		vim.cmd("CopilotChat " .. context .. input)
-	end
 end
 
 -- Smart commit message generation based on git diff
@@ -220,10 +218,327 @@ local function project_help()
 	end
 end
 
+-- Settings interface using telescope
+local function show_settings()
+	local pickers = require("telescope.pickers")
+	local finders = require("telescope.finders")
+	local conf = require("telescope.config").values
+	local actions = require("telescope.actions")
+	local action_state = require("telescope.actions.state")
+
+	local settings_options = {
+		{ name = "🤖 Change Model", action = "model", desc = "Switch between " .. #MODELS .. " available AI models" },
+		{ name = "🎭 Change Chat Mode", action = "mode", desc = "Switch between edit, ask, agent, and other chat modes" },
+		{ name = "📊 Copilot Status", action = "status", desc = "View detailed status and diagnostics dashboard" },
+		{ name = "🔄 Restart Copilot", action = "restart", desc = "Restart service to fix connection issues" },
+		{ name = "🔧 Authentication", action = "auth", desc = "Re-authenticate with GitHub account" },
+		{ name = "💬 Chat History", action = "history", desc = "View and manage saved chat sessions" },
+		{ name = "🗑️ Clear All History", action = "clear_all", desc = "Permanently delete all chat sessions" },
+	}
+
+	pickers.new({}, {
+		prompt_title = "🤖 Copilot Settings & Configuration",
+		initial_mode = "normal",
+		finder = finders.new_table({
+			results = settings_options,
+			entry_maker = function(entry)
+				return {
+					value = entry,
+					display = entry.name,
+					ordinal = entry.name .. " " .. entry.desc,
+				}
+			end,
+		}),
+		sorter = conf.generic_sorter({}),
+		previewer = require("telescope.previewers").new_buffer_previewer({
+			title = "Setting Details",
+			define_preview = function(self, entry)
+				local setting = entry.value
+				local preview_lines = {
+					"⚙️ " .. setting.name,
+					"",
+					"Description:",
+					setting.desc,
+					"",
+				}
+
+				-- Add action-specific details
+				if setting.action == "model" then
+					table.insert(preview_lines, "Available Models:")
+					for _, model in ipairs(MODELS) do
+						local marker = model.name == get_current_model() and "➤ " or "  "
+						table.insert(preview_lines, marker .. model.name .. " - " .. model.description)
+					end
+				elseif setting.action == "mode" then
+					table.insert(preview_lines, "Available Chat Modes:")
+					table.insert(preview_lines, "🎯 Edit Mode - Direct code editing")
+					table.insert(preview_lines, "❓ Ask Mode - Question & answer format")
+					table.insert(preview_lines, "🤖 Agent Mode - AI assistant behavior")
+					table.insert(preview_lines, "💬 Chat Mode - Conversational interface")
+					table.insert(preview_lines, "🔧 Fix Mode - Code problem solving")
+					table.insert(preview_lines, "📝 Review Mode - Code review assistance")
+				elseif setting.action == "status" then
+					table.insert(preview_lines, "Status Dashboard includes:")
+					table.insert(preview_lines, "• Connection and service health")
+					table.insert(preview_lines, "• Authentication information")
+					table.insert(preview_lines, "• System requirements check")
+					table.insert(preview_lines, "• Quick action buttons")
+					table.insert(preview_lines, "• Troubleshooting tools")
+				elseif setting.action == "restart" then
+					table.insert(preview_lines, "Restart process:")
+					table.insert(preview_lines, "• Stops current Copilot service")
+					table.insert(preview_lines, "• Clears existing connections")
+					table.insert(preview_lines, "• Reinitializes with fresh state")
+					table.insert(preview_lines, "• Resolves most connection issues")
+				elseif setting.action == "auth" then
+					table.insert(preview_lines, "Authentication steps:")
+					table.insert(preview_lines, "• Opens GitHub authentication flow")
+					table.insert(preview_lines, "• Requires valid GitHub account")
+					table.insert(preview_lines, "• Verifies Copilot subscription")
+					table.insert(preview_lines, "• Refreshes access tokens")
+				elseif setting.action == "history" then
+					table.insert(preview_lines, "Chat history management:")
+					table.insert(preview_lines, "• View all saved sessions")
+					table.insert(preview_lines, "• Open specific conversations")
+					table.insert(preview_lines, "• Browse session timestamps")
+					table.insert(preview_lines, "• Quick session access")
+				elseif setting.action == "clear_all" then
+					table.insert(preview_lines, "⚠️  WARNING: This action:")
+					table.insert(preview_lines, "• Permanently deletes ALL chat sessions")
+					table.insert(preview_lines, "• Cannot be undone")
+					table.insert(preview_lines, "• Requires confirmation")
+					table.insert(preview_lines, "• Clears conversation history")
+				end
+
+				vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, preview_lines)
+			end,
+		}),
+		attach_mappings = function(prompt_bufnr, map)
+			actions.select_default:replace(function()
+				local selection = action_state.get_selected_entry()
+				actions.close(prompt_bufnr)
+				if selection then
+					handle_setting_action(selection.value.action)
+				end
+			end)
+
+			-- Enhanced navigation with backspace support
+			map("n", "<BS>", function()
+				actions.close(prompt_bufnr)
+			end)
+
+			map("i", "<BS>", function()
+				local line = action_state.get_current_line()
+				if line == "" then
+					actions.close(prompt_bufnr)
+				else
+					vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<BS>", true, false, true), "n", false)
+				end
+			end)
+
+			map("n", "?", function()
+				vim.notify("Copilot Settings:\n• Enter: Select option\n• BS: Navigate back/close\n• ?: Show this help\n• /: Search settings\n• q/Esc: Close", vim.log.levels.INFO)
+			end)
+
+			return true
+		end,
+	}):find()
+end
+
+-- Chat mode selection with telescope
+local function select_chat_mode()
+	local pickers = require("telescope.pickers")
+	local finders = require("telescope.finders")
+	local conf = require("telescope.config").values
+	local actions = require("telescope.actions")
+	local action_state = require("telescope.actions.state")
+
+	local chat_modes = {
+		{
+			name = "edit",
+			display = "🎯 Edit Mode",
+			description = "Direct code editing and modification",
+			detail = "Copilot will make direct edits to your code with inline suggestions and modifications.",
+		},
+		{
+			name = "ask",
+			display = "❓ Ask Mode",
+			description = "Question and answer format",
+			detail = "Interactive Q&A format where you ask questions and get detailed explanations.",
+		},
+		{
+			name = "agent",
+			display = "🤖 Agent Mode",
+			description = "AI assistant behavior",
+			detail = "Copilot acts as an intelligent agent, proactively helping with your development tasks.",
+		},
+		{
+			name = "chat",
+			display = "💬 Chat Mode",
+			description = "Conversational interface",
+			detail = "Natural conversation mode for discussing code, ideas, and getting assistance.",
+		},
+		{
+			name = "fix",
+			display = "🔧 Fix Mode",
+			description = "Code problem solving",
+			detail = "Focused on identifying and fixing bugs, errors, and code issues.",
+		},
+		{
+			name = "review",
+			display = "📝 Review Mode",
+			description = "Code review assistance",
+			detail = "Comprehensive code review with suggestions for improvements and best practices.",
+		},
+		{
+			name = "explain",
+			display = "💡 Explain Mode",
+			description = "Code explanation and documentation",
+			detail = "Detailed explanations of code functionality, patterns, and concepts.",
+		},
+		{
+			name = "optimize",
+			display = "⚡ Optimize Mode",
+			description = "Performance and efficiency improvements",
+			detail = "Focus on code optimization, performance improvements, and efficiency.",
+		},
+	}
+
+	-- Get current mode (if available)
+	local current_mode = "chat" -- Default mode
+	local chat_ok, chat = pcall(require, "CopilotChat")
+	if chat_ok and chat.config and chat.config.mode then
+		current_mode = chat.config.mode
+	end
+
+	pickers.new({}, {
+		prompt_title = "🎭 Select Copilot Chat Mode",
+		initial_mode = "normal",
+		finder = finders.new_table({
+			results = chat_modes,
+			entry_maker = function(entry)
+				local marker = entry.name == current_mode and "➤ " or "  "
+				return {
+					value = entry,
+					display = marker .. entry.display,
+					ordinal = entry.name .. " " .. entry.description .. " " .. entry.detail,
+				}
+			end,
+		}),
+		sorter = conf.generic_sorter({}),
+		previewer = require("telescope.previewers").new_buffer_previewer({
+			title = "Mode Details",
+			define_preview = function(self, entry)
+				local mode = entry.value
+				local preview_lines = {
+					"🎭 " .. mode.display,
+					"",
+					"Mode: " .. mode.name,
+					"",
+					"Description:",
+					mode.description,
+					"",
+					"Details:",
+					mode.detail,
+					"",
+					"Use Cases:",
+				}
+
+				-- Add specific use cases for each mode
+				if mode.name == "edit" then
+					table.insert(preview_lines, "• Refactoring existing code")
+					table.insert(preview_lines, "• Making specific modifications")
+					table.insert(preview_lines, "• Applying code suggestions directly")
+					table.insert(preview_lines, "• Quick fixes and improvements")
+				elseif mode.name == "ask" then
+					table.insert(preview_lines, "• Getting explanations about code")
+					table.insert(preview_lines, "• Learning new concepts")
+					table.insert(preview_lines, "• Troubleshooting issues")
+					table.insert(preview_lines, "• Understanding APIs and libraries")
+				elseif mode.name == "agent" then
+					table.insert(preview_lines, "• Complex problem solving")
+					table.insert(preview_lines, "• Multi-step development tasks")
+					table.insert(preview_lines, "• Architectural decisions")
+					table.insert(preview_lines, "• Project planning assistance")
+				elseif mode.name == "chat" then
+					table.insert(preview_lines, "• Casual coding discussions")
+					table.insert(preview_lines, "• Brainstorming ideas")
+					table.insert(preview_lines, "• General programming help")
+					table.insert(preview_lines, "• Learning and exploration")
+				elseif mode.name == "fix" then
+					table.insert(preview_lines, "• Debugging runtime errors")
+					table.insert(preview_lines, "• Fixing compilation issues")
+					table.insert(preview_lines, "• Resolving logical bugs")
+					table.insert(preview_lines, "• Error message interpretation")
+				elseif mode.name == "review" then
+					table.insert(preview_lines, "• Code quality assessment")
+					table.insert(preview_lines, "• Security vulnerability checks")
+					table.insert(preview_lines, "• Performance optimization")
+					table.insert(preview_lines, "• Best practices validation")
+				elseif mode.name == "explain" then
+					table.insert(preview_lines, "• Complex algorithm explanation")
+					table.insert(preview_lines, "• Design pattern clarification")
+					table.insert(preview_lines, "• Documentation generation")
+					table.insert(preview_lines, "• Educational content creation")
+				elseif mode.name == "optimize" then
+					table.insert(preview_lines, "• Performance bottleneck analysis")
+					table.insert(preview_lines, "• Memory usage optimization")
+					table.insert(preview_lines, "• Algorithm efficiency improvements")
+					table.insert(preview_lines, "• Resource usage reduction")
+				end
+
+				vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, preview_lines)
+			end,
+		}),
+		attach_mappings = function(prompt_bufnr, map)
+			actions.select_default:replace(function()
+				local selection = action_state.get_selected_entry()
+				actions.close(prompt_bufnr)
+				if selection then
+					-- Set the chat mode
+					local chat_ok, chat = pcall(require, "CopilotChat")
+					if chat_ok and chat.config then
+						chat.config.mode = selection.value.name
+						vim.notify("🎭 Chat mode set to: " .. selection.value.display, vim.log.levels.INFO)
+					else
+						vim.notify("❌ Failed to set chat mode", vim.log.levels.ERROR)
+					end
+				end
+			end)
+
+			-- Enhanced navigation with backspace support
+			map("n", "<BS>", function()
+				actions.close(prompt_bufnr)
+			end)
+
+			map("i", "<BS>", function()
+				local line = action_state.get_current_line()
+				if line == "" then
+					actions.close(prompt_bufnr)
+				else
+					vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<BS>", true, false, true), "n", false)
+				end
+			end)
+
+			map("n", "?", function()
+				vim.notify("Chat Mode Selection:\n• Enter: Select mode\n• BS: Navigate back/close\n• ?: Show this help\n• /: Search modes\n• q/Esc: Close", vim.log.levels.INFO)
+			end)
+
+			map("i", "<Esc>", actions.close)
+			map("n", "<Esc>", actions.close)
+			map("n", "q", actions.close)
+
+			return true
+		end,
+	}):find()
+end
+
 -- Handle setting actions
 local function handle_setting_action(action)
 	if action == "model" then
 		select_model_telescope()
+	elseif action == "mode" then
+		select_chat_mode()
 	elseif action == "status" then
 		show_status()
 	elseif action == "restart" then
@@ -238,25 +553,359 @@ local function handle_setting_action(action)
 	end
 end
 
--- Show Copilot status
+-- Show Copilot status using telescope
 local function show_status()
+	local pickers = require("telescope.pickers")
+	local finders = require("telescope.finders")
+	local conf = require("telescope.config").values
+	local actions = require("telescope.actions")
+	local action_state = require("telescope.actions.state")
+
+	-- Gather comprehensive status information
+	local status_items = {}
 	local ok, copilot = pcall(require, "copilot.api")
-	if ok and copilot.status then
-		local status = copilot.status.data
-		if status then
-			vim.notify(
-				string.format("Copilot Status: %s\nMessage: %s",
-					status.status or "unknown",
-					status.message or "no message"
-				),
-				vim.log.levels.INFO
-			)
-		else
-			vim.notify("Copilot status not available", vim.log.levels.WARN)
+
+	-- Status icons for different states
+	local status_icons = {
+		["Normal"] = "✅",
+		["Warning"] = "⚠️",
+		["InProgress"] = "🔄",
+		["offline"] = "❌",
+		["unknown"] = "❓",
+	}
+
+	-- Core status information
+	if ok and copilot and copilot.status and copilot.status.data then
+		local status_payload = copilot.status.data
+		local status = status_payload.status or "unknown"
+		local message = status_payload.message or "no message"
+		local icon = status_icons[status] or status_icons["unknown"]
+
+		table.insert(status_items, {
+			name = "📊 Connection Status",
+			value = icon .. " " .. status,
+			detail = message,
+			action = "none",
+			category = "status",
+		})
+
+		-- User information
+		if status_payload.user then
+			table.insert(status_items, {
+				name = "👤 Authenticated User",
+				value = status_payload.user,
+				detail = "Currently signed in GitHub account",
+				action = "none",
+				category = "status",
+			})
 		end
+
+		-- Version information
+		if status_payload.version then
+			table.insert(status_items, {
+				name = "🏷️ Copilot Version",
+				value = status_payload.version,
+				detail = "Current Copilot extension version",
+				action = "none",
+				category = "status",
+			})
+		end
+
+		-- Additional detailed status
+		table.insert(status_items, {
+			name = "📈 Service Health",
+			value = status == "Normal" and "🟢 Healthy" or "🔴 Issues Detected",
+			detail = "Overall service health assessment",
+			action = "none",
+			category = "status",
+		})
+
 	else
-		vim.notify("Copilot not loaded", vim.log.levels.ERROR)
+		-- Error state with detailed diagnostics
+		local reason = "unknown issue"
+		if not ok then
+			reason = "copilot.api module could not be loaded"
+		elseif not copilot then
+			reason = "copilot.api module loaded as nil"
+		elseif not copilot.status then
+			reason = "copilot.api has no status member"
+		elseif not copilot.status.data then
+			reason = "copilot.api.status has no data property"
+		end
+
+		table.insert(status_items, {
+			name = "❌ Connection Error",
+			value = "Service Unavailable",
+			detail = "Reason: " .. reason,
+			action = "none",
+			category = "status",
+		})
+
+		table.insert(status_items, {
+			name = "🔧 Troubleshooting",
+			value = "Diagnostic Information",
+			detail = "Check authentication and network connectivity",
+			action = "none",
+			category = "status",
+		})
 	end
+
+	-- Current model information
+	local current_model = get_current_model()
+	table.insert(status_items, {
+		name = "🤖 Active Model",
+		value = current_model,
+		detail = "Currently selected AI model for chat",
+		action = "model",
+		category = "settings",
+	})
+
+	-- Configuration status
+	local chat_ok, chat = pcall(require, "CopilotChat")
+	if chat_ok and chat.config then
+		table.insert(status_items, {
+			name = "⚙️ Chat Configuration",
+			value = "Loaded",
+			detail = "CopilotChat plugin is properly configured",
+			action = "none",
+			category = "settings",
+		})
+	else
+		table.insert(status_items, {
+			name = "⚙️ Chat Configuration",
+			value = "❌ Error",
+			detail = "CopilotChat plugin configuration issue",
+			action = "none",
+			category = "settings",
+		})
+	end
+
+	-- Node.js status (required for Copilot)
+	local node_version = vim.fn.system("node --version 2>/dev/null"):gsub("\n", "")
+	if vim.v.shell_error == 0 then
+		table.insert(status_items, {
+			name = "📦 Node.js Runtime",
+			value = node_version,
+			detail = "Node.js is available and working",
+			action = "none",
+			category = "system",
+		})
+	else
+		table.insert(status_items, {
+			name = "📦 Node.js Runtime",
+			value = "❌ Not Found",
+			detail = "Node.js is required for Copilot functionality",
+			action = "none",
+			category = "system",
+		})
+	end
+
+	-- Separator
+	table.insert(status_items, {
+		name = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+		value = "Actions & Settings",
+		detail = "",
+		action = "none",
+		category = "separator",
+	})
+
+	-- Action items with more comprehensive options
+	table.insert(status_items, {
+		name = "🔄 Restart Copilot Service",
+		value = "Reset Connection",
+		detail = "Restart Copilot to fix connection issues",
+		action = "restart",
+		category = "actions",
+	})
+
+	table.insert(status_items, {
+		name = "🔧 Re-authenticate",
+		value = "GitHub Login",
+		detail = "Sign in to GitHub or refresh authentication",
+		action = "auth",
+		category = "actions",
+	})
+
+	table.insert(status_items, {
+		name = "🤖 Change AI Model",
+		value = "Model Selection",
+		detail = "Switch between " .. #MODELS .. " available AI models",
+		action = "model",
+		category = "actions",
+	})
+
+	table.insert(status_items, {
+		name = "💬 Chat History",
+		value = "Session Management",
+		detail = "View and manage saved chat sessions",
+		action = "history",
+		category = "actions",
+	})
+
+	table.insert(status_items, {
+		name = "🗑️ Clear All History",
+		value = "Reset Sessions",
+		detail = "Delete all saved chat sessions permanently",
+		action = "clear_all",
+		category = "actions",
+	})
+
+	table.insert(status_items, {
+		name = "🔀 Toggle Copilot",
+		value = vim.g.copilot_enabled == false and "Enable" or "Disable",
+		detail = "Turn Copilot suggestions on or off",
+		action = "toggle",
+		category = "actions",
+	})
+
+	table.insert(status_items, {
+		name = "📋 Full Settings Menu",
+		value = "Advanced Options",
+		detail = "Open comprehensive settings interface",
+		action = "settings",
+		category = "actions",
+	})
+
+	pickers.new({}, {
+		prompt_title = "📊 Copilot Status & Settings Dashboard",
+		initial_mode = "normal",
+		finder = finders.new_table({
+			results = status_items,
+			entry_maker = function(entry)
+				local icon_prefix = ""
+				if entry.category == "status" then
+					icon_prefix = ""
+				elseif entry.category == "settings" then
+					icon_prefix = "⚙️ "
+				elseif entry.category == "system" then
+					icon_prefix = "🖥️ "
+				elseif entry.category == "actions" then
+					icon_prefix = "⚡ "
+				elseif entry.category == "separator" then
+					icon_prefix = ""
+				end
+
+				return {
+					value = entry,
+					display = entry.category == "separator" and entry.name or (icon_prefix .. entry.name .. ": " .. entry.value),
+					ordinal = entry.name .. " " .. entry.value .. " " .. entry.detail .. " " .. entry.category,
+				}
+			end,
+		}),
+		sorter = conf.generic_sorter({}),
+		previewer = require("telescope.previewers").new_buffer_previewer({
+			title = "Details & Information",
+			define_preview = function(self, entry)
+				local item = entry.value
+				local preview_lines = {
+					"📋 " .. item.name,
+					"",
+					"Value: " .. item.value,
+					"",
+					"Category: " .. string.upper(item.category),
+					"",
+					"Description:",
+					item.detail,
+				}
+
+				-- Add category-specific information
+				if item.category == "status" then
+					table.insert(preview_lines, "")
+					table.insert(preview_lines, "Status Information:")
+					table.insert(preview_lines, "• Real-time connection status")
+					table.insert(preview_lines, "• Service health indicators")
+					table.insert(preview_lines, "• Authentication state")
+				elseif item.category == "system" then
+					table.insert(preview_lines, "")
+					table.insert(preview_lines, "System Requirements:")
+					table.insert(preview_lines, "• Node.js runtime environment")
+					table.insert(preview_lines, "• Network connectivity")
+					table.insert(preview_lines, "• GitHub authentication")
+				elseif item.action == "restart" then
+					table.insert(preview_lines, "")
+					table.insert(preview_lines, "This action will:")
+					table.insert(preview_lines, "• Stop the current Copilot service")
+					table.insert(preview_lines, "• Clear existing connections")
+					table.insert(preview_lines, "• Restart with fresh state")
+					table.insert(preview_lines, "• May resolve connection issues")
+				elseif item.action == "auth" then
+					table.insert(preview_lines, "")
+					table.insert(preview_lines, "Authentication process:")
+					table.insert(preview_lines, "• Opens browser for GitHub login")
+					table.insert(preview_lines, "• Requires valid GitHub account")
+					table.insert(preview_lines, "• Refreshes access tokens")
+					table.insert(preview_lines, "• Verifies Copilot subscription")
+				elseif item.action == "model" then
+					table.insert(preview_lines, "")
+					table.insert(preview_lines, "Available AI models:")
+					for _, model in ipairs(MODELS) do
+						table.insert(preview_lines, "• " .. model.name .. " (" .. model.category .. ")")
+					end
+				elseif item.action == "toggle" then
+					table.insert(preview_lines, "")
+					table.insert(preview_lines, "Toggle functionality:")
+					table.insert(preview_lines, "• Enable/disable code suggestions")
+					table.insert(preview_lines, "• Affects autocomplete behavior")
+					table.insert(preview_lines, "• Does not affect chat features")
+				end
+
+				vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, preview_lines)
+			end,
+		}),
+		attach_mappings = function(prompt_bufnr, map)
+			actions.select_default:replace(function()
+				local selection = action_state.get_selected_entry()
+				actions.close(prompt_bufnr)
+				if selection and selection.value.action and selection.value.action ~= "none" then
+					if selection.value.action == "toggle" then
+						-- Handle toggle action specifically
+						if vim.g.copilot_enabled == false then
+							vim.cmd("Copilot enable")
+							vim.notify("✅ Copilot enabled", vim.log.levels.INFO)
+						else
+							vim.cmd("Copilot disable")
+							vim.notify("⚠️ Copilot disabled", vim.log.levels.WARN)
+						end
+					elseif selection.value.action == "settings" then
+						-- Open the main settings menu
+						show_settings()
+					else
+						handle_setting_action(selection.value.action)
+					end
+				end
+			end)
+
+			-- Enhanced navigation with backspace support
+			map("n", "<BS>", function()
+				actions.close(prompt_bufnr)
+				-- Navigate back to main settings if this was called from there
+				-- This allows for a breadcrumb-like navigation experience
+			end)
+
+			map("i", "<BS>", function()
+				-- Allow normal backspace in insert mode for editing
+				local line = action_state.get_current_line()
+				if line == "" then
+					actions.close(prompt_bufnr)
+				else
+					-- Normal backspace behavior
+					vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<BS>", true, false, true), "n", false)
+				end
+			end)
+
+			-- Enhanced help mapping
+			map("n", "?", function()
+				vim.notify("Copilot Status Dashboard:\n• Enter: Execute action/view details\n• BS: Navigate back/close\n• ?: Show this help\n• /: Search items\n• q/Esc: Close\n• j/k: Navigate up/down", vim.log.levels.INFO)
+			end)
+
+			-- Standard close mappings
+			map("n", "q", actions.close)
+			map("i", "<Esc>", actions.close)
+			map("n", "<Esc>", actions.close)
+
+			return true
+		end,
+	}):find()
 end
 
 -- Chat history management
@@ -354,54 +1003,6 @@ local function save_chat_session()
 	end)
 end
 
--- Settings interface using telescope
-local function show_settings()
-	local pickers = require("telescope.pickers")
-	local finders = require("telescope.finders")
-	local conf = require("telescope.config").values
-	local actions = require("telescope.actions")
-	local action_state = require("telescope.actions.state")
-
-	local settings_options = {
-		{ name = "🤖 Change Model", action = "model" },
-		{ name = "📊 Copilot Status", action = "status" },
-		{ name = "🔄 Restart Copilot", action = "restart" },
-		{ name = "🔧 Authentication", action = "auth" },
-		{ name = "🎨 Chat History", action = "history" },
-		{ name = "🗑️ Clear All History", action = "clear_all" },
-	}
-
-	pickers.new({}, {
-		prompt_title = "🤖 Copilot Settings",
-		finder = finders.new_table({
-			results = settings_options,
-			entry_maker = function(entry)
-				return {
-					value = entry,
-					display = entry.name,
-					ordinal = entry.name,
-				}
-			end,
-		}),
-		sorter = conf.generic_sorter({}),
-		attach_mappings = function(prompt_bufnr, map)
-			actions.select_default:replace(function()
-				local selection = action_state.get_selected_entry()
-				actions.close(prompt_bufnr)
-				if selection then
-					handle_setting_action(selection.value.action)
-				end
-			end)
-
-			map("n", "?", function()
-				vim.notify("Settings Navigation:\n• Enter: Select option\n• q/Esc: Close\n• ?: Show this help", vim.log.levels.INFO)
-			end)
-
-			return true
-		end,
-	}):find()
-end
-
 return {
 	-- GitHub Copilot core functionality
 	{
@@ -415,7 +1016,7 @@ return {
 				hide_during_completion = true,
 				debounce = 75,
 				keymap = {
-					accept = "<M-l>",
+					accept = "<Tab>",
 					accept_word = false,
 					accept_line = false,
 					next = "<M-]>",
@@ -630,20 +1231,6 @@ return {
 				end,
 				desc = "Copilot Help actions",
 			},
-			{
-				"<leader>ap",
-				function()
-					local actions = require("CopilotChat.actions")
-					require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
-				end,
-				desc = "Copilot Prompt actions",
-			},
-			{
-				"<leader>ap",
-				":lua require('CopilotChat.integrations.telescope').pick(require('CopilotChat.actions').prompt_actions({selection = require('CopilotChat.select').visual}))<CR>",
-				mode = "x",
-				desc = "Copilot Prompt actions (visual)",
-			},
 
 			-- Quick actions
 			{ "<leader>ae", "<cmd>CopilotChat Explain the selected code<cr>", mode = { "n", "v" }, desc = "Explain code" },
@@ -673,15 +1260,6 @@ return {
 				end,
 				desc = "Quick chat",
 			},
-
-			-- Enhanced context-aware functions
-			{
-				"<leader>aX",
-				function()
-					context_aware_chat()
-				end,
-				desc = "Enhanced context chat",
-			},
 			{
 				"<leader>aE",
 				function()
@@ -689,17 +1267,9 @@ return {
 				end,
 				desc = "Explain with context",
 			},
-			{
-				"<leader>aP",
-				function()
-					project_help()
-				end,
-				desc = "Project-aware help",
-			},
 
 			-- Git integration
 			{ "<leader>am", "<cmd>CopilotChat Write a commit message for the changes based on the git diff<cr>", desc = "Generate commit message" },
-			{ "<leader>aM", "<cmd>CopilotChat Write a commit message for the staged changes<cr>", desc = "Generate commit message (staged)" },
 			{
 				"<leader>aC",
 				function()
@@ -730,6 +1300,13 @@ return {
 					select_model_telescope()
 				end,
 				desc = "Select model (enhanced)",
+			},
+			{
+				"<leader>aM",
+				function()
+					select_chat_mode()
+				end,
+				desc = "Select chat mode",
 			},
 			{
 				"<leader>aS",

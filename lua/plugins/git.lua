@@ -203,7 +203,14 @@ return {
 				-- Get current project root for scoping
 				local cwd = vim.fn.getcwd()
 				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
-				local project_root = (vim.v.shell_error == 0 and git_root) or cwd
+
+				-- Check if we're in a git repository
+				if vim.v.shell_error ~= 0 then
+					vim.notify("Not in a git repository", vim.log.levels.WARN)
+					return
+				end
+
+				local project_root = git_root
 
 				telescope_builtin.git_branches({
 					prompt_title = "󰘬 Git Branches - " .. vim.fn.fnamemodify(project_root, ":t"),
@@ -243,7 +250,15 @@ return {
 											vim.notify("Deleted branch: " .. branch, vim.log.levels.INFO)
 											-- Refresh the picker
 											actions.close(prompt_bufnr)
-											telescope_builtin.git_branches()
+											telescope_builtin.git_branches({
+												prompt_title = "󰘬 Git Branches - " .. vim.fn.fnamemodify(project_root, ":t"),
+												initial_mode = "normal",
+												theme = "ivy",
+												layout_config = { height = 0.6 },
+												cwd = project_root,
+												show_remote_tracking_branches = true,
+												sort_mru = true,
+											})
 										end
 									end)
 								else
@@ -264,6 +279,14 @@ return {
 
 			-- Git stashes picker
 			vim.keymap.set("n", "<leader>gT", function()
+				-- Check if we're in a git repository
+				local cwd = vim.fn.getcwd()
+				vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")
+				if vim.v.shell_error ~= 0 then
+					vim.notify("Not in a git repository", vim.log.levels.WARN)
+					return
+				end
+
 				telescope_builtin.git_stash({
 					prompt_title = "󰜦 Git Stashes",
 					theme = "ivy",
@@ -294,7 +317,11 @@ return {
 										vim.notify("Dropped stash: " .. selection.value, vim.log.levels.INFO)
 										-- Refresh the picker
 										actions.close(prompt_bufnr)
-										telescope_builtin.git_stash()
+										telescope_builtin.git_stash({
+											prompt_title = "󰜦 Git Stashes",
+											theme = "ivy",
+											layout_config = { height = 0.6 },
+										})
 									end
 								end)
 							end
@@ -310,7 +337,14 @@ return {
 				-- Get current project root for scoping
 				local cwd = vim.fn.getcwd()
 				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
-				local project_root = (vim.v.shell_error == 0 and git_root) or cwd
+
+				-- Check if we're in a git repository
+				if vim.v.shell_error ~= 0 then
+					vim.notify("Not in a git repository", vim.log.levels.WARN)
+					return
+				end
+
+				local project_root = git_root
 
 				telescope_builtin.git_status({
 					prompt_title = "󰊢  Changed Files - " .. vim.fn.fnamemodify(project_root, ":t"),
@@ -339,7 +373,13 @@ return {
 								vim.notify("Staged: " .. selection.value, vim.log.levels.INFO)
 								-- Refresh the picker
 								actions.close(prompt_bufnr)
-								telescope_builtin.git_status()
+								telescope_builtin.git_status({
+									prompt_title = "󰊢  Changed Files - " .. vim.fn.fnamemodify(project_root, ":t"),
+									initial_mode = "normal",
+									theme = "ivy",
+									layout_config = { height = 0.6 },
+									cwd = project_root,
+								})
 							end
 						end)
 
@@ -351,7 +391,13 @@ return {
 								vim.notify("Unstaged: " .. selection.value, vim.log.levels.INFO)
 								-- Refresh the picker
 								actions.close(prompt_bufnr)
-								telescope_builtin.git_status()
+								telescope_builtin.git_status({
+									prompt_title = "󰊢  Changed Files - " .. vim.fn.fnamemodify(project_root, ":t"),
+									initial_mode = "normal",
+									theme = "ivy",
+									layout_config = { height = 0.6 },
+									cwd = project_root,
+								})
 							end
 						end)
 
@@ -408,6 +454,14 @@ return {
 
 			-- Enhanced git file browser with fugitive backend
 			vim.keymap.set("n", "<leader>gl", function()
+				-- Check if we're in a git repository
+				local cwd = vim.fn.getcwd()
+				vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")
+				if vim.v.shell_error ~= 0 then
+					vim.notify("Not in a git repository", vim.log.levels.WARN)
+					return
+				end
+
 				-- First select a commit/branch, then browse files
 				telescope_builtin.git_commits({
 					prompt_title = "󰜘 Enhanced Explorable Logs",
