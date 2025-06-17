@@ -1340,7 +1340,42 @@ return {
 
 			-- Register all the key groups
 			wk.add({
-				{ "<leader>a", group = "󰃉 Add/Actions" },
+				-- AI/Copilot group with all commands
+				{ "<leader>a", group = "󰧑 AI/Copilot" },
+				{ "<leader>ac", desc = "󰭻 Toggle chat" },
+				{ "<leader>ah", desc = "󰋖 Help actions" },
+				{ "<leader>ap", desc = "󰅺 Prompt actions" },
+				{ "<leader>ae", desc = "󰍉 Explain code" },
+				{ "<leader>at", desc = "󰙨 Generate tests" },
+				{ "<leader>ar", desc = "󰁨 Review code" },
+				{ "<leader>aR", desc = "󰑕 Refactor code" },
+				{ "<leader>an", desc = "󰏫 Better naming" },
+				{ "<leader>av", desc = "󰿟 Visual chat/Toggle" },
+				{ "<leader>ax", desc = "󰑮 Run in-place" },
+				{ "<leader>ai", desc = "󰭺 Ask input" },
+				{ "<leader>am", desc = "󰊢 Commit message (all)" },
+				{ "<leader>aM", desc = "󰊢 Commit message (staged)" },
+				{ "<leader>aq", desc = "󰅺 Quick chat" },
+				{ "<leader>ad", desc = "󰃤 Debug info" },
+				{ "<leader>af", desc = "󰁨 Fix diagnostic" },
+				{ "<leader>al", desc = "󰃢 Clear buffer/history" },
+				{ "<leader>a?", desc = "󰍉 Select models" },
+				-- Settings UI and Session Management
+				{ "<leader>aS", desc = "⚙️ Copilot Settings" },
+				{ "<leader>aQ", desc = "⚡ Quick Session Actions" },
+				{ "<leader>aN", desc = "🆕 New Chat Session" },
+				{ "<leader>aH", desc = "📂 Session History" },
+				{ "<leader>a$", desc = "💾 Save Current Session" },
+				-- Enhanced functions from copilot-enhanced.lua
+				{ "<leader>aX", desc = "󰍉 Enhanced context chat" },
+				{ "<leader>aC", desc = "󰊢 Smart commit message" },
+				{ "<leader>aE", desc = "󰍉 Explain with context" },
+				{ "<leader>aP", desc = "󰏗 Project-aware help" },
+				-- Utility commands
+				{ "<leader>aT", desc = "󰔌 Toggle Copilot on/off" },
+				{ "<leader>as", desc = "󰓕 Check Copilot status" },
+
+				-- Other groups
 				{ "<leader>b", group = "󰓩 Buffer" },
 				{ "<leader>c", group = "󰒓 Context/Code-Actions" },
 				{ "<leader>d", group = "󰒡 Diagnostics" },

@@ -103,6 +103,7 @@ return {
 			"saadparwaiz1/cmp_luasnip", -- for autocompletion
 			"rafamadriz/friendly-snippets", -- useful snippets
 			"onsails/lspkind.nvim", -- vs-code like pictograms
+			"zbirenbaum/copilot-cmp", -- Copilot completions
         },
 		config = function()
 			local cmp = require("cmp")
@@ -140,6 +141,7 @@ return {
 				}),
 				-- sources for autocompletion
 				sources = cmp.config.sources({
+					{ name = "copilot", group_index = 1, priority = 100 }, -- Copilot suggestions (highest priority)
 					{ name = "luasnip", trigger_characters = {}, option = { show_autosnippets = true } }, -- snippets
 					{ name = "nvim_lsp", keyword_length = 1 }, -- lsp
 					{ name = "buffer", keyword_length = 2 }, -- text within current buffer
@@ -164,7 +166,25 @@ return {
 					format = lspkind.cmp_format({
 						maxwidth = 50,
 						ellipsis_char = "...",
+						symbol_map = {
+							Copilot = "",
+						},
 					}),
+				},
+				-- Custom sorting for Copilot prioritization
+				sorting = {
+					priority_weight = 2,
+					comparators = {
+						require("cmp.config.compare").offset,
+						require("cmp.config.compare").exact,
+						require("cmp.config.compare").score,
+						require("cmp.config.compare").recently_used,
+						require("cmp.config.compare").locality,
+						require("cmp.config.compare").kind,
+						require("cmp.config.compare").sort_text,
+						require("cmp.config.compare").length,
+						require("cmp.config.compare").order,
+					},
 				},
 			})
 		end,

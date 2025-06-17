@@ -410,6 +410,7 @@ return {
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+			{ "nvim-telescope/telescope-ui-select.nvim" },
 			"nvim-tree/nvim-web-devicons",
 			"folke/todo-comments.nvim",
 			{
@@ -474,11 +475,21 @@ return {
 							["nvim"] = vim.fn.expand("~/.config/nvim"),
 						},
 					},
+					["ui-select"] = {
+						require("telescope.themes").get_dropdown({
+							layout_config = {
+								width = 0.8,
+								height = 0.6,
+							},
+							borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+						}),
+					},
 				},
 			})
 
 			telescope.load_extension("fzf")
 			telescope.load_extension("frecency")
+			telescope.load_extension("ui-select")
 
 			-- Load csharpls-extended telescope extension if available
 			local has_csharpls_extended = pcall(require, "csharpls_extended")
