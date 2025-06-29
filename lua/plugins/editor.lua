@@ -314,8 +314,6 @@ return {
 					-- Diagnostic navigation mappings with [ and ] were causing navigation delays
 					-- Original: vim.keymap.set("n", "]e", api.node.navigate.diagnostics.next, opts("Next Diagnostic"))
 					-- Original: vim.keymap.set("n", "[e", api.node.navigate.diagnostics.prev, opts("Prev Diagnostic"))
-					vim.keymap.set("n", "<leader>de", api.node.navigate.diagnostics.prev, opts("Prev Diagnostic"))
-					vim.keymap.set("n", "<leader>dE", api.node.navigate.diagnostics.next, opts("Next Diagnostic"))
 					vim.keymap.set("n", "F", api.live_filter.clear, opts("Live Filter: Clear"))
 					vim.keymap.set("n", "f", api.live_filter.start, opts("Live Filter: Start"))
 					vim.keymap.set("n", "g?", api.tree.toggle_help, opts("Help"))
@@ -439,7 +437,7 @@ return {
 					layout_config = {
 						width = 0.98,
 						height = 0.8,
-						preview_width = 0.5,
+						-- preview_width = 0.5,
 						prompt_position = "top"
 					},
 					sorting_strategy = "ascending",
@@ -830,7 +828,7 @@ return {
 					layout_config = {
 						width = 0.98,
 						height = 0.8,
-						preview_width = 0.5,
+						-- preview_width = 0.5,
 						prompt_position = "top"
 					},
 					sorting_strategy = "ascending",
@@ -1346,7 +1344,7 @@ return {
 				desc = "Open trouble document diagnostics",
 			},
 			{ "<leader>xq", "<cmd>Trouble quickfix toggle<CR>", desc = "Open trouble quickfix list" },
-			{ "<leader>xl", "<cmd>Trouble loclist toggle<CR>", desc = "Open trouble location list" },
+			{ "<leader>xL", "<cmd>Trouble loclist toggle<CR>", desc = "Open trouble location list" },
 			{ "<leader>xt", "<cmd>Trouble todo toggle<CR>", desc = "Open todos in trouble" },
 		},
 	},
@@ -1479,44 +1477,15 @@ return {
 			-- Use ]b and [b for buffer cycling (consistent with other bracket mappings)
 			vim.keymap.set("n", "]b", "<Plug>(CybuNext)", { desc = "Next buffer with context" })
 			vim.keymap.set("n", "[b", "<Plug>(CybuPrev)", { desc = "Previous buffer with context" })
-
-			-- Keep <C-i> separate from <Tab> as recommended
-			vim.keymap.set("n", "<C-i>", "<C-i>", { desc = "Jump forward" })
-
-			-- Set up autocmds for dynamic keymaps when Cybu window is visible
-			local cybu_group = vim.api.nvim_create_augroup("CybuKeymaps", { clear = true })
-
-			-- Create keymaps when Cybu opens
-			vim.api.nvim_create_autocmd("User", {
-				pattern = "CybuOpen",
-				group = cybu_group,
-				callback = function()
-					-- Tab/Shift+Tab for last used buffer cycling (only when container is visible)
-					vim.keymap.set({ "n", "v" }, "<Tab>", "<Plug>(CybuLastusedNext)",
-						{ buffer = true, desc = "Next last used buffer" })
-					vim.keymap.set({ "n", "v" }, "<S-Tab>", "<Plug>(CybuLastusedPrev)",
-						{ buffer = true, desc = "Previous last used buffer" })
-
-					-- j/k for navigation within Cybu window (only when container is visible)
-					vim.keymap.set({ "n", "v" }, "j", "<Plug>(CybuLastusedNext)",
-						{ buffer = true, desc = "Next last used buffer (j)" })
-					vim.keymap.set({ "n", "v" }, "k", "<Plug>(CybuLastusedPrev)",
-						{ buffer = true, desc = "Previous last used buffer (k)" })
-				end,
-			})
-
-			-- Remove keymaps when Cybu closes
-			vim.api.nvim_create_autocmd("User", {
-				pattern = "CybuClose",
-				group = cybu_group,
-				callback = function()
-					-- Remove buffer-local keymaps
-					pcall(vim.keymap.del, { "n", "v" }, "<Tab>", { buffer = true })
-					pcall(vim.keymap.del, { "n", "v" }, "<S-Tab>", { buffer = true })
-					pcall(vim.keymap.del, { "n", "v" }, "j", { buffer = true })
-					pcall(vim.keymap.del, { "n", "v" }, "k", { buffer = true })
-				end,
-			})
 		end,
 	},
+  {
+    'MeanderingProgrammer/render-markdown.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
+    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.icons' }, -- if you use standalone mini plugins
+    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+    ---@module 'render-markdown'
+    ---@type render.md.UserConfig
+    opts = {},
+}
 }

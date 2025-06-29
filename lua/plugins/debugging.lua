@@ -27,18 +27,39 @@ return {
 			--   args = { '-m', 'debugpy.adapter' },
 			-- }
 
-			-- General DAP keymaps - using <leader>D to avoid conflict with diagnostics
-			vim.keymap.set("n", "<leader>Db", dap.toggle_breakpoint, { desc = "Toggle Breakpoint" })
-			vim.keymap.set("n", "<leader>DB", function()
+			-- General DAP keymaps - using <leader>d
+			vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, { desc = "Toggle Breakpoint" })
+			vim.keymap.set("n", "<leader>dB", function()
 				dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
 			end, { desc = "Set Conditional Breakpoint" })
-			vim.keymap.set("n", "<leader>Dc", dap.continue, { desc = "Start/Continue Debugging" })
-			vim.keymap.set("n", "<leader>Di", dap.step_into, { desc = "Step Into" })
-			vim.keymap.set("n", "<leader>Do", dap.step_over, { desc = "Step Over" })
-			vim.keymap.set("n", "<leader>DO", dap.step_out, { desc = "Step Out" })
-			vim.keymap.set("n", "<leader>Dr", dap.repl.open, { desc = "Open REPL" })
-			vim.keymap.set("n", "<leader>Dl", dap.run_last, { desc = "Run Last Debug Configuration" })
-			vim.keymap.set("n", "<leader>Dt", dap.terminate, { desc = "Terminate Debugging" })
+			vim.keymap.set("n", "<leader>dc", dap.continue, { desc = "Start/Continue Debugging" })
+			vim.keymap.set("n", "<leader>di", dap.step_into, { desc = "Step Into" })
+			vim.keymap.set("n", "<leader>do", dap.step_over, { desc = "Step Over" })
+			vim.keymap.set("n", "<leader>dO", dap.step_out, { desc = "Step Out" })
+			vim.keymap.set("n", "<leader>dr", dap.repl.open, { desc = "Open REPL" })
+			vim.keymap.set("n", "<leader>dl", dap.run_last, { desc = "Run Last Debug Configuration" })
+			vim.keymap.set("n", "<leader>dt", dap.terminate, { desc = "Terminate Debugging" })
+			-- vim.keymap.set(
+			-- 	"n",
+			-- 	"<leader>dt",
+			-- 	"<Cmd>lua require('neotest').run.run({strategy = 'dap'})<CR>",
+			-- 	{ noremap = true, silent = true, desc = "debug nearest test" }
+			-- )
+			vim.keymap.set("n", "<leader>du", "<Cmd>lua require'dapui'.toggle()<CR>", opts)
+			vim.keymap.set({ "n", "v" }, "<Leader>dh", function()
+				require("dap.ui.widgets").hover()
+			end, { desc = "UI Widget Hover" })
+			vim.keymap.set({ "n", "v" }, "<Leader>dp", function()
+				require("dap.ui.widgets").preview()
+			end, { desc = "UI Widget Preview" })
+			vim.keymap.set("n", "<Leader>df", function()
+				local widgets = require("dap.ui.widgets")
+				widgets.centered_float(widgets.frames)
+			end, { desc = "Widget Frame" })
+			vim.keymap.set("n", "<Leader>ds", function()
+				local widgets = require("dap.ui.widgets")
+				widgets.centered_float(widgets.scopes)
+			end, { desc = "Widget Float" })
 		end,
 	},
 }

@@ -16,8 +16,8 @@ vim.o.scrolloff = 5
 --   [c - Previous git change (current document → workspace fallback)
 --
 -- Diagnostic navigation:
---   <leader>dj - Next diagnostic (was ]e or <D-S-]>) - ALSO: CMD+] (<D-]>)
---   <leader>dk - Previous diagnostic (was [e or <D-S-[>) - ALSO: CMD+[ (<D-[>)
+--   <leader>xj - Next diagnostic (was ]e or <D-S-]>) - ALSO: CMD+] (<D-]>)
+--   <leader>xk - Previous diagnostic (was [e or <D-S-[>) - ALSO: CMD+[ (<D-[>)
 --
 -- Hunks navigation (gitsigns):
 --   <leader>hj - Next hunk (was ]h)
@@ -148,7 +148,6 @@ map("n", "U", "<C-r>", { desc = "Redo", silent = true })
 map("n", "<C-i>", "<C-i>", { desc = "Jump forward in jump list", silent = true })
 
 -- Deletion without yanking
-map("n", "<leader>dd", "d", { desc = "Delete with yanking" })
 map("n", "c", '"_c', { desc = "c: Change without yanking" })
 map("n", "x", '"_x', { desc = "x: Delete char without yanking" })
 map("n", "d", '"_d', { desc = "d: Delete without yanking" })
@@ -266,7 +265,6 @@ map("n", "<leader>5", ":lua require('harpoon.ui').nav_file(5)<CR>", { desc = "Na
 
 
 -- Additional IDE-like actions
--- map("n", "<leader>db", ":lua require('dap').toggle_breakpoint()<CR>", { desc = "Toggle breakpoint" })
 map("n", "<leader>tr", ":lua require('trouble').toggle()<CR>", { desc = "Toggle trouble" })
 map("n", "<leader>r", ":lua vim.lsp.buf.rename()<CR>", { desc = "Rename symbol" })
 
@@ -323,8 +321,9 @@ map({ "n", "v" }, "g[", goto_prev_member, { desc = "Previous code block", silent
 
 -- Insert mode mappings
 map("i", ";;", "<ESC>A;<ESC>", { desc = "Add semicolon at end", silent = true })
-map("i", ",,", "<ESC>la, <ESC>", { desc = "Add comma", silent = true })
-map("i", ">>", "<ESC>la => ,<ESC>f,i", { desc = "Add arrow function", silent = true })
+map("i", ",,", "<ESC>A,<ESC>", { desc = "Add comma at the end", silent = true })
+-- map("i", ",,", "<ESC>la, <ESC>", { desc = "Add comma", silent = true })
+map("i", ">>", "<ESC>la => <ESC>i", { desc = "Add arrow function", silent = true })
 
 -- Visual mode mappings
 map("v", "<", "<gv", { desc = "Indent left and keep selection", silent = true })

@@ -1250,7 +1250,7 @@ return {
 		keys = {
 			-- Chat management
 			{ "<leader>ac", "<cmd>CopilotChatToggle<cr>", desc = "Toggle Copilot Chat" },
-			{ "<D-a>", "<cmd>CopilotChatToggle<cr>", mode = { "n", "v" }, desc = "Toggle Copilot Chat (CMD+A)" },
+			{ "<D-a>", "<cmd>CopilotChatToggle<cr>", mode = { "n", "v", "i" }, desc = "Toggle Copilot Chat (CMD+A)" },
 			{ "<leader>al", "<cmd>CopilotChatReset<cr>", desc = "Reset chat" },
 
 			-- Prompt actions with telescope

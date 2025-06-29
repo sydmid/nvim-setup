@@ -341,8 +341,8 @@ return {
 
 					-- Diagnostics with enhanced Lspsaga UI
 					-- Use ONLY Lspsaga for diagnostics UI to avoid duplication
-					keymap("n", "<leader>d", "<cmd>Lspsaga show_line_diagnostics<CR>", { buffer = ev.buf, desc = "Line diagnostics" })
-					keymap("n", "<leader>D", function()
+					keymap("n", "<leader>xx", "<cmd>Lspsaga show_line_diagnostics<CR>", { buffer = ev.buf, desc = "Line diagnostics" })
+					keymap("n", "<leader>fx", function()
 						require("telescope.builtin").diagnostics({
 							bufnr = 0,
 							attach_mappings = function(prompt_bufnr, map_func)
@@ -354,8 +354,8 @@ return {
 							end,
 						})
 					end, { buffer = ev.buf, desc = "Buffer diagnostics" })
-					keymap("n", "<leader>dj", "<cmd>Lspsaga diagnostic_jump_next<CR>", { buffer = ev.buf, desc = "Next diagnostic" })
-					keymap("n", "<leader>dk", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { buffer = ev.buf, desc = "Previous diagnostic" })
+					keymap("n", "<leader>xj", "<cmd>Lspsaga diagnostic_jump_next<CR>", { buffer = ev.buf, desc = "Next diagnostic" })
+					keymap("n", "<leader>xk", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { buffer = ev.buf, desc = "Previous diagnostic" })
 					keymap("n", "<D-]>", "<cmd>Lspsaga diagnostic_jump_next<CR>", { buffer = ev.buf, desc = "Next diagnostic" })
 					keymap("n", "<D-[>", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { buffer = ev.buf, desc = "Previous diagnostic" })
 				end,
