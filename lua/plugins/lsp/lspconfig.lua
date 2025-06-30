@@ -742,9 +742,111 @@ return {
 					-- Standard actions (maintaining backward compatibility)
 					keymap("n", "<leader>r", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename symbol" })
 
-					-- Diagnostics with enhanced Lspsaga UI + Error Lens integration
-					-- Use ONLY Lspsaga for diagnostics UI to avoid duplication
-					keymap("n", "<leader>xx", "<cmd>Lspsaga show_line_diagnostics<CR>", { buffer = ev.buf, desc = "Line diagnostics" })
+					-- Enhanced line diagnostics with better formatting (replacing lspsaga)
+					keymap("n", "<leader>xx", function()
+						-- Use vim's native diagnostics with enhanced formatting
+						local diagnostics = vim.diagnostic.get(0, { lnum = vim.fn.line('.') - 1 })
+
+						if #diagnostics == 0 then
+							vim.notify("No diagnostics found on current line", vim.log.levels.INFO)
+							return
+						end
+
+						-- Create a comprehensive diagnostic display
+						local lines = {}
+						local severity_icons = {
+							[vim.diagnostic.severity.ERROR] = " ",
+							[vim.diagnostic.severity.WARN] = " ",
+							[vim.diagnostic.severity.INFO] = " ",
+							[vim.diagnostic.severity.HINT] = " ",
+						}
+
+						local severity_names = {
+							[vim.diagnostic.severity.ERROR] = "ERROR",
+							[vim.diagnostic.severity.WARN] = "WARN",
+							[vim.diagnostic.severity.INFO] = "INFO",
+							[vim.diagnostic.severity.HINT] = "HINT",
+						}
+
+						table.insert(lines, "Line " .. vim.fn.line('.') .. " Diagnostics:")
+						table.insert(lines, "")
+
+						for i, diagnostic in ipairs(diagnostics) do
+							local icon = severity_icons[diagnostic.severity] or "󰌶"
+							local severity = severity_names[diagnostic.severity] or "UNKNOWN"
+							local source = diagnostic.source and (" [" .. diagnostic.source .. "]") or ""
+							local code = diagnostic.code and (" (" .. diagnostic.code .. ")") or ""
+
+							table.insert(lines, string.format("%s %s%s%s", icon, severity, source, code))
+							table.insert(lines, "  " .. diagnostic.message)
+
+							if i < #diagnostics then
+								table.insert(lines, "")
+							end
+						end
+
+						-- Show in a floating window with better styling
+						local buf = vim.api.nvim_create_buf(false, true)
+						vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+
+						-- Set buffer filetype for syntax highlighting
+						vim.api.nvim_buf_set_option(buf, 'filetype', 'markdown')
+
+						local width = math.min(80, vim.o.columns - 4)
+						local height = math.min(#lines + 2, math.floor(vim.o.lines * 0.4))
+
+						local win = vim.api.nvim_open_win(buf, false, {
+							relative = 'cursor',
+							width = width,
+							height = height,
+							row = 1,
+							col = 0,
+							border = 'rounded',
+							style = 'minimal',
+							title = ' Line Diagnostics ',
+							title_pos = 'center',
+							focusable = true, -- Make it focusable for better interaction
+						})
+
+						-- Set window options
+						vim.api.nvim_win_set_option(win, 'wrap', true)
+						vim.api.nvim_win_set_option(win, 'linebreak', true)
+
+						-- Auto-close on buffer change or insert mode (removed CursorMoved for stability)
+						local group = vim.api.nvim_create_augroup('LineDiagnosticFloat', { clear = true })
+						vim.api.nvim_create_autocmd({'BufLeave', 'InsertEnter'}, {
+							group = group,
+							buffer = vim.api.nvim_get_current_buf(),
+							once = true,
+							callback = function()
+								if vim.api.nvim_win_is_valid(win) then
+									vim.api.nvim_win_close(win, true)
+								end
+								vim.api.nvim_del_augroup_by_id(group)
+							end,
+						})
+
+						-- Auto-close after 10 seconds (timeout)
+						vim.defer_fn(function()
+							if vim.api.nvim_win_is_valid(win) then
+								vim.api.nvim_win_close(win, true)
+							end
+							pcall(vim.api.nvim_del_augroup_by_id, group)
+						end, 10000)
+
+						-- Add keymap to close manually
+						vim.keymap.set('n', '<Esc>', function()
+							if vim.api.nvim_win_is_valid(win) then
+								vim.api.nvim_win_close(win, true)
+							end
+						end, { buffer = buf, nowait = true })
+
+						vim.keymap.set('n', 'q', function()
+							if vim.api.nvim_win_is_valid(win) then
+								vim.api.nvim_win_close(win, true)
+							end
+						end, { buffer = buf, nowait = true })
+					end, { buffer = ev.buf, desc = "Line diagnostics (enhanced native)" })
 					keymap("n", "<leader>fx", function()
 						require("telescope.builtin").diagnostics({
 							bufnr = 0,
