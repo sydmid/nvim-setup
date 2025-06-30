@@ -59,6 +59,29 @@ end, { noremap = true, silent = true })
 -- Buffer management commands (which-key compatible)
 map("n", "<leader>bb", "<cmd>e #<CR>", { desc = "Switch to other buffer" })
 map("n", "<leader>bo", "<cmd>%bd|e#|bd#<CR>", { desc = "Delete other buffers" })
+-- Reset current buffer (reload from disk, discard changes)
+map("n", "<leader>br", function()
+  local bufname = vim.api.nvim_buf_get_name(0)
+  if bufname == "" then
+    vim.notify("Cannot reset buffer: No file associated", vim.log.levels.WARN)
+    return
+  end
+
+  local modified = vim.api.nvim_buf_get_option(0, 'modified')
+  if modified then
+    local choice = vim.fn.confirm(
+      "Buffer has unsaved changes. Reset anyway?",
+      "&Yes\n&No",
+      2
+    )
+    if choice ~= 1 then
+      return
+    end
+  end
+
+  vim.cmd("edit!")
+  vim.notify("Buffer reset from disk", vim.log.levels.INFO)
+end, { desc = "Reset buffer (reload from disk)" })
 
 -- Buffer navigation - Native Vim/Neovim approach (replacing Cybu plugin)
 -- These follow standard vim practices and are completely reliable

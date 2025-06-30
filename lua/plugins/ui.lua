@@ -1534,11 +1534,11 @@ return {
 					icon = " ",
 					label = " Recent Projects:",
 					action = function(path)
-						-- Use telescope find_files with the project path
-						require("telescope.builtin").find_files({
+						-- Use telescope oldfiles (recent files) with the project path
+						require("telescope.builtin").oldfiles({
 							cwd = path,
-							hidden = false,
-							no_ignore = false,
+							cwd_only = true, -- Only show recent files from this project
+							previewer = true,
 						})
 					end,
 				},
