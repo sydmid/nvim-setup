@@ -464,8 +464,9 @@ return {
 					frecency = {
 						show_scores = true,
 						show_unindexed = true,
-						ignore_patterns = { "*.git/*", "*/tmp/*" },
+						ignore_patterns = { "*.git/*", "*/tmp/*", "*/.DS_Store" },
 						disable_devicons = false,
+						auto_validate = false, -- Disable auto-validation to prevent cross-project contamination
 						workspaces = {
 							["conf"] = vim.fn.expand("~/.config"),
 							["data"] = vim.fn.expand("~/.local/share"),
@@ -494,6 +495,43 @@ return {
 			if has_csharpls_extended then
 				telescope.load_extension("csharpls_definition")
 			end
+
+			-- Clear telescope cache when changing directories to prevent cross-project results
+			vim.api.nvim_create_autocmd("DirChanged", {
+				group = vim.api.nvim_create_augroup("TelescopeCacheClear", { clear = true }),
+				callback = function()
+					-- Clear telescope picker history and cache
+					pcall(function()
+						local state = require("telescope.state")
+						-- Clear all picker history
+						state.global_cache = {}
+					end)
+				end,
+			})
+
+			-- Additional autocmd to clear cache when entering a different git repository
+			vim.api.nvim_create_autocmd("BufEnter", {
+				group = vim.api.nvim_create_augroup("TelescopeProjectCacheClear", { clear = true }),
+				callback = function()
+					local current_file = vim.fn.expand("%:p")
+					if current_file ~= "" then
+						local current_dir = vim.fn.fnamemodify(current_file, ":h")
+						local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(current_dir) .. " rev-parse --show-toplevel 2>/dev/null")[1]
+
+						if vim.v.shell_error == 0 and git_root then
+							-- Store the last known git root in a global variable
+							if _G.last_telescope_git_root ~= git_root then
+								_G.last_telescope_git_root = git_root
+								-- Clear cache when entering a different git repository
+								pcall(function()
+									local state = require("telescope.state")
+									state.global_cache = {}
+								end)
+							end
+						end
+					end
+				end,
+			})
 
 			-- Custom telescope functions with dynamic preview titles
 			local function lsp_references_with_dynamic_title()
@@ -642,9 +680,15 @@ return {
 				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
 				local project_root = (vim.v.shell_error == 0 and git_root) or cwd
 
+				-- Clear telescope cache to prevent cross-project results
+				pcall(function()
+					require("telescope.builtin").resume = function() end -- Disable resume functionality temporarily
+				end)
+
 				local config = vim.tbl_extend("force", opts, {
 					prompt_title = "🔍 Live Grep - " .. vim.fn.fnamemodify(project_root, ":t"),
 					cwd = project_root,
+					search_dirs = { project_root }, -- Explicitly limit search to project root
 					path_display = { "smart" },
 					entry_maker = function(entry)
 						local make_entry = require("telescope.make_entry")
@@ -804,12 +848,29 @@ return {
 				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
 				local project_root = (vim.v.shell_error == 0 and git_root) or cwd
 
+				-- Clear telescope cache to prevent cross-project results
+				pcall(function()
+					require("telescope.builtin").resume = function() end -- Disable resume functionality temporarily
+				end)
+
 				-- Use fixed-strings flag for literal search and scope to project
 				local config = vim.tbl_extend("force", opts, {
 					additional_args = { "--fixed-strings" },
 					path_display = { "smart" },
 					prompt_title = "🔍 Live Grep (Literal Search) - " .. vim.fn.fnamemodify(project_root, ":t"),
 					cwd = project_root,
+					search_dirs = { project_root }, -- Explicitly limit search to project root
+					attach_mappings = function(prompt_bufnr, map_func)
+						local actions = require("telescope.actions")
+						map_func("i", "<Esc>", actions.close)
+						map_func("n", "<Esc>", actions.close)
+						map_func("n", "q", actions.close)
+						-- Preserve any existing attach_mappings
+						if opts.attach_mappings then
+							return opts.attach_mappings(prompt_bufnr, map_func)
+						end
+						return true
+					end,
 				})
 
 				builtin.live_grep(config)
@@ -818,10 +879,34 @@ return {
 			-- Make the literal search function globally accessible
 			_G.telescope_live_grep_literal = live_grep_literal
 
+			-- Create a command to manually clear telescope cache
+			vim.api.nvim_create_user_command("TelescopeClearCache", function()
+				pcall(function()
+					local state = require("telescope.state")
+					state.global_cache = {}
+					-- Also clear frecency cache if available
+					if require("telescope").extensions and require("telescope").extensions.frecency then
+						pcall(function()
+							local frecency = require("telescope").extensions.frecency
+							if frecency.clear_cache then
+								frecency.clear_cache()
+							end
+						end)
+					end
+					vim.notify("Telescope cache cleared", vim.log.levels.INFO)
+				end)
+			end, { desc = "Clear telescope cache to fix cross-project results" })
+
 			-- Custom function to show all files with priority for recently opened ones
 			local function find_files_with_priority()
+				-- Get current project root
+				local cwd = vim.fn.getcwd()
+				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel")[1]
+				local project_root = (vim.v.shell_error == 0 and git_root) or cwd
+
 				require("telescope").extensions.frecency.frecency({
 					workspace = "CWD",
+					cwd = project_root, -- Ensure frecency is scoped to current project
 					path_display = { "smart" },
 					previewer = true,
 					layout_strategy = "horizontal",
@@ -870,7 +955,28 @@ return {
 			end
 
 			keymap.set("n", "<leader>ff", telescope_with_esc(builtin.find_files), { desc = "Fuzzy find files in cwd" })
-            keymap.set("n", "<D-S-p>", telescope_with_esc(builtin.find_files), { desc = "Fuzzy find files in cwd" })
+            keymap.set("n", "<D-S-p>", function()
+				-- Get current working directory
+				local cwd = vim.fn.getcwd()
+
+				-- Try to find git root first, fallback to cwd
+				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel")[1]
+				local project_root = (vim.v.shell_error == 0 and git_root) or cwd
+
+				-- Clear telescope cache to prevent cross-project results
+				pcall(function()
+					require("telescope.builtin").resume = function() end -- Disable resume functionality temporarily
+				end)
+
+				-- Use telescope find_files with project root scope
+				telescope_with_esc(builtin.find_files, {
+					cwd = project_root,
+					search_dirs = { project_root }, -- Explicitly limit search to project root
+					prompt_title = "Find Files in " .. vim.fn.fnamemodify(project_root, ":t"),
+					hidden = false, -- Don't search hidden files by default to avoid cross-project contamination
+					no_ignore = false, -- Respect .gitignore to avoid cross-project results
+				})()
+			end, { desc = "Fuzzy find files in current project" })
 			keymap.set("n", "<D-p>", function()
 				-- Get current working directory
 				local cwd = vim.fn.getcwd()
@@ -1037,6 +1143,7 @@ return {
 
 			-- Additional Telescope mappings (converted from FZF)
 			keymap.set("n", "<leader>fh", telescope_with_esc(builtin.help_tags), { desc = "Find help tags" })
+			keymap.set("n", "<leader>fx", "<cmd>TelescopeClearCache<CR>", { desc = "Clear telescope cache" })
 			keymap.set("n", "<leader>fj", telescope_with_esc(builtin.jumplist, {initial_mode = "normal"}), { desc = "Find jumps" })
 			keymap.set("n", "<leader>fm", telescope_with_esc(builtin.marks ,{initial_mode = "normal"}), { desc = "Find marks" })
 			keymap.set("n", "<leader>fb", function()
