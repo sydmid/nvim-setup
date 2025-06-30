@@ -60,6 +60,55 @@ end, { noremap = true, silent = true })
 map("n", "<leader>bb", "<cmd>e #<CR>", { desc = "Switch to other buffer" })
 map("n", "<leader>bo", "<cmd>%bd|e#|bd#<CR>", { desc = "Delete other buffers" })
 
+-- Buffer navigation - Native Vim/Neovim approach (replacing Cybu plugin)
+-- These follow standard vim practices and are completely reliable
+
+-- Enhanced buffer navigation with better feedback
+local function smart_buffer_nav(direction)
+  local current_buf = vim.api.nvim_get_current_buf()
+  local buffers = vim.tbl_filter(function(buf)
+    return vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_buf_get_option(buf, 'buflisted')
+  end, vim.api.nvim_list_bufs())
+
+  if #buffers <= 1 then
+    vim.notify("No other buffers available", vim.log.levels.INFO)
+    return
+  end
+
+  if direction == "next" then
+    vim.cmd("bnext")
+  else
+    vim.cmd("bprevious")
+  end
+
+  -- Show brief buffer info
+  local new_buf = vim.api.nvim_get_current_buf()
+  local buf_name = vim.api.nvim_buf_get_name(new_buf)
+  local display_name = buf_name == "" and "[No Name]" or vim.fn.fnamemodify(buf_name, ":t")
+
+  -- Get buffer index for display
+  local buf_index = 0
+  for i, buf in ipairs(buffers) do
+    if buf == new_buf then
+      buf_index = i
+      break
+    end
+  end
+
+  vim.notify(string.format("Buffer %d/%d: %s", buf_index, #buffers, display_name), vim.log.levels.INFO, {
+    timeout = 1000,
+  })
+end
+
+map("n", "]b", function() smart_buffer_nav("next") end, { desc = "Next buffer" })
+map("n", "[b", function() smart_buffer_nav("previous") end, { desc = "Previous buffer" })
+map("n", "<leader>bl", function() smart_buffer_nav("next") end, { desc = "Next buffer" })
+map("n", "<leader>bh", function() smart_buffer_nav("previous") end, { desc = "Previous buffer" })
+-- Ctrl+6 is the standard vim way to switch to alternate (last) buffer
+map("n", "<C-^>", "<cmd>e #<CR>", { desc = "Switch to alternate buffer" })
+-- Alternative mapping for switching to last buffer
+map("n", "<leader>ba", "<cmd>e #<CR>", { desc = "Switch to alternate buffer" })
+
 -- Register buffer commands with which-key explicitly
 vim.defer_fn(function()
   local wk_ok, wk = pcall(require, "which-key")
@@ -69,7 +118,14 @@ vim.defer_fn(function()
       ["<leader>bb"] = { "<cmd>e #<CR>", "Switch to other buffer" },
       ["<leader>bd"] = { "<cmd>bdelete<CR>", "Delete buffer and window" },
       ["<leader>bo"] = { "<cmd>%bd|e#|bd#<CR>", "Delete other buffers" },
-      ["<leader>bh"] = { "<cmd>hide<CR>", "Hide current buffer" },
+      ["<leader>bh"] = { function() smart_buffer_nav("previous") end, "Previous buffer" },
+      ["<leader>bl"] = { function() smart_buffer_nav("next") end, "Next buffer" },
+      ["<leader>ba"] = { "<cmd>e #<CR>", "Switch to alternate buffer" },
+    })
+    -- Register bracket navigation
+    wk.register({
+      ["]b"] = { "Next buffer" },
+      ["[b"] = { "Previous buffer" },
     })
   end
 end, 100)
