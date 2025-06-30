@@ -1376,6 +1376,12 @@ return {
 				-- Other groups
 				{ "<leader>b", group = "󰓩 Buffer" },
 				{ "<leader>c", group = "󰒓 Context/Code-Actions" },
+				{ "<leader>ch", desc = "🔄 Toggle context header (robust)" },
+				{ "<leader>cj", desc = "🔗 Jump to context" },
+				{ "<leader>cd", desc = "🐛 Debug context state" },
+				{ "<leader>ce", desc = "✅ Force enable context" },
+				{ "<leader>cx", desc = "❌ Force disable context" },
+				{ "<leader>cs", desc = "🔍 Context status & health" },
 				{ "<leader>d", group = "󰃤 Debug" },
 				{ "<leader>e", group = "🔍 Error Lens/Explorer" },
 				{ "<leader>el", desc = "🔍 Toggle Error Lens (ThePrimeagen style)" },

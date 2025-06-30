@@ -18,7 +18,7 @@ return {
       zindex = 20, -- Z-index for the floating window
       on_attach = nil, -- Optional callback to run when attached
 
-      -- Patterns for different filetypes to improve context detection
+      -- Enhanced patterns for better context detection and reliability
       patterns = {
         -- Enhanced HTML patterns for Angular templates
         html = {
@@ -27,6 +27,7 @@ return {
           'self_closing_tag',
           'script_element',
           'style_element',
+          'attribute',
         },
         -- Angular TypeScript files
         typescript = {
@@ -37,6 +38,29 @@ return {
           'if_statement',
           'for_statement',
           'while_statement',
+          'try_statement',
+          'object_pattern',
+        },
+        -- JavaScript files
+        javascript = {
+          'function_declaration',
+          'arrow_function',
+          'method_definition',
+          'if_statement',
+          'for_statement',
+          'while_statement',
+          'try_statement',
+          'object_pattern',
+        },
+        -- Lua files (for nvim config)
+        lua = {
+          'function_declaration',
+          'local_function',
+          'method_index',
+          'if_statement',
+          'for_statement',
+          'while_statement',
+          'repeat_statement',
         },
         -- Make sure other languages work well too
         default = {
@@ -48,6 +72,7 @@ return {
           'if',
           'switch',
           'case',
+          'try',
         },
       },
     },
@@ -105,7 +130,72 @@ return {
       -- Apply highlights immediately
       vim.schedule(function()
         vim.cmd("doautocmd ColorScheme")
-      end)      -- Keymaps for context navigation (moved to <leader>h group)
+      end)
+
+      -- Enhanced context refresh mechanism for better reliability
+      local refresh_timer = nil
+      vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
+        group = vim.api.nvim_create_augroup("TreesitterContextRefresh", { clear = true }),
+        callback = function()
+          local tsc = require("treesitter-context")
+          if tsc.enabled() then
+            -- Cancel any pending refresh
+            if refresh_timer then
+              vim.fn.timer_stop(refresh_timer)
+            end
+
+            -- Schedule a refresh with debouncing
+            refresh_timer = vim.fn.timer_start(50, function()
+              if tsc.enabled() then
+                vim.schedule(function()
+                  vim.cmd("doautocmd CursorMoved")
+                  vim.cmd("redraw!")
+                end)
+              end
+              refresh_timer = nil
+            end)
+          end
+        end,
+      })
+
+      -- Separate autocmd for cursor movement with less aggressive refresh
+      vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+        group = vim.api.nvim_create_augroup("TreesitterContextCursor", { clear = true }),
+        callback = function()
+          local tsc = require("treesitter-context")
+          if tsc.enabled() then
+            -- Only refresh on significant cursor movement (every 5th movement)
+            local context_refresh_counter = vim.g.context_refresh_counter or 0
+            context_refresh_counter = context_refresh_counter + 1
+            vim.g.context_refresh_counter = context_refresh_counter
+
+            if context_refresh_counter % 5 == 0 then
+              vim.schedule(function()
+                if tsc.enabled() then
+                  vim.cmd("redraw!")
+                end
+              end)
+            end
+          end
+        end,
+      })
+
+      -- Ensure context is properly displayed after buffer changes
+      vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile", "BufWinEnter" }, {
+        group = vim.api.nvim_create_augroup("TreesitterContextBufferSetup", { clear = true }),
+        callback = function()
+          local tsc = require("treesitter-context")
+          if tsc.enabled() then
+            vim.schedule(function()
+              -- Force context refresh for new buffers
+              vim.cmd("doautocmd CursorMoved")
+              vim.defer_fn(function()
+                vim.cmd("redraw!")
+              end, 100)
+            end)
+          end
+        end,
+      })      -- Keymaps for context navigation (moved to <leader>h group)
       vim.keymap.set("n", "[c", function()
         require("treesitter-context").go_to_context(vim.v.count1)
       end, {
@@ -123,13 +213,59 @@ return {
 
       vim.keymap.set("n", "<leader>ch", function()
         local tsc = require("treesitter-context")
+
+        -- Store current state before toggling
+        local was_enabled = tsc.enabled()
+
+        -- Perform the toggle
         tsc.toggle()
-        vim.notify(
-          tsc.enabled() and "Context enabled" or "Context disabled",
-          vim.log.levels.INFO
-        )
+
+        -- Force a refresh after a short delay to ensure state consistency
+        vim.defer_fn(function()
+          local current_state = tsc.enabled()
+
+          -- If the state didn't change as expected, force the toggle again
+          if current_state == was_enabled then
+            tsc.toggle()
+            current_state = tsc.enabled()
+          end
+
+          -- Force a complete refresh of the context display
+          if current_state then
+            -- When enabling, force multiple refresh attempts
+            tsc.enable() -- Ensure it's really enabled
+            vim.cmd("doautocmd CursorMoved")
+
+            vim.schedule(function()
+              -- Additional refresh attempts
+              vim.cmd("doautocmd CursorMoved")
+              vim.cmd("redraw!")
+
+              -- Final validation and force enable if needed
+              vim.defer_fn(function()
+                if not tsc.enabled() then
+                  tsc.enable()
+                  vim.cmd("doautocmd CursorMoved")
+                  vim.cmd("redraw!")
+                end
+              end, 100)
+            end)
+          else
+            -- When disabling, ensure it's completely hidden
+            tsc.disable() -- Ensure it's really disabled
+            vim.schedule(function()
+              vim.cmd("redraw!")
+            end)
+          end
+
+          -- Notify the final state
+          vim.notify(
+            current_state and "Context enabled" or "Context disabled",
+            vim.log.levels.INFO
+          )
+        end, 50) -- Small delay to allow the toggle to complete
       end, {
-        desc = "Toggle treesitter context"
+        desc = "Toggle treesitter context (robust)"
       })
 
       vim.keymap.set("n", "<leader>cd", function()
@@ -150,6 +286,65 @@ return {
         ), vim.log.levels.INFO)
       end, {
         desc = "Debug treesitter context"
+      })
+
+      -- Force enable context (for troubleshooting)
+      vim.keymap.set("n", "<leader>ce", function()
+        local tsc = require("treesitter-context")
+        tsc.enable()
+        vim.schedule(function()
+          vim.cmd("doautocmd CursorMoved")
+          vim.cmd("redraw!")
+          vim.notify("Context force enabled", vim.log.levels.INFO)
+        end)
+      end, {
+        desc = "Force enable treesitter context"
+      })
+
+      -- Force disable context (for troubleshooting)
+      vim.keymap.set("n", "<leader>cx", function()
+        local tsc = require("treesitter-context")
+        tsc.disable()
+        vim.schedule(function()
+          vim.cmd("redraw!")
+          vim.notify("Context force disabled", vim.log.levels.INFO)
+        end)
+      end, {
+        desc = "Force disable treesitter context"
+      })
+
+      -- Context status and health check
+      vim.keymap.set("n", "<leader>cs", function()
+        local tsc = require("treesitter-context")
+        local bufnr = vim.api.nvim_get_current_buf()
+        local ft = vim.bo.filetype
+        local has_parser = pcall(vim.treesitter.get_parser, bufnr, ft)
+        local line_count = vim.api.nvim_buf_line_count(bufnr)
+        local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
+
+        local status_msg = string.format(
+          "🔍 Context Status Report:\n\n" ..
+          "📊 State: %s\n" ..
+          "📄 Filetype: %s\n" ..
+          "🌳 Treesitter parser: %s\n" ..
+          "📏 Buffer lines: %d\n" ..
+          "📍 Cursor line: %d\n" ..
+          "🎯 Refresh counter: %s\n\n" ..
+          "💡 If context isn't showing:\n" ..
+          "   • Try <leader>ce to force enable\n" ..
+          "   • Check if treesitter parser exists for filetype\n" ..
+          "   • Make sure you're in a file with functions/classes",
+          tsc.enabled() and "🟢 ENABLED" or "🔴 DISABLED",
+          ft == "" and "none" or ft,
+          has_parser and "✅ Available" or "❌ Missing",
+          line_count,
+          cursor_line,
+          vim.g.context_refresh_counter or "0"
+        )
+
+        vim.notify(status_msg, vim.log.levels.INFO)
+      end, {
+        desc = "Context status and health check"
       })
     end,
   },
