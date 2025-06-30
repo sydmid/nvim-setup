@@ -17,15 +17,21 @@ return {
 				return orig_make_position_params(winnr, encoding or "utf-8")
 			end
 
-			-- Configure diagnostics to prevent duplication with Lspsaga
-			-- Default state: warnings and info are DISABLED (only errors visible)
+			-- Configure diagnostics for Error Lens integration
+			-- Enhanced diagnostic configuration with Error Lens support
 			vim.diagnostic.config({
-				virtual_text = false, -- Disable virtual text by default
+				virtual_text = false, -- Disabled - Error Lens handles inline display
 				signs = {
-					severity = { min = vim.diagnostic.severity.ERROR } -- Only show errors by default
+					severity = { min = vim.diagnostic.severity.HINT }, -- Show all diagnostic signs
+					text = {
+						[vim.diagnostic.severity.ERROR] = " ",
+						[vim.diagnostic.severity.WARN] = " ",
+						[vim.diagnostic.severity.INFO] = " ",
+						[vim.diagnostic.severity.HINT] = " ",
+					}
 				},
 				underline = {
-					severity = { min = vim.diagnostic.severity.ERROR } -- Only underline errors by default
+					severity = { min = vim.diagnostic.severity.HINT } -- Underline all diagnostics
 				},
 				update_in_insert = false,
 				severity_sort = true,
@@ -36,6 +42,18 @@ return {
 					source = "always",
 					header = "",
 					prefix = "",
+					format = function(diagnostic)
+						-- Enhanced formatting for floating diagnostics
+						local severity_map = {
+							[vim.diagnostic.severity.ERROR] = "ERROR",
+							[vim.diagnostic.severity.WARN] = "WARN",
+							[vim.diagnostic.severity.INFO] = "INFO",
+							[vim.diagnostic.severity.HINT] = "HINT"
+						}
+						local severity = severity_map[diagnostic.severity] or "UNKNOWN"
+						local code = diagnostic.code and string.format(" [%s]", diagnostic.code) or ""
+						return string.format("%s: %s%s", severity, diagnostic.message, code)
+					end,
 				},
 			})
 
@@ -339,7 +357,7 @@ return {
 					-- Standard actions (maintaining backward compatibility)
 					keymap("n", "<leader>r", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename symbol" })
 
-					-- Diagnostics with enhanced Lspsaga UI
+					-- Diagnostics with enhanced Lspsaga UI + Error Lens integration
 					-- Use ONLY Lspsaga for diagnostics UI to avoid duplication
 					keymap("n", "<leader>xx", "<cmd>Lspsaga show_line_diagnostics<CR>", { buffer = ev.buf, desc = "Line diagnostics" })
 					keymap("n", "<leader>fx", function()
@@ -354,10 +372,45 @@ return {
 							end,
 						})
 					end, { buffer = ev.buf, desc = "Buffer diagnostics" })
-					keymap("n", "<leader>xj", "<cmd>Lspsaga diagnostic_jump_next<CR>", { buffer = ev.buf, desc = "Next diagnostic" })
-					keymap("n", "<leader>xk", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { buffer = ev.buf, desc = "Previous diagnostic" })
-					keymap("n", "<D-]>", "<cmd>Lspsaga diagnostic_jump_next<CR>", { buffer = ev.buf, desc = "Next diagnostic" })
-					keymap("n", "<D-[>", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { buffer = ev.buf, desc = "Previous diagnostic" })
+
+					-- Enhanced diagnostic navigation that works with Error Lens
+					keymap("n", "<leader>xj", function()
+						vim.diagnostic.goto_next()
+						-- Trigger Error Lens update after navigation
+						if _G.ErrorLens and _G.ErrorLens.enabled then
+							vim.defer_fn(function()
+								_G.ErrorLens.refresh_current_buffer()
+							end, 50)
+						end
+					end, { buffer = ev.buf, desc = "Next diagnostic (with Error Lens sync)" })
+
+					keymap("n", "<leader>xk", function()
+						vim.diagnostic.goto_prev()
+						-- Trigger Error Lens update after navigation
+						if _G.ErrorLens and _G.ErrorLens.enabled then
+							vim.defer_fn(function()
+								_G.ErrorLens.refresh_current_buffer()
+							end, 50)
+						end
+					end, { buffer = ev.buf, desc = "Previous diagnostic (with Error Lens sync)" })
+
+					keymap("n", "<D-]>", function()
+						vim.diagnostic.goto_next()
+						if _G.ErrorLens and _G.ErrorLens.enabled then
+							vim.defer_fn(function()
+								_G.ErrorLens.refresh_current_buffer()
+							end, 50)
+						end
+					end, { buffer = ev.buf, desc = "Next diagnostic (with Error Lens sync)" })
+
+					keymap("n", "<D-[>", function()
+						vim.diagnostic.goto_prev()
+						if _G.ErrorLens and _G.ErrorLens.enabled then
+							vim.defer_fn(function()
+								_G.ErrorLens.refresh_current_buffer()
+							end, 50)
+						end
+					end, { buffer = ev.buf, desc = "Previous diagnostic (with Error Lens sync)" })
 				end,
 			})
 
