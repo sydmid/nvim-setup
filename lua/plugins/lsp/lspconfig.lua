@@ -119,6 +119,11 @@ return {
 						fg = "#121212",
 						bold = true
 					})
+					-- Enhanced highlight for LSP reference previews
+					vim.api.nvim_set_hl(0, "TelescopePreviewLine", {
+						bg = "#2A2A2A",
+						fg = "#E1E1E1"
+					})
 				end,
 			})
 
@@ -159,47 +164,6 @@ return {
 			local lspconfig = require("lspconfig")
 			local mason_lspconfig = require("mason-lspconfig")
 
-			-- Diagnostic signs
-			-- local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
-			-- for type, icon in pairs(signs) do
-			-- 	local hl = "DiagnosticSign" .. type
-			-- 	vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-			-- end
-
-			-- LSP keymaps
-			-- Best practice: Define all LSP-related keymaps in the LspAttach event
-			-- This ensures the keymaps are only active when an LSP server is attached to the buffer
-			-- Prevents errors when trying to use LSP features in buffers without LSP support
-
-			-- Auto-trigger signature help autocmd (DISABLED - use manual trigger <D-S-i> instead)
-			-- vim.api.nvim_create_autocmd("LspAttach", {
-			-- 	group = vim.api.nvim_create_augroup("UserLspSignatureHelp", {}),
-			-- 	callback = function(ev)
-			-- 		local client = vim.lsp.get_client_by_id(ev.data.client_id)
-			-- 		if client and client.server_capabilities.signatureHelpProvider then
-			-- 			-- Auto-trigger signature help on specific events
-			-- 			vim.api.nvim_create_autocmd({ "TextChangedI" }, {
-			-- 				buffer = ev.buf,
-			-- 				group = vim.api.nvim_create_augroup("SignatureHelpAutoTrigger", { clear = false }),
-			-- 				callback = function()
-			-- 					local line = vim.api.nvim_get_current_line()
-			-- 					local col = vim.api.nvim_win_get_cursor(0)[2]
-			-- 					local char_before = col > 0 and line:sub(col, col) or ""
-			-- 					local char_current = line:sub(col + 1, col + 1)
-			--
-			-- 					-- Trigger on function call characters
-			-- 					if char_before == "(" or char_before == "," or char_current == "(" then
-			-- 						vim.defer_fn(function()
-			-- 							if vim.fn.pumvisible() == 0 then
-			-- 								vim.lsp.buf.signature_help()
-			-- 							end
-			-- 						end, 150)
-			-- 					end
-			-- 				end,
-			-- 			})
-			-- 		end
-			-- 	end,
-			-- })
 
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -220,7 +184,226 @@ return {
 						end, { buffer = ev.buf, desc = "Peek definition (with decompilation)" })
 
 						keymap("n", "<leader>us", function()
-							require("omnisharp_extended").lsp_references()
+							-- Get current position to filter out keymap definitions
+							local current_buf = vim.api.nvim_get_current_buf()
+							local current_line = vim.api.nvim_win_get_cursor(0)[1]
+							local current_file = vim.api.nvim_buf_get_name(current_buf)
+
+							-- Use omnisharp-extended but with filtering
+							local params = vim.lsp.util.make_position_params()
+							local bufnr = vim.api.nvim_get_current_buf()
+
+							vim.lsp.buf_request(bufnr, "textDocument/references", params, function(err, result, ctx, config)
+								if err then
+									vim.notify("LSP references error: " .. tostring(err), vim.log.levels.ERROR)
+									return
+								end
+
+								if not result or vim.tbl_isempty(result) then
+									vim.notify("No references found", vim.log.levels.INFO)
+									return
+								end
+
+								-- Filter out current line references
+								local filtered_result = {}
+								for _, ref in ipairs(result) do
+									local uri = ref.uri
+									local file_path = vim.uri_to_fname(uri)
+									local line_num = ref.range.start.line + 1 -- Convert to 1-based
+
+									-- Skip if it's the same file and same line
+									if not (file_path == current_file and line_num == current_line) then
+										table.insert(filtered_result, ref)
+									end
+								end
+
+								if vim.tbl_isempty(filtered_result) then
+									vim.notify("No external references found", vim.log.levels.INFO)
+									return
+								end
+
+								-- Convert to quickfix format and show in telescope
+								local qf_list = vim.lsp.util.locations_to_items(filtered_result, vim.lsp.get_client_by_id(ctx.client_id).offset_encoding)
+
+								require("telescope.builtin").quickfix({
+									initial_mode = "normal",
+									path_display = { "smart" },
+									-- Force preview to show even for single results
+									preview = {
+										check_mime_type = false,
+										hide_on_startup = false,
+									},
+									layout_config = {
+										preview_width = 0.6,
+										width = 0.9,
+										height = 0.8,
+									},
+									selection_strategy = "reset",
+									sorting_strategy = "ascending",
+									attach_mappings = function(prompt_bufnr, map_func)
+										local actions = require("telescope.actions")
+										local action_state = require("telescope.actions.state")
+
+										-- Custom mapping to ensure preview is triggered
+										local function ensure_preview()
+											local selection = action_state.get_selected_entry()
+											if selection then
+												-- Force preview refresh
+												require("telescope.actions").preview_scrolling_up(prompt_bufnr)
+												require("telescope.actions").preview_scrolling_down(prompt_bufnr)
+											end
+										end
+
+										map_func("i", "<Esc>", actions.close)
+										map_func("n", "<Esc>", actions.close)
+										map_func("n", "q", actions.close)
+
+										-- Add preview refresh on movement
+										map_func("n", "j", function()
+											actions.move_selection_next(prompt_bufnr)
+											ensure_preview()
+										end)
+										map_func("n", "k", function()
+											actions.move_selection_previous(prompt_bufnr)
+											ensure_preview()
+										end)
+
+										return true
+									end,
+									-- Enhanced display
+									entry_maker = function(entry)
+										local make_entry = require("telescope.make_entry")
+										local default_entry = make_entry.gen_from_quickfix({})(entry)
+
+										if default_entry then
+											default_entry.display = function(ent)
+												local path_display = require("telescope.utils").path_smart(ent.filename)
+												local line_preview = ent.text and ent.text:gsub("^%s+", "") or ""
+												return string.format("%s:%d:%d │ %s", path_display, ent.lnum, ent.col, line_preview)
+											end
+										end
+
+										return default_entry
+									end,
+									-- Enhanced previewer for C# references (same as non-C# version)
+									previewer = require("telescope.previewers").new_buffer_previewer({
+										title = "C# LSP References",
+										dyn_title = function(_, entry)
+											if entry and entry.filename then
+												return vim.fn.fnamemodify(entry.filename, ":t")
+											end
+											return "C# LSP References"
+										end,
+										get_buffer_by_name = function(_, entry)
+											return entry and entry.filename or ""
+										end,
+										define_preview = function(self, entry, status)
+											if not entry or not entry.filename then
+												return
+											end
+
+											-- Enhanced preview function with better initialization
+											local function setup_preview_and_highlight()
+												if not entry.lnum or not self.state.winid or not vim.api.nvim_win_is_valid(self.state.winid) then
+													return
+												end
+
+												-- Set cursor position with better error handling
+												pcall(vim.api.nvim_win_set_cursor, self.state.winid, { entry.lnum, math.max(0, (entry.col or 1) - 1) })
+
+												-- Center the line in the window
+												pcall(vim.api.nvim_win_call, self.state.winid, function()
+													vim.cmd("normal! zz")
+												end)
+
+												-- Clear previous highlights
+												pcall(vim.api.nvim_buf_clear_namespace, self.state.bufnr, -1, 0, -1)
+
+												-- Apply highlighting with enhanced logic
+												if entry.lnum and entry.col then
+													-- First, highlight the entire line
+													pcall(vim.api.nvim_buf_add_highlight,
+														self.state.bufnr,
+														-1,
+														"TelescopePreviewLine",
+														entry.lnum - 1,
+														0,
+														-1
+													)
+
+													-- Then highlight the specific symbol
+													local lines = vim.api.nvim_buf_get_lines(self.state.bufnr, entry.lnum - 1, entry.lnum, false)
+													if lines and lines[1] then
+														local line_text = lines[1]
+														local col = math.max(0, entry.col - 1)
+
+														-- Find word boundaries
+														local start_col = col
+														local end_col = col
+
+														while start_col > 0 and line_text:sub(start_col, start_col):match("[%w_]") do
+															start_col = start_col - 1
+														end
+														if start_col < col and not line_text:sub(start_col + 1, start_col + 1):match("[%w_]") then
+															start_col = start_col + 1
+														end
+
+														while end_col < #line_text and line_text:sub(end_col + 1, end_col + 1):match("[%w_]") do
+															end_col = end_col + 1
+														end
+
+														-- Apply symbol highlight
+														if end_col >= start_col then
+															pcall(vim.api.nvim_buf_add_highlight,
+																self.state.bufnr,
+																-1,
+																"TelescopeMatching",
+																entry.lnum - 1,
+																start_col,
+																end_col + 1
+															)
+														end
+													end
+												end
+											end
+
+											-- Robust preview with multiple attempts
+											local ok = pcall(function()
+												require("telescope.previewers").buffer_previewer_maker(entry.filename, self.state.bufnr, {
+													bufname = self.state.bufname,
+													winid = self.state.winid,
+													preview = {
+														mime_type = vim.filetype.match({ filename = entry.filename }),
+													},
+												})
+
+												-- Multiple scheduling attempts
+												setup_preview_and_highlight()
+												vim.schedule(function()
+													setup_preview_and_highlight()
+												end)
+												vim.defer_fn(function()
+													setup_preview_and_highlight()
+												end, 10)
+												vim.defer_fn(function()
+													setup_preview_and_highlight()
+												end, 50)
+											end)
+
+											if not ok then
+												-- Fallback
+												pcall(require("telescope.previewers").buffer_previewer_maker, entry.filename, self.state.bufnr, {
+													bufname = self.state.bufname,
+													winid = self.state.winid,
+												})
+												vim.defer_fn(function()
+													setup_preview_and_highlight()
+												end, 100)
+											end
+										end
+									}),
+								})
+							end)
 						end, { buffer = ev.buf, desc = "Find references (enhanced)" })
 
 						keymap("n", "<leader>ii", function()
@@ -235,7 +418,209 @@ return {
 						keymap("n", "gd", "<cmd>Lspsaga goto_definition<CR>", { buffer = ev.buf, desc = "Go to definition" })
 						keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>", { buffer = ev.buf, desc = "Peek definition" })
 						keymap("n", "<leader>us", function()
-							_G.telescope_lsp_references_with_dynamic_title()
+							require("telescope.builtin").lsp_references({
+								initial_mode = "normal",
+								path_display = { "smart" },
+								include_declaration = false, -- Exclude the declaration itself
+								include_current_line = false, -- Custom option we'll handle
+								-- Force preview to show even for single results
+								preview = {
+									check_mime_type = false,
+									hide_on_startup = false,
+								},
+								layout_config = {
+									preview_width = 0.6,
+									width = 0.9,
+									height = 0.8,
+								},
+								-- Ensure first result is selected and previewed
+								selection_strategy = "reset",
+								sorting_strategy = "ascending",
+								attach_mappings = function(prompt_bufnr, map_func)
+									local actions = require("telescope.actions")
+									local action_state = require("telescope.actions.state")
+
+									-- Custom mapping to ensure preview is triggered
+									local function ensure_preview()
+										local selection = action_state.get_selected_entry()
+										if selection then
+											-- Force preview refresh
+											require("telescope.actions").preview_scrolling_up(prompt_bufnr)
+											require("telescope.actions").preview_scrolling_down(prompt_bufnr)
+										end
+									end
+
+									map_func("i", "<Esc>", actions.close)
+									map_func("n", "<Esc>", actions.close)
+									map_func("n", "q", actions.close)
+
+									-- Add preview refresh on movement
+									map_func("n", "j", function()
+										actions.move_selection_next(prompt_bufnr)
+										ensure_preview()
+									end)
+									map_func("n", "k", function()
+										actions.move_selection_previous(prompt_bufnr)
+										ensure_preview()
+									end)
+
+									return true
+								end,
+								-- Filter out the current line to avoid showing keymap definitions
+								entry_maker = function(entry)
+									local make_entry = require("telescope.make_entry")
+									local default_entry = make_entry.gen_from_quickfix({})(entry)
+
+									if default_entry then
+										-- Get current buffer and line
+										local current_buf = vim.api.nvim_get_current_buf()
+										local current_line = vim.api.nvim_win_get_cursor(0)[1]
+										local current_file = vim.api.nvim_buf_get_name(current_buf)
+
+										-- Filter out references from the same line in the same file
+										if entry.filename == current_file and entry.lnum == current_line then
+											return nil -- Skip this entry
+										end
+
+										-- Enhanced display with better formatting
+										default_entry.display = function(ent)
+											local path_display = require("telescope.utils").path_smart(ent.filename)
+											local line_preview = ent.text and ent.text:gsub("^%s+", "") or "" -- Trim leading whitespace
+											return string.format("%s:%d:%d │ %s", path_display, ent.lnum, ent.col, line_preview)
+										end
+									end
+
+									return default_entry
+								end,
+								-- Enhanced previewer for better reliability
+								previewer = require("telescope.previewers").new_buffer_previewer({
+									title = "LSP References",
+									dyn_title = function(_, entry)
+										if entry and entry.filename then
+											return vim.fn.fnamemodify(entry.filename, ":t")
+										end
+										return "LSP References"
+									end,
+									get_buffer_by_name = function(_, entry)
+										return entry and entry.filename or ""
+									end,
+									define_preview = function(self, entry, status)
+										if not entry or not entry.filename then
+											return
+										end
+
+										-- Enhanced preview function with better initialization
+										local function setup_preview_and_highlight()
+											if not entry.lnum or not self.state.winid or not vim.api.nvim_win_is_valid(self.state.winid) then
+												return
+											end
+
+											-- Set cursor position with better error handling
+											pcall(vim.api.nvim_win_set_cursor, self.state.winid, { entry.lnum, math.max(0, (entry.col or 1) - 1) })
+
+											-- Center the line in the window
+											pcall(vim.api.nvim_win_call, self.state.winid, function()
+												vim.cmd("normal! zz")
+											end)
+
+											-- Clear previous highlights
+											pcall(vim.api.nvim_buf_clear_namespace, self.state.bufnr, -1, 0, -1)
+
+											-- Apply highlighting with enhanced logic
+											if entry.lnum and entry.col then
+												-- First, highlight the entire line with a subtle background
+												pcall(vim.api.nvim_buf_add_highlight,
+													self.state.bufnr,
+													-1,
+													"TelescopePreviewLine",
+													entry.lnum - 1,
+													0,
+													-1
+												)
+
+												-- Then highlight the specific symbol with a more prominent color
+												local lines = vim.api.nvim_buf_get_lines(self.state.bufnr, entry.lnum - 1, entry.lnum, false)
+												if lines and lines[1] then
+													local line_text = lines[1]
+													local col = math.max(0, entry.col - 1)
+
+													-- Find word boundaries for the symbol
+													local start_col = col
+													local end_col = col
+
+													-- Expand to word boundaries
+													while start_col > 0 and line_text:sub(start_col, start_col):match("[%w_]") do
+														start_col = start_col - 1
+													end
+													if start_col < col and not line_text:sub(start_col + 1, start_col + 1):match("[%w_]") then
+														start_col = start_col + 1
+													end
+
+													while end_col < #line_text and line_text:sub(end_col + 1, end_col + 1):match("[%w_]") do
+														end_col = end_col + 1
+													end
+
+													-- Apply symbol highlight with bright color
+													if end_col >= start_col then
+														pcall(vim.api.nvim_buf_add_highlight,
+															self.state.bufnr,
+															-1,
+															"TelescopeMatching",
+															entry.lnum - 1,
+															start_col,
+															end_col + 1
+														)
+													end
+												end
+											end
+										end
+
+										-- Robust preview with multiple attempts and error handling
+										local ok = pcall(function()
+											require("telescope.previewers").buffer_previewer_maker(entry.filename, self.state.bufnr, {
+												bufname = self.state.bufname,
+												winid = self.state.winid,
+												preview = {
+													mime_type = vim.filetype.match({ filename = entry.filename }),
+												},
+											})
+
+											-- Multiple scheduling attempts to ensure highlighting works
+											-- Immediate attempt
+											setup_preview_and_highlight()
+
+											-- Scheduled attempt for better reliability
+											vim.schedule(function()
+												setup_preview_and_highlight()
+											end)
+
+											-- Delayed attempt for edge cases (especially single results)
+											vim.defer_fn(function()
+												setup_preview_and_highlight()
+											end, 10)
+
+											-- Additional delayed attempt for very slow loading
+											vim.defer_fn(function()
+												setup_preview_and_highlight()
+											end, 50)
+										end)
+
+										if not ok then
+											-- Fallback: show file content without special positioning
+											pcall(require("telescope.previewers").buffer_previewer_maker, entry.filename, self.state.bufnr, {
+												bufname = self.state.bufname,
+												winid = self.state.winid,
+											})
+											-- Still try to apply highlighting even in fallback
+											vim.defer_fn(function()
+												setup_preview_and_highlight()
+											end, 100)
+										end
+									end
+								}),
+								-- Force preview on single result by customizing telescope behavior
+								default_selection_index = 1,
+							})
 						end, { buffer = ev.buf, desc = "Find references" })
 						keymap("n", "<leader>ii", function()
 							require("telescope.builtin").lsp_implementations({
