@@ -90,8 +90,9 @@ return {
 				max_width = 80,
 				max_height = 15,
 				wrap = true,
-				title = " Documentation ",
+				title = " Doc ",
 				title_pos = "center",
+				-- close_events = { "BufHidden" }, -- Only close when leaving buffer, not on cursor movement
 			})
 
 			-- Custom highlight groups for LSP floating windows to match theme
@@ -730,8 +731,32 @@ return {
 					-- 	vim.defer_fn(auto_signature_help, 100)
 					-- end, { buffer = ev.buf, desc = "Auto-trigger signature help", silent = true })
 
-					-- Enhanced hover with Lspsaga for better UI
-					keymap("n", "<D-i>", "<cmd>Lspsaga hover_doc<CR>", { buffer = ev.buf, desc = "Show documentation (Lspsaga)", silent = true })
+					-- Enhanced hover with beautiful styling and proper persistence
+					keymap("n", "<D-i>", function()
+						-- Custom hover with enhanced styling that matches peek_definition
+						local params = vim.lsp.util.make_position_params()
+						vim.lsp.buf_request(0, 'textDocument/hover', params, function(err, result, ctx, config)
+							if err or not result or not result.contents then
+								return
+							end
+
+							-- Enhanced window configuration matching peek_definition style
+							local opts = {
+								border = "rounded",
+								focusable = true,
+								style = "minimal",
+								max_width = 80,
+								max_height = 15,
+								wrap = true,
+								title = " Documentation ",
+								title_pos = "center",
+								-- close_events = { "BufHidden" }, -- Only close on buffer change, not cursor movement
+							}
+
+							-- Use the enhanced handler with our custom styling
+							vim.lsp.handlers["textDocument/hover"](err, result, ctx, vim.tbl_extend("force", config or {}, opts))
+						end)
+					end, { buffer = ev.buf, desc = "Show documentation (Enhanced)", silent = true })
 
 					-- Additional useful Lspsaga keymaps
 					keymap("n", "<leader>ca", "<cmd>Lspsaga code_action<CR>", { buffer = ev.buf, desc = "Code actions (Lspsaga)" })
