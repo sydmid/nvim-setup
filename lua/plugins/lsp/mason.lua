@@ -34,10 +34,10 @@ return {
     -- Enhanced error handling for network issues
     local function safe_mason_setup()
       local is_online = check_network_connectivity()
-      
+
       if not is_online then
         vim.notify("⚠️  Network connectivity limited - Mason will skip automatic installations", vim.log.levels.WARN)
-        
+
         -- Setup Mason in offline mode (minimal configuration)
         pcall(function()
           mason.setup({
@@ -53,17 +53,17 @@ return {
             automatic_installation = false,
           })
         end)
-        
+
         -- Setup mason-lspconfig without automatic installations
         pcall(function()
           mason_lspconfig.setup({
             automatic_installation = false, -- Don't try to install when offline
           })
         end)
-        
+
         return false -- Indicate offline mode
       end
-      
+
       -- Normal online setup
       mason.setup({
         ui = {
@@ -98,24 +98,25 @@ return {
           "emmet_ls",
           "prismals",
           "pyright",
+          "ruff_lsp", -- Modern Python linting/formatting
           "eslint",
           "bashls",
           "csharp_ls",
         },
         automatic_installation = true,
       })
-      
+
       return true -- Indicate online mode
     end
 
     -- Attempt safe setup with error handling
     local setup_success, setup_result = pcall(safe_mason_setup)
-    
+
     if not setup_success then
       vim.notify("⚠️  Mason setup failed - continuing without automatic tool installation\nError: " .. tostring(setup_result), vim.log.levels.WARN)
       return
     end
-    
+
     -- Only try to install tools if we're online and setup succeeded
     if setup_result then
       pcall(function()
@@ -125,7 +126,10 @@ return {
             "stylua", -- lua formatter
             "isort", -- python formatter
             "black", -- python formatter
-            "pylint",
+            "ruff", -- python linting and formatting (replaces flake8, pylint, etc.)
+            "mypy", -- python type checker
+            "debugpy", -- python debugger
+            "pylint", -- python linter (legacy support)
             "eslint_d",
             "shfmt", -- shell script formatter
             "shellcheck", -- shell script linter
@@ -136,7 +140,7 @@ return {
           auto_update = false, -- Disable auto-update to prevent network errors
           run_on_start = false, -- Don't run on startup to avoid blocking
         })
-        
+
         -- Defer the installation check to avoid startup blocking
         vim.defer_fn(function()
           if check_network_connectivity() then

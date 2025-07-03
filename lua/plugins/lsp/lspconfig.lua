@@ -1020,6 +1020,69 @@ return {
 						})
 					end,
 
+					["pyright"] = function()
+						-- Professional Python LSP configuration
+						lspconfig.pyright.setup({
+							capabilities = capabilities,
+							settings = {
+								pyright = {
+									-- Using Ruff's import organizer
+									disableOrganizeImports = true,
+									-- Disable some features that Ruff handles better
+									disableTaggedHints = false,
+								},
+								python = {
+									analysis = {
+										-- Enhanced type checking
+										typeCheckingMode = "strict",
+										-- Auto-import completions
+										autoImportCompletions = true,
+										-- Use workspace libraries
+										useLibraryCodeForTypes = true,
+										-- Diagnostic modes
+										diagnosticMode = "workspace",
+										-- Auto-search paths
+										autoSearchPaths = true,
+										-- Stub path
+										stubPath = "typings",
+										-- Extra paths for analysis
+										extraPaths = {},
+										-- Diagnostic severity overrides
+										diagnosticSeverityOverrides = {
+											reportMissingTypeStubs = "none",
+											reportUnknownParameterType = "none",
+											reportUnknownArgumentType = "none",
+											reportUnknownLambdaType = "none",
+											reportUnknownVariableType = "none",
+											reportUnknownMemberType = "none",
+											reportMissingParameterType = "none",
+										},
+									},
+								},
+							},
+						})
+					end,
+
+					["ruff_lsp"] = function()
+						-- Ruff LSP for ultra-fast Python linting and formatting
+						lspconfig.ruff_lsp.setup({
+							capabilities = capabilities,
+							init_options = {
+								settings = {
+									-- Ruff configuration
+									args = {
+										"--config=pyproject.toml", -- Use pyproject.toml if available
+									},
+								}
+							},
+							-- Organize imports capability
+							on_attach = function(client, bufnr)
+								-- Disable hover in favor of Pyright
+								client.server_capabilities.hoverProvider = false
+							end,
+						})
+					end,
+
 					["csharp_ls"] = function()
 						local handlers = {}
 
@@ -1051,7 +1114,7 @@ return {
 				-- Set up servers manually
 				local servers = {
 					"html", "cssls", "tailwindcss", "svelte", "lua_ls", "graphql",
-					"emmet_ls", "prismals", "pyright", "eslint", "bashls", "csharp_ls"
+					"emmet_ls", "prismals", "pyright", "ruff_lsp", "eslint", "bashls", "csharp_ls"
 				}
 
 				for _, server_name in ipairs(servers) do
@@ -1077,6 +1140,65 @@ return {
 									shellcheckPath = "",
 								},
 							},
+						})
+					elseif server_name == "pyright" then
+						-- Professional Python LSP configuration
+						lspconfig.pyright.setup({
+							capabilities = capabilities,
+							settings = {
+								pyright = {
+									-- Using Ruff's import organizer
+									disableOrganizeImports = true,
+									-- Disable some features that Ruff handles better
+									disableTaggedHints = false,
+								},
+								python = {
+									analysis = {
+										-- Enhanced type checking
+										typeCheckingMode = "strict",
+										-- Auto-import completions
+										autoImportCompletions = true,
+										-- Use workspace libraries
+										useLibraryCodeForTypes = true,
+										-- Diagnostic modes
+										diagnosticMode = "workspace",
+										-- Auto-search paths
+										autoSearchPaths = true,
+										-- Stub path
+										stubPath = "typings",
+										-- Extra paths for analysis
+										extraPaths = {},
+										-- Diagnostic severity overrides
+										diagnosticSeverityOverrides = {
+											reportMissingTypeStubs = "none",
+											reportUnknownParameterType = "none",
+											reportUnknownArgumentType = "none",
+											reportUnknownLambdaType = "none",
+											reportUnknownVariableType = "none",
+											reportUnknownMemberType = "none",
+											reportMissingParameterType = "none",
+										},
+									},
+								},
+							},
+						})
+					elseif server_name == "ruff_lsp" then
+						-- Ruff LSP for ultra-fast Python linting and formatting
+						lspconfig.ruff_lsp.setup({
+							capabilities = capabilities,
+							init_options = {
+								settings = {
+									-- Ruff configuration
+									args = {
+										"--config=pyproject.toml", -- Use pyproject.toml if available
+									},
+								}
+							},
+							-- Organize imports capability
+							on_attach = function(client, bufnr)
+								-- Disable hover in favor of Pyright
+								client.server_capabilities.hoverProvider = false
+							end,
 						})
 					elseif server_name == "csharp_ls" then
 						local handlers = {}
@@ -1113,6 +1235,14 @@ return {
 				pattern = { ".bashrc", ".zshrc", ".bash_profile", ".profile", ".zsh_*", ".bash_*", ".env" },
 				callback = function(ev)
 					vim.bo[ev.buf].filetype = "sh"
+				end,
+			})
+
+			-- Add filetype detection for Python files
+			vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+				pattern = { "*.py", "*.pyi", "*.pyw", ".pythonrc", "SConstruct", "SConscript", "*.wsgi" },
+				callback = function(ev)
+					vim.bo[ev.buf].filetype = "python"
 				end,
 			})
 

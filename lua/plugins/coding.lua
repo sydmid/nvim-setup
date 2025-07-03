@@ -292,13 +292,36 @@ return {
 					graphql = { "prettier" },
 					liquid = { "prettier" },
 					lua = { "stylua" },
-					python = { "isort", "black" },
+					python = { "ruff_format", "ruff_organize_imports" },
 					sh = { "shfmt" },
 					bash = { "shfmt" },
 					zsh = { "shfmt_zsh", "zsh_indent" }, -- Try shfmt_zsh first, fallback to custom indenter
 					cs = { "csharpier" }, -- C# formatting
 				},
 				formatters = {
+					-- Modern Python formatting with Ruff
+					ruff_format = {
+						command = "ruff",
+						args = {
+							"format",
+							"--stdin-filename",
+							"$FILENAME",
+							"-",
+						},
+						stdin = true,
+					},
+					ruff_organize_imports = {
+						command = "ruff",
+						args = {
+							"--select",
+							"I",
+							"--fix",
+							"--stdin-filename",
+							"$FILENAME",
+							"-",
+						},
+						stdin = true,
+					},
 					csharpier = {
 						command = function()
 							-- First try to find csharpier in Mason's bin directory
@@ -481,7 +504,7 @@ return {
 				javascriptreact = { "eslint_d" },
 				typescriptreact = { "eslint_d" },
 				svelte = { "eslint_d" },
-				python = { "pylint" },
+				python = { "ruff" },
 				sh = { "shellcheck" },
 				bash = { "shellcheck" },
 				zsh = { "shellcheck" },
@@ -545,7 +568,10 @@ return {
 						"javac $fileName &&",
 						"java $fileNameWithoutExt"
 					},
-					python = "python3 -u",
+					python = {
+						"cd $dir &&",
+						"if [ -f .venv/bin/python ]; then .venv/bin/python -u $fileName; else python3 -u $fileName; fi"
+					},
 					typescript = "deno run",
 					rust = {
 						"cd $dir &&",
