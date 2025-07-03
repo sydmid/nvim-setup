@@ -123,11 +123,8 @@ return {
     },    keys = {
       -- Primary toggle (Cmd+A for macOS - Cursor-like)
       { "<D-a>", "<cmd>AvanteToggle<cr>", mode = { "n", "v", "i" }, desc = "Toggle Avante Chat (Cmd+A)" },
-      { "<leader>ac", "<cmd>AvanteToggle<cr>", desc = "Toggle Avante Chat" },
-      { "<leader>av", "<cmd>AvanteToggle<cr>", mode = { "v" }, desc = "Toggle Chat with selection" },
 
       -- Core chat functionality
-      { "<leader>ai", "<cmd>AvanteAsk<cr>", desc = "Ask Avante" },
       { "<leader>af", "<cmd>AvanteFocus<cr>", desc = "Focus Avante" },
       { "<leader>al", "<cmd>AvanteClear<cr>", desc = "Clear chat" },
       { "<leader>aR", "<cmd>AvanteRefresh<cr>", desc = "Refresh Avante" },
@@ -135,8 +132,6 @@ return {
       -- Native Avante history features
       { "<leader>ah", "<cmd>AvanteHistory<cr>", desc = "Avante history" },
       { "<D-4>", "<cmd>AvanteHistory<cr>", desc = "Avante history" },
-      { "[a", avante_history_nav, desc = "Chat history selector" },
-      { "]a", avante_history_nav, desc = "Chat history selector" },
 
       -- Code assistance (visual mode only)
       { "<leader>ae", "<cmd>AvanteAsk Explain the selected code in detail<cr>", mode = { "v" }, desc = "Explain code" },
