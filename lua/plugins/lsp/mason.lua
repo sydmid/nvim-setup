@@ -98,7 +98,7 @@ return {
           "emmet_ls",
           "prismals",
           "pyright",
-          "ruff_lsp", -- Modern Python linting/formatting
+          "ruff", -- Modern Python linting/formatting
           "eslint",
           "bashls",
           "csharp_ls",

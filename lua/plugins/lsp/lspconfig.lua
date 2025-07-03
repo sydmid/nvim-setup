@@ -1063,9 +1063,9 @@ return {
 						})
 					end,
 
-					["ruff_lsp"] = function()
+					["ruff"] = function()
 						-- Ruff LSP for ultra-fast Python linting and formatting
-						lspconfig.ruff_lsp.setup({
+						lspconfig.ruff.setup({
 							capabilities = capabilities,
 							init_options = {
 								settings = {
@@ -1114,7 +1114,7 @@ return {
 				-- Set up servers manually
 				local servers = {
 					"html", "cssls", "tailwindcss", "svelte", "lua_ls", "graphql",
-					"emmet_ls", "prismals", "pyright", "ruff_lsp", "eslint", "bashls", "csharp_ls"
+					"emmet_ls", "prismals", "pyright", "ruff", "eslint", "bashls", "csharp_ls"
 				}
 
 				for _, server_name in ipairs(servers) do
@@ -1182,9 +1182,9 @@ return {
 								},
 							},
 						})
-					elseif server_name == "ruff_lsp" then
+					elseif server_name == "ruff" then
 						-- Ruff LSP for ultra-fast Python linting and formatting
-						lspconfig.ruff_lsp.setup({
+						lspconfig.ruff.setup({
 							capabilities = capabilities,
 							init_options = {
 								settings = {
