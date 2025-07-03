@@ -1280,10 +1280,13 @@ map("n", "<D-w>", smart_buffer_delete, { desc = "Close buffer (with confirmation
 map("n", "<leader>bd", smart_buffer_delete, { desc = "Smart delete buffer", silent = true })
 map({ "n", "i", "v" }, "<D-S-s>", save_all_modified, { desc = "Save all modified buffers", noremap = true, silent = true })
 
--- Theme toggle keymap
+-- Theme selector keymap
 map("n", "<leader>tt", function()
-	_G.toggle_theme()
-end, { desc = "Toggle between themes (no-clown-fiesta ⟷ rose-pine)", silent = true })
+	_G.telescope_theme_picker()
+end, { desc = "🎨 Select theme", silent = true })
+
+
+
 
 -- Indentation management keymaps (spaces over tabs best practices)
 -- Show invisible characters (spaces, tabs, line endings)

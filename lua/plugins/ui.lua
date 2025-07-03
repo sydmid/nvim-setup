@@ -9,24 +9,183 @@
 -- - Completion menu (nvim-cmp) styled with theme colors
 -- - LSP Saga windows themed consistently
 -- - Auto-persistence of custom highlights after theme changes via ColorScheme autocmd
--- - Theme toggle functionality with <leader>tt (switches between no-clown-fiesta and Catppuccin)
+-- - Theme selector with <leader>tt for choosing between available themes
 --
 
--- Global variable to track current theme
-_G.current_theme = "no-clown-fiesta"
+-- Global variables to track current theme
+_G.available_themes = {
+	"oxocarbon",
+	"no-clown-fiesta",
+	"gruvbox",
+	"vscode"
+}
+_G.current_theme_index = 1
+_G.current_theme = "oxocarbon"
 
--- Theme toggle function (made global for keymap access)
-function _G.toggle_theme()
-	if _G.current_theme == "no-clown-fiesta" then
-		_G.current_theme = "rose-pine"
-		vim.cmd.colorscheme("rose-pine")
-		vim.notify("Switched to Rose Pine theme", vim.log.levels.INFO)
-	else
-		_G.current_theme = "no-clown-fiesta"
-		vim.cmd.colorscheme("no-clown-fiesta")
-		vim.notify("Switched to No Clown Fiesta theme", vim.log.levels.INFO)
+-- Function to set a specific theme by name
+function _G.set_theme(theme_name)
+	for i, theme in ipairs(_G.available_themes) do
+		if theme == theme_name then
+			_G.current_theme_index = i
+			_G.current_theme = theme_name
+			vim.cmd.colorscheme(theme_name)
+			_G.save_theme_preference()
+					-- Theme-specific configurations
+		if theme_name == "oxocarbon" then
+			vim.opt.background = "dark"
+			vim.notify("🎨 Set to Oxocarbon theme (IBM Carbon inspired)", vim.log.levels.INFO)
+		elseif theme_name == "no-clown-fiesta" then
+			vim.notify("🎭 Set to No Clown Fiesta theme (vibrant & focused)", vim.log.levels.INFO)
+		elseif theme_name == "gruvbox" then
+			vim.opt.background = "dark"
+			vim.notify("🍄 Set to Gruvbox theme (retro groove)", vim.log.levels.INFO)
+		elseif theme_name == "vscode" then
+			vim.opt.background = "dark"
+			vim.notify("💻 Set to VSCode theme (familiar coding experience)", vim.log.levels.INFO)
+		end
+			return
+		end
+	end
+	vim.notify("❌ Theme '" .. theme_name .. "' not found!", vim.log.levels.ERROR)
+end
+
+-- Function to save theme preference
+function _G.save_theme_preference()
+	local theme_file = vim.fn.stdpath("data") .. "/theme_preference.lua"
+	local file = io.open(theme_file, "w")
+	if file then
+		file:write("return {\n")
+		file:write("  theme = \"" .. _G.current_theme .. "\",\n")
+		file:write("  index = " .. _G.current_theme_index .. "\n")
+		file:write("}\n")
+		file:close()
 	end
 end
+
+-- Function to load theme preference
+function _G.load_theme_preference()
+	local theme_file = vim.fn.stdpath("data") .. "/theme_preference.lua"
+	if vim.fn.filereadable(theme_file) == 1 then
+		local ok, prefs = pcall(dofile, theme_file)
+		if ok and prefs and prefs.theme then
+			for i, theme in ipairs(_G.available_themes) do
+				if theme == prefs.theme then
+					_G.current_theme_index = i
+					_G.current_theme = prefs.theme
+					return
+				end
+			end
+		end
+	end
+end
+
+-- Function to list all available themes
+function _G.list_themes()
+	vim.notify("Available themes: " .. table.concat(_G.available_themes, ", ") .. "\nCurrent: " .. _G.current_theme, vim.log.levels.INFO)
+end
+
+-- Function to create a Telescope theme picker
+function _G.telescope_theme_picker()
+	if not pcall(require, "telescope") then
+		vim.notify("Telescope not available", vim.log.levels.WARN)
+		return
+	end
+
+	local pickers = require("telescope.pickers")
+	local finders = require("telescope.finders")
+	local conf = require("telescope.config").values
+	local actions = require("telescope.actions")
+	local action_state = require("telescope.actions.state")
+
+	local theme_info = {
+		{
+			name = "oxocarbon",
+			display = "🎨 Oxocarbon - IBM Carbon inspired",
+			description = "Modern dark theme with industrial blue/gray palette"
+		},
+		{
+			name = "no-clown-fiesta",
+			display = "🎭 No Clown Fiesta - Vibrant & focused",
+			description = "Minimalist theme with enhanced contrast and vibrancy"
+		},
+		{
+			name = "gruvbox",
+			display = "🍄 Gruvbox - Retro groove",
+			description = "Warm, earthy color scheme with excellent contrast"
+		},
+		{
+			name = "vscode",
+			display = "💻 VSCode - Familiar coding experience",
+			description = "Authentic VSCode dark theme for comfortable coding"
+		}
+	}
+
+	pickers.new({}, {
+		prompt_title = "🎨 Theme Selector",
+		initial_mode = "normal",
+		finder = finders.new_table({
+			results = theme_info,
+			entry_maker = function(entry)
+				return {
+					value = entry.name,
+					display = entry.display,
+					ordinal = entry.name .. " " .. entry.display,
+					theme_info = entry
+				}
+			end
+		}),
+		sorter = conf.generic_sorter({}),
+		attach_mappings = function(prompt_bufnr, map)
+			actions.select_default:replace(function()
+				actions.close(prompt_bufnr)
+				local selection = action_state.get_selected_entry()
+				if selection then
+					_G.set_theme(selection.value)
+				end
+			end)
+			return true
+		end,
+	}):find()
+end
+
+-- Function to add new themes dynamically
+function _G.add_theme(theme_name, description, setup_function)
+	if not vim.tbl_contains(_G.available_themes, theme_name) then
+		table.insert(_G.available_themes, theme_name)
+		vim.notify("✅ Added theme: " .. theme_name, vim.log.levels.INFO)
+
+		-- Run setup function if provided
+		if setup_function and type(setup_function) == "function" then
+			setup_function()
+		end
+	else
+		vim.notify("⚠️ Theme '" .. theme_name .. "' already exists", vim.log.levels.WARN)
+	end
+end
+
+-- Function to remove themes
+function _G.remove_theme(theme_name)
+	if theme_name == "oxocarbon" or theme_name == "no-clown-fiesta" then
+		vim.notify("❌ Cannot remove default theme: " .. theme_name, vim.log.levels.ERROR)
+		return
+	end
+
+	for i, theme in ipairs(_G.available_themes) do
+		if theme == theme_name then
+			table.remove(_G.available_themes, i)
+			vim.notify("🗑️ Removed theme: " .. theme_name, vim.log.levels.INFO)
+
+			-- Switch to default theme if current theme was removed
+			if _G.current_theme == theme_name then
+				_G.set_theme("oxocarbon")
+			end
+			return
+		end
+	end
+	vim.notify("❌ Theme '" .. theme_name .. "' not found", vim.log.levels.ERROR)
+end
+
+
 
 local theme_opts = {
 	styles = {
@@ -42,7 +201,8 @@ local theme_opts = {
 local function config_theme()
 	local plugin = require("no-clown-fiesta")
 	plugin.setup(theme_opts)
-	plugin.load()
+	-- Don't auto-load the theme - let oxocarbon be the default
+	-- plugin.load()
 
 	-- Apply additional highlight enhancements for better vibrancy and contrast
 	local enhancements = {
@@ -213,105 +373,176 @@ local function config_theme()
 	vim.schedule(function()
 		vim.cmd("doautocmd ColorScheme")
 	end)
+
+	-- Create user commands for theme management
+	vim.api.nvim_create_user_command("ThemeSet", function(opts)
+		_G.set_theme(opts.args)
+	end, {
+		desc = "Set a specific theme",
+		nargs = 1,
+		complete = function(ArgLead, CmdLine, CursorPos)
+			return vim.tbl_filter(function(theme)
+				return theme:match("^" .. ArgLead)
+			end, _G.available_themes)
+		end
+	})
+
+	vim.api.nvim_create_user_command("ThemeList", function()
+		_G.list_themes()
+	end, { desc = "List all available themes" })
+
+	vim.api.nvim_create_user_command("ThemeSelect", function()
+		_G.telescope_theme_picker()
+	end, { desc = "Select theme with Telescope" })
+
+	vim.api.nvim_create_user_command("ThemeAdd", function(opts)
+		_G.add_theme(opts.args)
+	end, {
+		desc = "Add a new theme to the cycle",
+		nargs = 1
+	})
+
+	vim.api.nvim_create_user_command("ThemeRemove", function(opts)
+		_G.remove_theme(opts.args)
+	end, {
+		desc = "Remove a theme from the cycle",
+		nargs = 1,
+		complete = function(ArgLead, CmdLine, CursorPos)
+			return vim.tbl_filter(function(theme)
+				return theme:match("^" .. ArgLead) and not vim.tbl_contains({"oxocarbon", "no-clown-fiesta"}, theme)
+			end, _G.available_themes)
+		end
+	})
 end
 return {
-	-- Alternative colorscheme for toggle (Rose Pine - elegant and soothing)
+	-- Default colorscheme - Oxocarbon (IBM Carbon inspired)
 	{
-		"rose-pine/neovim",
-		name = "rose-pine",
-		priority = 999, -- Load before no-clown-fiesta but after it
+		"nyoom-engineering/oxocarbon.nvim",
+		priority = 1000,
 		config = function()
-			require("rose-pine").setup({
-				variant = "auto", -- auto, main, moon, or dawn
-				dark_variant = "main", -- main, moon, or dawn
-				dim_inactive_windows = false,
-				extend_background_behind_borders = true,
+			-- Load saved theme preference or use oxocarbon as default
+			_G.load_theme_preference()
 
-				enable = {
-					terminal = true,
-					legacy_highlights = true, -- Improve compatibility for previous versions of Neovim
-					migrations = true, -- Handle deprecated options automatically
-				},
+			-- Configure oxocarbon theme
+			vim.opt.background = "dark"
+			vim.cmd.colorscheme(_G.current_theme)
 
-				styles = {
-					bold = true,
-					italic = true,
-					transparency = false,
-				},
+			-- Apply custom highlights for oxocarbon to maintain consistency
+			vim.api.nvim_create_autocmd("ColorScheme", {
+				pattern = "oxocarbon",
+				group = vim.api.nvim_create_augroup("OxocarbonCustom", { clear = true }),
+				callback = function()
+					-- Ensure floating windows and popups have proper styling
+					local oxocarbon_enhancements = {
+						-- Floating windows
+						NormalFloat = { bg = "#161616" },
+						FloatBorder = { fg = "#6f6f6f", bg = "#161616" },
+						FloatTitle = { fg = "#161616", bg = "#78a9ff", bold = true },
 
-				groups = {
-					border = "muted",
-					link = "iris",
-					panel = "surface",
+						-- Telescope enhancements
+						TelescopeNormal = { bg = "#161616" },
+						TelescopeBorder = { fg = "#6f6f6f", bg = "#161616" },
+						TelescopePromptBorder = { fg = "#78a9ff", bg = "#262626" },
+						TelescopePromptTitle = { fg = "#161616", bg = "#78a9ff", bold = true },
+						TelescopeResultsTitle = { fg = "#161616", bg = "#42be65", bold = true },
+						TelescopePreviewTitle = { fg = "#161616", bg = "#ff7eb6", bold = true },
 
-					error = "love",
-					hint = "iris",
-					info = "foam",
-					note = "pine",
-					todo = "rose",
-					warn = "gold",
+						-- Popup menu
+						Pmenu = { bg = "#161616" },
+						PmenuSel = { fg = "#161616", bg = "#78a9ff", bold = true },
+						PmenuBorder = { fg = "#6f6f6f", bg = "#161616" },
 
-					git_add = "foam",
-					git_change = "rose",
-					git_delete = "love",
-					git_dirty = "rose",
-					git_ignore = "muted",
-					git_merge = "iris",
-					git_rename = "pine",
-					git_stage = "iris",
-					git_text = "rose",
-					git_untracked = "subtle",
+						-- Status line adjustments
+						StatusLine = { bg = "#262626" },
+						StatusLineNC = { bg = "#161616" },
 
-					h1 = "iris",
-					h2 = "foam",
-					h3 = "rose",
-					h4 = "gold",
-					h5 = "pine",
-					h6 = "foam",
-				},
+						-- Enhanced diagnostic colors
+						DiagnosticError = { fg = "#ff7eb6" },
+						DiagnosticWarn = { fg = "#ffab00" },
+						DiagnosticInfo = { fg = "#78a9ff" },
+						DiagnosticHint = { fg = "#42be65" },
+					}
 
-				palette = {
-					-- Override the builtin palette per variant
-					-- moon = {
-					--     base = '#18191a',
-					--     overlay = '#363738',
-					-- },
-				},
-
-				-- NOTE: Highlight groups are extended (merged) by default. Disable this
-				-- per group via `inherit = false`
-				highlight_groups = {
-					-- Comment = { fg = "foam" },
-					-- StatusLine = { fg = "love", bg = "love", blend = 15 },
-					-- VertSplit = { fg = "muted", bg = "muted" },
-					-- Visual = { fg = "base", bg = "text", inherit = false },
-				},
-
-				before_highlight = function(group, highlight, palette)
-					-- Disable all undercurls
-					-- if highlight.undercurl then
-					--     highlight.undercurl = false
-					-- end
-					--
-					-- Change palette colour
-					-- if highlight.fg == palette.pine then
-					--     highlight.fg = palette.foam
-					-- end
+					for group, opts in pairs(oxocarbon_enhancements) do
+						vim.api.nvim_set_hl(0, group, opts)
+					end
 				end,
 			})
-
-			vim.cmd("colorscheme rose-pine")
-			-- vim.cmd("colorscheme rose-pine-main")
-			-- vim.cmd("colorscheme rose-pine-moon")
-			-- vim.cmd("colorscheme rose-pine-dawn")
 		end,
+		lazy = false
 	},
 
-	-- Colorscheme
+	-- Colorscheme - No Clown Fiesta (vibrant and focused)
 	{
 		"aktersnurra/no-clown-fiesta.nvim",
-		priority = 1000,
+		priority = 999,
 		config = config_theme,
+		lazy = false
+	},
+
+	-- Colorscheme - Gruvbox (retro groove)
+	{
+		"ellisonleao/gruvbox.nvim",
+		priority = 998,
+		config = function()
+			require("gruvbox").setup({
+				terminal_colors = true,
+				undercurl = true,
+				underline = true,
+				bold = true,
+				italic = {
+					strings = true,
+					emphasis = true,
+					comments = true,
+					operators = false,
+					folds = true,
+				},
+				strikethrough = true,
+				invert_selection = false,
+				invert_signs = false,
+				invert_tabline = false,
+				invert_intend_guides = false,
+				inverse = true,
+				contrast = "", -- can be "hard", "soft" or empty string
+				palette_overrides = {},
+				overrides = {},
+				dim_inactive = false,
+				transparent_mode = false,
+			})
+			-- Don't auto-load the theme - let oxocarbon be the default
+		end,
+		lazy = false
+	},
+
+	-- Colorscheme - VSCode (familiar coding experience)
+	{
+		"Mofiqul/vscode.nvim",
+		priority = 997,
+		config = function()
+			local vscode = require('vscode')
+			local c = require('vscode.colors').get_colors()
+			vscode.setup({
+				-- Enable transparent background
+				transparent = false,
+				-- Enable italic comment
+				italic_comments = true,
+				-- Underline `@markup.link.*` variants
+				underline_links = true,
+				-- Disable nvim-tree background color
+				disable_nvimtree_bg = true,
+				-- Apply theme colors to terminal
+				terminal_colors = true,
+				-- Override colors for better consistency
+				color_overrides = {},
+				-- Override highlight groups
+				group_overrides = {
+					-- Enhanced floating window styling
+					NormalFloat = { bg = c.vscBack },
+					FloatBorder = { fg = c.vscSplitMedium, bg = c.vscBack },
+				}
+			})
+			-- Don't auto-load the theme - let oxocarbon be the default
+		end,
 		lazy = false
 	},
 
@@ -1403,8 +1634,8 @@ return {
 				{ "<leader>p", group = "󰭷 Peek/Preview" },
 				{ "<leader>r", group = "󰑕 Rename/Refactor" },
 				{ "<leader>s", group = "󰯌 Session/Split" },
-				{ "<leader>t", group = "󰆍 Terminal/Tabs" },
-				{ "<leader>tt", desc = "󰔡 Toggle themes (no-clown-fiesta ⟷ rose-pine)" },
+				{ "<leader>t", group = "󰆍 Terminal/Tabs/Themes" },
+				{ "<leader>tt", desc = "🎨 Select theme" },
 				{ "<leader>u", group = "󰙨 Test/Utils" },
 				{ "<leader>v", group = "󰒉 Visual/View" },
 				{ "<leader>w", group = "󰓩 Workspace/Tabs" },
