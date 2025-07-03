@@ -1505,38 +1505,28 @@ return {
 
 			-- Register all the key groups
 			wk.add({
-				-- AI/Copilot group with all commands
-				{ "<leader>a", group = "󰧑 AI/Copilot" },
+				-- AI/Avante group with streamlined commands
+				{ "<leader>a", group = "🤖 AI/Avante" },
 				{ "<leader>ac", desc = "󰭻 Toggle chat" },
-				{ "<leader>ah", desc = "󰋖 Help actions" },
-				{ "<leader>ae", desc = "󰍉 Explain code" },
-				{ "<leader>at", desc = "󰙨 Generate tests" },
-				{ "<leader>ar", desc = "󰁨 Review code" },
-				{ "<leader>aR", desc = "󰑕 Refactor code" },
-				{ "<leader>an", desc = "󰏫 Better naming" },
-				{ "<leader>av", desc = "󰿟 Visual chat/Toggle" },
-				{ "<leader>ax", desc = "󰑮 Run in-place" },
 				{ "<leader>ai", desc = "󰭺 Ask input" },
-				{ "<leader>am", desc = "󰊢 Commit message (all)" },
-				{ "<leader>aM", desc = "󰊢 Commit message (staged)" },
-				{ "<leader>aq", desc = "󰅺 Quick chat" },
-				{ "<leader>ad", desc = "󰃤 Debug info" },
-				{ "<leader>af", desc = "󰁨 Fix diagnostic" },
-				{ "<leader>al", desc = "󰃢 Clear buffer/history" },
-				{ "<leader>a?", desc = "󰍉 Select models" },
-				-- Settings UI and Session Management
-				{ "<leader>aS", desc = "⚙️ Copilot Settings" },
-				{ "<leader>aQ", desc = "⚡ Quick Session Actions" },
-				{ "<leader>aN", desc = "🆕 New Chat Session" },
-				{ "<leader>aH", desc = "📂 Session History" },
-				{ "<leader>a$", desc = "💾 Save Current Session" },
-				-- Enhanced functions from copilot-enhanced.lua
-				{ "<leader>aX", desc = "󰍉 Enhanced context chat" },
-				{ "<leader>aC", desc = "󰊢 Smart commit message" },
-				{ "<leader>aE", desc = "󰍉 Explain with context" },
-				-- Utility commands
-				{ "<leader>aT", desc = "󰔌 Toggle Copilot on/off" },
-				{ "<leader>as", desc = "󰓕 Check Copilot status" },
+				{ "<leader>af", desc = "󰍉 Focus chat" },
+				{ "<leader>al", desc = "󰃢 Clear chat" },
+				-- Native Avante history features
+				{ "<leader>ah", desc = "📂 Avante history" },
+				{ "[a", desc = "📚 Chat history selector" },
+				{ "]a", desc = "📚 Chat history selector" },
+				-- Code assistance (visual mode)
+				{ "<leader>ae", desc = "� Explain code" },
+				{ "<leader>at", desc = "󰙨 Generate tests" },
+				{ "<leader>ar", desc = "� Review code" },
+				{ "<leader>ad", desc = "󰃤 Add docs" },
+				{ "<leader>ao", desc = "⚡ Optimize code" },
+				-- Git integration
+				{ "<leader>am", desc = "󰊢 Commit message" },
+				-- Provider management
+				{ "<leader>ap", desc = "⚙️ Switch provider" },
+				{ "<leader>aT", desc = "🦙 Test Ollama" },
+				{ "<leader>aP", desc = "🔍 Test current provider" },
 
 				-- Other groups
 				{ "<leader>b", group = "󰓩 Buffer" },

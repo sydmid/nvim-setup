@@ -1032,7 +1032,8 @@ local function save_chat_session()
 end
 
 return {
-	-- GitHub Copilot core functionality
+	-- GitHub Copilot core functionality (Re-enabled for inline suggestions)
+	-- Works alongside avante.nvim for comprehensive AI assistance
 	{
 		"zbirenbaum/copilot.lua",
 		cmd = "Copilot",
@@ -1093,7 +1094,8 @@ return {
 		end,
 	},
 
-	-- Copilot Chat for interactive AI conversations
+	-- Copilot Chat DISABLED - Using avante.nvim for enhanced chat features
+	--[[
 	{
 		"CopilotC-Nvim/CopilotChat.nvim",
 		branch = "canary",
@@ -1391,8 +1393,9 @@ return {
 			},
 		},
 	},
+	--]] -- End of disabled CopilotChat section
 
-	-- Copilot completions integration with nvim-cmp
+	-- Copilot completions integration with nvim-cmp (Re-enabled for inline suggestions)
 	{
 		"zbirenbaum/copilot-cmp",
 		dependencies = "copilot.lua",

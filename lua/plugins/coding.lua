@@ -103,7 +103,7 @@ return {
 			"saadparwaiz1/cmp_luasnip", -- for autocompletion
 			"rafamadriz/friendly-snippets", -- useful snippets
 			"onsails/lspkind.nvim", -- vs-code like pictograms
-			"zbirenbaum/copilot-cmp", -- Copilot completions
+			"zbirenbaum/copilot-cmp", -- GitHub Copilot completions (for inline suggestions)
         },
 		config = function()
 			local cmp = require("cmp")
@@ -141,7 +141,8 @@ return {
 				}),
 				-- sources for autocompletion
 				sources = cmp.config.sources({
-					{ name = "copilot", group_index = 1, priority = 100 }, -- Copilot suggestions (highest priority)
+					{ name = "copilot", group_index = 1, priority = 100 }, -- GitHub Copilot inline suggestions
+					-- Note: Avante.nvim handles chat functionality separately
 					{ name = "luasnip", trigger_characters = {}, option = { show_autosnippets = true } }, -- snippets
 					{ name = "nvim_lsp", keyword_length = 1 }, -- lsp
 					{ name = "buffer", keyword_length = 2 }, -- text within current buffer
@@ -167,11 +168,12 @@ return {
 						maxwidth = 50,
 						ellipsis_char = "...",
 						symbol_map = {
-							Copilot = "",
+							Copilot = "", -- Inline suggestions
+							Avante = "🤖", -- Chat and advanced features
 						},
 					}),
 				},
-				-- Custom sorting for Copilot prioritization
+				-- Custom sorting prioritization (removed Copilot, using Avante)
 				sorting = {
 					priority_weight = 2,
 					comparators = {

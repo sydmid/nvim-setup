@@ -334,7 +334,7 @@ end, { desc = "Format document" })
 -- Use <D-S-i> (Cmd+Shift+I) to manually trigger signature help when needed.
 
 -- Harpoon mappings
-map("n", "<leader>ah", ":lua require('harpoon.mark').add_file()<CR>", { desc = "Add to harpoon" })
+map("n", "<leader>hh", ":lua require('harpoon.mark').add_file()<CR>", { desc = "Add to harpoon" })
 
 map("n", "<leader>1", ":lua require('harpoon.ui').nav_file(1)<CR>", { desc = "Navigate to harpoon 1" })
 map("n", "<leader>2", ":lua require('harpoon.ui').nav_file(2)<CR>", { desc = "Navigate to harpoon 2" })
