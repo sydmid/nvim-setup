@@ -90,9 +90,9 @@ return {
 				max_width = 80,
 				max_height = 15,
 				wrap = true,
-				title = " Doc ",
+				title = " Documentation ",
 				title_pos = "center",
-				-- close_events = { "BufHidden" }, -- Only close when leaving buffer, not on cursor movement
+				close_events = { "BufHidden" }, -- Only close when leaving buffer, not on cursor movement
 			})
 
 			-- Custom highlight groups for LSP floating windows to match theme
@@ -733,15 +733,30 @@ return {
 
 					-- Enhanced hover with beautiful styling and proper persistence
 					keymap("n", "<D-i>", function()
-						-- Custom hover with enhanced styling that matches peek_definition
+						-- Get LSP clients for current buffer
+						local clients = vim.lsp.get_clients({ bufnr = 0 })
+						if #clients == 0 then
+							vim.notify("No LSP client attached to current buffer", vim.log.levels.WARN)
+							return
+						end
+
+						-- Use vim.lsp.buf.hover with enhanced configuration
 						local params = vim.lsp.util.make_position_params()
-						vim.lsp.buf_request(0, 'textDocument/hover', params, function(err, result, ctx, config)
-							if err or not result or not result.contents then
+
+						-- Create custom hover handler with enhanced styling
+						local function enhanced_hover_handler(err, result, ctx, config)
+							if err then
+								vim.notify("LSP hover error: " .. tostring(err), vim.log.levels.ERROR)
+								return
+							end
+
+							if not result or not result.contents then
+								vim.notify("No hover information available", vim.log.levels.INFO)
 								return
 							end
 
 							-- Enhanced window configuration matching peek_definition style
-							local opts = {
+							local opts = vim.tbl_extend("force", config or {}, {
 								border = "rounded",
 								focusable = true,
 								style = "minimal",
@@ -750,13 +765,54 @@ return {
 								wrap = true,
 								title = " Documentation ",
 								title_pos = "center",
-								-- close_events = { "BufHidden" }, -- Only close on buffer change, not cursor movement
-							}
+								close_events = { "BufHidden" }, -- Only close on buffer change, not cursor movement
+							})
 
-							-- Use the enhanced handler with our custom styling
-							vim.lsp.handlers["textDocument/hover"](err, result, ctx, vim.tbl_extend("force", config or {}, opts))
-						end)
+							-- Call the default hover handler with our custom styling
+							vim.lsp.handlers["textDocument/hover"](err, result, ctx, opts)
+						end
+
+						-- Make the hover request with our enhanced handler
+						vim.lsp.buf_request(0, 'textDocument/hover', params, enhanced_hover_handler)
 					end, { buffer = ev.buf, desc = "Show documentation (Enhanced)", silent = true })
+
+					-- Fallback hover using native LSP hover (for troubleshooting)
+					keymap("n", "<D-S-h>", function()
+						vim.lsp.buf.hover()
+					end, { buffer = ev.buf, desc = "Show documentation (Native)", silent = true })
+
+					-- Debug command to test LSP hover capability
+					keymap("n", "<leader>dh", function()
+						local clients = vim.lsp.get_clients({ bufnr = 0 })
+						if #clients == 0 then
+							vim.notify("No LSP clients attached", vim.log.levels.ERROR)
+							return
+						end
+
+						local client_info = {}
+						for _, client in ipairs(clients) do
+							table.insert(client_info, string.format("%s (hover: %s)",
+								client.name,
+								client.server_capabilities.hoverProvider and "yes" or "no"
+							))
+						end
+
+						vim.notify("LSP clients: " .. table.concat(client_info, ", "), vim.log.levels.INFO)
+
+						-- Test hover
+						local params = vim.lsp.util.make_position_params()
+						vim.lsp.buf_request(0, 'textDocument/hover', params, function(err, result, ctx, config)
+							if err then
+								vim.notify("Hover error: " .. tostring(err), vim.log.levels.ERROR)
+							elseif not result or not result.contents then
+								vim.notify("No hover content available", vim.log.levels.WARN)
+							else
+								vim.notify("Hover content received successfully", vim.log.levels.INFO)
+								-- Show the content
+								vim.lsp.handlers["textDocument/hover"](err, result, ctx, config)
+							end
+						end)
+					end, { buffer = ev.buf, desc = "Debug hover functionality", silent = true })
 
 					-- Additional useful Lspsaga keymaps
 					keymap("n", "<leader>ca", "<cmd>Lspsaga code_action<CR>", { buffer = ev.buf, desc = "Code actions (Lspsaga)" })
