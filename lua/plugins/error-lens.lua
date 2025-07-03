@@ -193,8 +193,8 @@ return {
         -- Clear existing decorations
         clear_error_lens(bufnr)
 
-        -- Get diagnostics for current buffer
-        local diagnostics = vim.diagnostic.get(bufnr)
+        -- Get diagnostics for current buffer (ONLY ERRORS)
+        local diagnostics = vim.diagnostic.get(bufnr, { severity = vim.diagnostic.severity.ERROR })
         if not diagnostics or #diagnostics == 0 then return end
 
         -- Group diagnostics by line
@@ -292,6 +292,42 @@ return {
         return M.enabled
       end
 
+      -- LSP Lines toggle functions
+      local function toggle_lsp_lines()
+        local current_config = vim.diagnostic.config()
+        local new_state = not current_config.virtual_lines
+
+        vim.diagnostic.config({
+          virtual_lines = new_state,
+        })
+
+        if new_state then
+          vim.notify("📏 LSP Lines enabled", vim.log.levels.INFO)
+        else
+          vim.notify("📏 LSP Lines disabled", vim.log.levels.INFO)
+        end
+      end
+
+      local function enable_lsp_lines()
+        vim.diagnostic.config({
+          virtual_lines = true,
+        })
+        vim.notify("📏 LSP Lines enabled", vim.log.levels.INFO)
+      end
+
+      local function disable_lsp_lines()
+        vim.diagnostic.config({
+          virtual_lines = false,
+        })
+        vim.notify("📏 LSP Lines disabled", vim.log.levels.INFO)
+      end
+
+      -- Combined toggle function for both Error Lens and LSP Lines
+      local function toggle_all_diagnostics()
+        M.toggle()
+        toggle_lsp_lines()
+      end
+
       -- Setup function
       function M.setup()
         -- Setup highlights
@@ -350,11 +386,25 @@ return {
         vim.notify(string.format("Error Lens is %s", status), vim.log.levels.INFO)
       end, { desc = "Show Error Lens status" })
 
+      -- LSP Lines commands
+      vim.api.nvim_create_user_command("LspLinesToggle", toggle_lsp_lines, { desc = "Toggle LSP Lines" })
+      vim.api.nvim_create_user_command("LspLinesEnable", enable_lsp_lines, { desc = "Enable LSP Lines" })
+      vim.api.nvim_create_user_command("LspLinesDisable", disable_lsp_lines, { desc = "Disable LSP Lines" })
+      vim.api.nvim_create_user_command("DiagnosticsToggleAll", toggle_all_diagnostics, { desc = "Toggle All Diagnostics" })
+
       -- Key mappings - ThePrimeagen style
       vim.keymap.set("n", "<leader>el", M.toggle, { desc = "Toggle Error Lens", silent = true })
       vim.keymap.set("n", "<leader>ee", M.enable, { desc = "Enable Error Lens", silent = true })
       vim.keymap.set("n", "<leader>ed", M.disable, { desc = "Disable Error Lens", silent = true })
       vim.keymap.set("n", "<leader>er", M.refresh_current_buffer, { desc = "Refresh Error Lens", silent = true })
+
+      -- LSP Lines keybindings
+      vim.keymap.set("n", "<leader>ell", toggle_lsp_lines, { desc = "Toggle LSP Lines", silent = true })
+      vim.keymap.set("n", "<leader>ele", enable_lsp_lines, { desc = "Enable LSP Lines", silent = true })
+      vim.keymap.set("n", "<leader>eld", disable_lsp_lines, { desc = "Disable LSP Lines", silent = true })
+
+      -- Combined toggle for both systems
+      vim.keymap.set("n", "<leader>ea", toggle_all_diagnostics, { desc = "Toggle All Diagnostics", silent = true })
 
       -- Initialize
       M.setup()
