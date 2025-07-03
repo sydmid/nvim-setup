@@ -14,13 +14,11 @@
 
 -- Global variables to track current theme
 _G.available_themes = {
-	"oxocarbon",
-	"no-clown-fiesta",
-	"gruvbox",
-	"vscode"
+	"iceberg",
+	"tokyonight-storm"
 }
 _G.current_theme_index = 1
-_G.current_theme = "oxocarbon"
+_G.current_theme = "iceberg"
 
 -- Function to set a specific theme by name
 function _G.set_theme(theme_name)
@@ -30,23 +28,27 @@ function _G.set_theme(theme_name)
 			_G.current_theme = theme_name
 			vim.cmd.colorscheme(theme_name)
 			_G.save_theme_preference()
-					-- Theme-specific configurations
-		if theme_name == "oxocarbon" then
-			vim.opt.background = "dark"
-			vim.notify("🎨 Set to Oxocarbon theme (IBM Carbon inspired)", vim.log.levels.INFO)
-		elseif theme_name == "no-clown-fiesta" then
-			vim.notify("🎭 Set to No Clown Fiesta theme (vibrant & focused)", vim.log.levels.INFO)
-		elseif theme_name == "gruvbox" then
-			vim.opt.background = "dark"
-			vim.notify("🍄 Set to Gruvbox theme (retro groove)", vim.log.levels.INFO)
-		elseif theme_name == "vscode" then
-			vim.opt.background = "dark"
-			vim.notify("💻 Set to VSCode theme (familiar coding experience)", vim.log.levels.INFO)
-		end
+			-- Theme-specific configurations
+			if theme_name == "iceberg" then
+				vim.opt.background = "dark"
+				vim.notify("🧊 Set to Iceberg theme (cool blue elegance)", vim.log.levels.INFO)
+			elseif theme_name == "tokyonight-storm" then
+				vim.opt.background = "dark"
+				vim.notify("⛈️ Set to Tokyo Night Storm theme (balanced dark)", vim.log.levels.INFO)
+			end
 			return
 		end
 	end
 	vim.notify("❌ Theme '" .. theme_name .. "' not found!", vim.log.levels.ERROR)
+end
+
+-- Function to toggle between the two available themes
+function _G.toggle_theme()
+	if _G.current_theme == "iceberg" then
+		_G.set_theme("tokyonight-storm")
+	else
+		_G.set_theme("iceberg")
+	end
 end
 
 -- Function to save theme preference
@@ -99,38 +101,35 @@ function _G.telescope_theme_picker()
 
 	local theme_info = {
 		{
-			name = "oxocarbon",
-			display = "🎨 Oxocarbon - IBM Carbon inspired",
-			description = "Modern dark theme with industrial blue/gray palette"
+			name = "iceberg",
+			display = "🧊 Iceberg - Cool blue elegance",
+			description = "Cool blue theme with elegant contrast and readability"
 		},
 		{
-			name = "no-clown-fiesta",
-			display = "🎭 No Clown Fiesta - Vibrant & focused",
-			description = "Minimalist theme with enhanced contrast and vibrancy"
-		},
-		{
-			name = "gruvbox",
-			display = "🍄 Gruvbox - Retro groove",
-			description = "Warm, earthy color scheme with excellent contrast"
-		},
-		{
-			name = "vscode",
-			display = "💻 VSCode - Familiar coding experience",
-			description = "Authentic VSCode dark theme for comfortable coding"
+			name = "tokyonight-storm",
+			display = "⛈️ Tokyo Night Storm - Balanced dark",
+			description = "Balanced dark variant with storm-like atmosphere"
 		}
 	}
 
 	pickers.new({}, {
-		prompt_title = "🎨 Theme Selector",
+		prompt_title = "🎨 Theme Selector (Current: " .. _G.current_theme .. ")",
 		initial_mode = "normal",
 		finder = finders.new_table({
 			results = theme_info,
 			entry_maker = function(entry)
+				local display_text = entry.display
+				-- Add current theme indicator with special styling
+				if entry.name == _G.current_theme then
+					display_text = "✓ " .. entry.display .. " 🎯 (CURRENT)"
+				end
+
 				return {
 					value = entry.name,
-					display = entry.display,
+					display = display_text,
 					ordinal = entry.name .. " " .. entry.display,
-					theme_info = entry
+					theme_info = entry,
+					is_current = entry.name == _G.current_theme
 				}
 			end
 		}),
@@ -165,7 +164,7 @@ end
 
 -- Function to remove themes
 function _G.remove_theme(theme_name)
-	if theme_name == "oxocarbon" or theme_name == "no-clown-fiesta" then
+	if theme_name == "iceberg" then
 		vim.notify("❌ Cannot remove default theme: " .. theme_name, vim.log.levels.ERROR)
 		return
 	end
@@ -177,7 +176,7 @@ function _G.remove_theme(theme_name)
 
 			-- Switch to default theme if current theme was removed
 			if _G.current_theme == theme_name then
-				_G.set_theme("oxocarbon")
+				_G.set_theme("iceberg")
 			end
 			return
 		end
@@ -415,133 +414,68 @@ local function config_theme()
 	})
 end
 return {
-	-- Default colorscheme - Oxocarbon (IBM Carbon inspired)
+	-- Default colorscheme - Iceberg (cool blue elegance)
 	{
-		"nyoom-engineering/oxocarbon.nvim",
+		"cocopon/iceberg.vim",
 		priority = 1000,
 		config = function()
-			-- Load saved theme preference or use oxocarbon as default
+			-- Configure Iceberg theme
+			vim.g.iceberg_transparent = 0
+
+			-- Load saved theme preference or use iceberg as default
 			_G.load_theme_preference()
 
-			-- Configure oxocarbon theme
+			-- Configure background and set the theme
 			vim.opt.background = "dark"
 			vim.cmd.colorscheme(_G.current_theme)
-
-			-- Apply custom highlights for oxocarbon to maintain consistency
-			vim.api.nvim_create_autocmd("ColorScheme", {
-				pattern = "oxocarbon",
-				group = vim.api.nvim_create_augroup("OxocarbonCustom", { clear = true }),
-				callback = function()
-					-- Ensure floating windows and popups have proper styling
-					local oxocarbon_enhancements = {
-						-- Floating windows
-						NormalFloat = { bg = "#161616" },
-						FloatBorder = { fg = "#6f6f6f", bg = "#161616" },
-						FloatTitle = { fg = "#161616", bg = "#78a9ff", bold = true },
-
-						-- Telescope enhancements
-						TelescopeNormal = { bg = "#161616" },
-						TelescopeBorder = { fg = "#6f6f6f", bg = "#161616" },
-						TelescopePromptBorder = { fg = "#78a9ff", bg = "#262626" },
-						TelescopePromptTitle = { fg = "#161616", bg = "#78a9ff", bold = true },
-						TelescopeResultsTitle = { fg = "#161616", bg = "#42be65", bold = true },
-						TelescopePreviewTitle = { fg = "#161616", bg = "#ff7eb6", bold = true },
-
-						-- Popup menu
-						Pmenu = { bg = "#161616" },
-						PmenuSel = { fg = "#161616", bg = "#78a9ff", bold = true },
-						PmenuBorder = { fg = "#6f6f6f", bg = "#161616" },
-
-						-- Status line adjustments
-						StatusLine = { bg = "#262626" },
-						StatusLineNC = { bg = "#161616" },
-
-						-- Enhanced diagnostic colors
-						DiagnosticError = { fg = "#ff7eb6" },
-						DiagnosticWarn = { fg = "#ffab00" },
-						DiagnosticInfo = { fg = "#78a9ff" },
-						DiagnosticHint = { fg = "#42be65" },
-					}
-
-					for group, opts in pairs(oxocarbon_enhancements) do
-						vim.api.nvim_set_hl(0, group, opts)
-					end
-				end,
-			})
 		end,
 		lazy = false
 	},
 
-	-- Colorscheme - No Clown Fiesta (vibrant and focused)
+	-- Colorscheme - Tokyo Night Storm (balanced dark)
 	{
-		"aktersnurra/no-clown-fiesta.nvim",
+		"folke/tokyonight.nvim",
 		priority = 999,
-		config = config_theme,
-		lazy = false
-	},
-
-	-- Colorscheme - Gruvbox (retro groove)
-	{
-		"ellisonleao/gruvbox.nvim",
-		priority = 998,
 		config = function()
-			require("gruvbox").setup({
-				terminal_colors = true,
-				undercurl = true,
-				underline = true,
-				bold = true,
-				italic = {
-					strings = true,
-					emphasis = true,
-					comments = true,
-					operators = false,
-					folds = true,
-				},
-				strikethrough = true,
-				invert_selection = false,
-				invert_signs = false,
-				invert_tabline = false,
-				invert_intend_guides = false,
-				inverse = true,
-				contrast = "", -- can be "hard", "soft" or empty string
-				palette_overrides = {},
-				overrides = {},
-				dim_inactive = false,
-				transparent_mode = false,
-			})
-			-- Don't auto-load the theme - let oxocarbon be the default
-		end,
-		lazy = false
-	},
-
-	-- Colorscheme - VSCode (familiar coding experience)
-	{
-		"Mofiqul/vscode.nvim",
-		priority = 997,
-		config = function()
-			local vscode = require('vscode')
-			local c = require('vscode.colors').get_colors()
-			vscode.setup({
-				-- Enable transparent background
+			-- Configure Tokyo Night theme
+			require("tokyonight").setup({
+				-- use the storm style by default
+				style = "storm", -- The theme comes in four styles: storm, moon, night and day
+				-- transparent background
 				transparent = false,
-				-- Enable italic comment
-				italic_comments = true,
-				-- Underline `@markup.link.*` variants
-				underline_links = true,
-				-- Disable nvim-tree background color
-				disable_nvimtree_bg = true,
-				-- Apply theme colors to terminal
+				-- configure the terminal colors
 				terminal_colors = true,
-				-- Override colors for better consistency
-				color_overrides = {},
-				-- Override highlight groups
-				group_overrides = {
-					-- Enhanced floating window styling
-					NormalFloat = { bg = c.vscBack },
-					FloatBorder = { fg = c.vscSplitMedium, bg = c.vscBack },
-				}
+				styles = {
+					-- style for comments
+					comments = { italic = true },
+					-- style for keywords
+					keywords = { italic = true },
+					-- style for functions
+					functions = {},
+					-- style for variables
+					variables = {},
+					-- Background styles: dark, transparent, normal
+					sidebars = "dark", -- style for sidebars
+					floats = "dark", -- style for floating windows
+				},
+				sidebars = { "qf", "help" }, -- Set a darker background on sidebar-like windows
+				day_brightness = 0.3, -- Adjusts the brightness of the colors of the Day style
+				hide_inactive_statusline = false, -- Enabling this option, will hide inactive statuslines
+				dim_inactive = false, -- dims inactive windows
+				lualine_bold = false, -- When true, section headers in the lualine theme will be bold
+
+				--- You can override specific color groups to use other groups or a hex color
+				--- function will be called with a ColorScheme table
+				---@param colors ColorScheme
+				on_colors = function(colors) end,
+
+				--- You can override specific highlights to use other groups or a hex color
+				--- function will be called with a Highlights and ColorScheme table
+				---@param highlights Highlights
+				---@param colors ColorScheme
+				on_highlights = function(highlights, colors) end,
 			})
-			-- Don't auto-load the theme - let oxocarbon be the default
+			-- Don't auto-load the theme - let iceberg be the default
 		end,
 		lazy = false
 	},
