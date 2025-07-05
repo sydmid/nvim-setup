@@ -27,17 +27,18 @@ vim.o.scrolloff = 5
 --   <leader>tj - Next todo comment (was ]t)
 --   <leader>tk - Previous todo comment (was [t)
 --
--- Bookmark navigation (bookmarks.nvim plugin):
---   <leader>mj - Next bookmark
---   <leader>mk - Previous bookmark
+-- Marks navigation (using snacks.nvim):
+--   <leader>mj - Next mark
+--   <leader>mk - Previous mark
 --
--- Bookmarks (VSCode-style):
---   <leader>mm - Toggle bookmark
---   <D-S-]>    - Jump to next bookmark (Shift+CMD+])
---   <D-S-[>    - Jump to previous bookmark (Shift+CMD+[)
---   <leader>ml - List all bookmarks
---   <leader>ma - Add annotation to bookmark
---   <leader>mc - Clear bookmarks in current buffer
+-- Marks (using snacks.nvim):
+--   <leader>mm - Smart mark toggle (auto-assigns a-z marks)
+--   <D-S-]>    - Jump to next mark (Shift+CMD+])
+--   <D-S-[>    - Jump to previous mark (Shift+CMD+[)
+--   <leader>ml - List all marks (using snacks picker)
+--   <leader>ma - Set global mark (A-Z)
+--   <leader>mc - Clear marks in current buffer
+--   <leader>mC - Clear global marks
 --
 -- Code block navigation using treesitter (VS Code gotoNextPreviousMember style):
 --   g] - Next code block (functions, methods, classes, properties, etc.)
@@ -433,10 +434,11 @@ map("n", "gmb", "mB", { desc = "Set global mark B" })
 map("n", "gma", "`A", { desc = "Go to global mark A" })
 map("n", "gmb", "`B", { desc = "Go to global mark B" })
 
--- Bookmark navigation (bookmarks.nvim plugin - follows the j/k navigation pattern)
--- Navigate to next and previous bookmarks in current buffer
-map("n", "<leader>mj", function() require("bookmarks").bookmark_next() end, { desc = "Next bookmark" })
-map("n", "<leader>mk", function() require("bookmarks").bookmark_prev() end, { desc = "Previous bookmark" })
+-- Marks navigation (using snacks.nvim - follows the j/k navigation pattern)
+-- Navigate to next and previous marks in current buffer
+-- NOTE: These are now handled by snacks.nvim in the marks section
+-- map("n", "<leader>mj", function() -- Next mark (handled by snacks)
+-- map("n", "<leader>mk", function() -- Previous mark (handled by snacks)
 
 -- Separate normal and visual mode mappings for D-S-f
 map("n", "<D-S-f>", function()

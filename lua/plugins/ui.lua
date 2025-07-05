@@ -1632,7 +1632,7 @@ return {
 				{ "<leader>j", group = "󰒐 Jump" },
 				{ "<leader>k", group = "󰒊 Jump/Flash" },
 				{ "<leader>l", group = "󰿘 LSP" },
-				{ "<leader>m", group = "󰃀 Bookmarks" },
+				{ "<leader>m", group = "󰃀 Marks" },
 				{ "<leader>n", group = "󰑮 Navigation" },
 				{ "<leader>o", group = "󰌸 Overseer/Tasks" },
 				{ "<leader>p", group = "󰭷 Peek/Preview" },

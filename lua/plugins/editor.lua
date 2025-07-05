@@ -295,10 +295,10 @@ return {
 					vim.keymap.set("n", "<", api.node.navigate.sibling.prev, opts("Previous Sibling"))
 					vim.keymap.set("n", ".", api.node.run.cmd, opts("Run Command"))
 					vim.keymap.set("n", "-", api.tree.change_root_to_parent, opts("Up"))
-					vim.keymap.set("n", "a", api.fs.create, opts("Create File Or Directory"))
-					vim.keymap.set("n", "bd", api.marks.bulk.delete, opts("Delete Bookmarked"))
-					vim.keymap.set("n", "bt", api.marks.bulk.trash, opts("Trash Bookmarked"))
-					vim.keymap.set("n", "bmv", api.marks.bulk.move, opts("Move Bookmarked"))
+					-- Removed bookmark operations - using snacks.nvim marks instead
+					-- vim.keymap.set("n", "bd", api.marks.bulk.delete, opts("Delete Bookmarked"))
+					-- vim.keymap.set("n", "bt", api.marks.bulk.trash, opts("Trash Bookmarked"))
+					-- vim.keymap.set("n", "bmv", api.marks.bulk.move, opts("Move Bookmarked"))
 					vim.keymap.set("n", "B", api.tree.toggle_no_buffer_filter, opts("Toggle Filter: No Buffer"))
 					vim.keymap.set("n", "c", api.fs.copy.node, opts("Copy"))
 					vim.keymap.set("n", "C", api.tree.toggle_git_clean_filter, opts("Toggle Filter: Git Clean"))
@@ -325,7 +325,8 @@ return {
 					vim.keymap.set("n", "K", api.node.navigate.sibling.first, opts("First Sibling"))
 					vim.keymap.set("n", "L", api.node.open.toggle_group_empty, opts("Toggle Group Empty"))
 					vim.keymap.set("n", "M", api.tree.toggle_no_bookmark_filter, opts("Toggle Filter: No Bookmark"))
-					vim.keymap.set("n", "m", api.marks.toggle, opts("Toggle Bookmark"))
+					-- Removed nvim-tree bookmark toggle - using snacks.nvim marks instead
+					-- vim.keymap.set("n", "m", api.marks.toggle, opts("Toggle Bookmark"))
 
 					-- Custom 'o' behavior: Open file, keep tree open and focused on tree
 					vim.keymap.set("n", "o", function()
@@ -1061,91 +1062,16 @@ return {
 				end
 			end, { desc = "Find todos" })
 
-			-- Custom telescope picker for bookmark annotations only
+			-- Removed bookmark annotations telescope - using snacks.nvim marks instead
 			keymap.set("n", "<leader>fa", function()
-				local builtin = require("telescope.builtin")
-				local pickers = require("telescope.pickers")
-				local finders = require("telescope.finders")
-				local conf = require("telescope.config").values
-				local actions = require("telescope.actions")
-				local action_state = require("telescope.actions.state")
-
-				-- Get bookmark annotations from the bookmarks plugin
-				local bookmarks_ok, bookmarks = pcall(require, "bookmarks")
-				if not bookmarks_ok then
-					vim.notify("Bookmarks plugin not available", vim.log.levels.ERROR)
-					return
-				end
-
-				local bookmark_list = bookmarks.bookmark_list()
-				local annotated_bookmarks = {}
-
-				if bookmark_list and type(bookmark_list) == "table" then
-					for _, bookmark in ipairs(bookmark_list) do
-						-- Only include bookmarks that have annotations
-						if bookmark.annotation and bookmark.annotation ~= "" then
-							-- Filter by current working directory
-							local relative_path = vim.fn.fnamemodify(bookmark.filename, ":.")
-							if vim.startswith(bookmark.filename, vim.fn.getcwd()) then
-								table.insert(annotated_bookmarks, {
-									filename = bookmark.filename,
-									lnum = bookmark.line,
-									col = 1,
-									text = bookmark.annotation,
-									display = string.format("%s:%d - %s", relative_path, bookmark.line, bookmark.annotation),
-								})
-							end
-						end
-					end
-				end
-
-				if #annotated_bookmarks == 0 then
-					vim.notify("No bookmark annotations found in current project", vim.log.levels.INFO)
-					return
-				end
-
-				-- Create telescope picker using the same configuration as other pickers
-				pickers.new({}, {
-					prompt_title = "♥ Find Bookmark Annotations",
-					finder = finders.new_table({
-						results = annotated_bookmarks,
-						entry_maker = function(entry)
-							return {
-								value = entry,
-								display = entry.display,
-								ordinal = entry.display,
-								filename = entry.filename,
-								lnum = entry.lnum,
-								col = entry.col,
-							}
-						end,
-					}),
-					sorter = conf.generic_sorter({}),
-					previewer = conf.file_previewer({}),
-					attach_mappings = function(prompt_bufnr)
-						actions.select_default:replace(function()
-							local selection = action_state.get_selected_entry()
-							actions.close(prompt_bufnr)
-							if selection then
-								vim.cmd("edit " .. vim.fn.fnameescape(selection.filename))
-								vim.api.nvim_win_set_cursor(0, {selection.lnum, selection.col})
-							end
-						end)
-						-- Add proper Esc handling
-						local map_func = vim.keymap.set
-						map_func("i", "<Esc>", function() actions.close(prompt_bufnr) end, { buffer = true })
-						map_func("n", "<Esc>", function() actions.close(prompt_bufnr) end, { buffer = true })
-						map_func("n", "q", function() actions.close(prompt_bufnr) end, { buffer = true })
-						return true
-					end,
-				}):find()
-			end, { desc = "Find bookmark annotations" })
+				vim.notify("📌 Use <leader>sm for marks or <leader>ml for marks list", vim.log.levels.INFO)
+			end, { desc = "Find annotations (redirect to marks)" })
 
 			-- Additional Telescope mappings (converted from FZF)
 			keymap.set("n", "<leader>fh", telescope_with_esc(builtin.help_tags), { desc = "Find help tags" })
 			keymap.set("n", "<leader>fx", "<cmd>TelescopeClearCache<CR>", { desc = "Clear telescope cache" })
 			keymap.set("n", "<leader>fj", telescope_with_esc(builtin.jumplist, {initial_mode = "normal"}), { desc = "Find jumps" })
-			keymap.set("n", "<leader>fm", telescope_with_esc(builtin.marks ,{initial_mode = "normal"}), { desc = "Find marks" })
+			keymap.set("n", "<leader>fm", function() require("snacks").picker.marks() end, { desc = "Find marks (snacks)" })
 			keymap.set("n", "<leader>fb", function()
 				-- Create a reusable function for buffer deletion
 				local function create_buffer_picker()
