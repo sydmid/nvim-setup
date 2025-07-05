@@ -552,9 +552,39 @@ local function is_main_buffer(bufnr)
 	return not vim.tbl_contains(ignored_filetypes, ft) and not vim.tbl_contains(ignored_buftypes, bt) and buf_name ~= ""
 end
 
+-- Helper function to check if a window is actually visible and accessible
+local function is_window_visible(win)
+	if not vim.api.nvim_win_is_valid(win) then
+		return false
+	end
+
+	-- Check if window is in current tabpage
+	local current_tabpage = vim.api.nvim_get_current_tabpage()
+	local win_tabpage = vim.api.nvim_win_get_tabpage(win)
+	if current_tabpage ~= win_tabpage then
+		return false
+	end
+
+	-- Check window configuration
+	local config = vim.api.nvim_win_get_config(win)
+
+	-- Skip floating windows that might be hidden or minimized
+	if config.relative ~= "" then
+		-- Check if floating window has reasonable dimensions
+		if config.width and config.height and (config.width < 5 or config.height < 3) then
+			return false
+		end
+	end
+
+	-- Check if window is part of current layout (not minimized/hidden)
+	local all_wins = vim.api.nvim_tabpage_list_wins(current_tabpage)
+	return vim.tbl_contains(all_wins, win)
+end
+
 -- -- Tab key toggles between main buffer and auxiliary buffers
 map("n", "<Tab>", function()
 	local current = vim.api.nvim_get_current_buf()
+	local current_win = vim.api.nvim_get_current_win()
 
 	-- Track the last known main and auxiliary buffers/windows
 	if not vim.g.last_main_win then
@@ -562,42 +592,66 @@ map("n", "<Tab>", function()
 		vim.g.last_aux_win = nil
 	end
 
-	-- If in a main buffer, focus on last auxiliary buffer if exists
+	-- If in a main buffer, focus on last auxiliary buffer if it's visible
 	if is_main_buffer(current) then
-		if vim.g.last_aux_win and vim.api.nvim_win_is_valid(vim.g.last_aux_win) then
-			vim.g.last_main_win = vim.api.nvim_get_current_win()
-			vim.api.nvim_set_current_win(vim.g.last_aux_win)
-			return
-		end
-
-		-- Otherwise find any auxiliary buffer to focus
-		for _, win in ipairs(vim.api.nvim_list_wins()) do
-			local buf = vim.api.nvim_win_get_buf(win)
-			if not is_main_buffer(buf) then
-				vim.g.last_main_win = vim.api.nvim_get_current_win()
-				vim.g.last_aux_win = win
-				vim.api.nvim_set_current_win(win)
+		if vim.g.last_aux_win and is_window_visible(vim.g.last_aux_win) then
+			local aux_buf = vim.api.nvim_win_get_buf(vim.g.last_aux_win)
+			-- Double-check that the auxiliary window still contains a non-main buffer
+			if not is_main_buffer(aux_buf) then
+				vim.g.last_main_win = current_win
+				vim.api.nvim_set_current_win(vim.g.last_aux_win)
 				return
 			end
 		end
+
+		-- Find any visible auxiliary buffer to focus
+		local visible_aux_windows = {}
+		for _, win in ipairs(vim.api.nvim_list_wins()) do
+			if is_window_visible(win) and win ~= current_win then
+				local buf = vim.api.nvim_win_get_buf(win)
+				if not is_main_buffer(buf) then
+					table.insert(visible_aux_windows, win)
+				end
+			end
+		end
+
+		-- Focus on the first visible auxiliary window found
+		if #visible_aux_windows > 0 then
+			vim.g.last_main_win = current_win
+			vim.g.last_aux_win = visible_aux_windows[1]
+			vim.api.nvim_set_current_win(visible_aux_windows[1])
+			return
+		end
+
+		-- No auxiliary windows visible, provide feedback
+		vim.notify("No auxiliary windows open", vim.log.levels.INFO, { timeout = 1000 })
 	else
-		-- If in auxiliary buffer, go back to last main buffer if exists
-		if vim.g.last_main_win and vim.api.nvim_win_is_valid(vim.g.last_main_win) then
-			vim.g.last_aux_win = vim.api.nvim_get_current_win()
-			vim.api.nvim_set_current_win(vim.g.last_main_win)
-			return
-		end
-
-		-- Otherwise find any main buffer
-		for _, win in ipairs(vim.api.nvim_list_wins()) do
-			local buf = vim.api.nvim_win_get_buf(win)
-			if is_main_buffer(buf) then
-				vim.g.last_aux_win = vim.api.nvim_get_current_win()
-				vim.g.last_main_win = win
-				vim.api.nvim_set_current_win(win)
+		-- If in auxiliary buffer, go back to last main buffer if it's visible
+		if vim.g.last_main_win and is_window_visible(vim.g.last_main_win) then
+			local main_buf = vim.api.nvim_win_get_buf(vim.g.last_main_win)
+			-- Double-check that the main window still contains a main buffer
+			if is_main_buffer(main_buf) then
+				vim.g.last_aux_win = current_win
+				vim.api.nvim_set_current_win(vim.g.last_main_win)
 				return
 			end
 		end
+
+		-- Find any visible main buffer
+		for _, win in ipairs(vim.api.nvim_list_wins()) do
+			if is_window_visible(win) and win ~= current_win then
+				local buf = vim.api.nvim_win_get_buf(win)
+				if is_main_buffer(buf) then
+					vim.g.last_aux_win = current_win
+					vim.g.last_main_win = win
+					vim.api.nvim_set_current_win(win)
+					return
+				end
+			end
+		end
+
+		-- No main windows found, provide feedback
+		vim.notify("No main windows available", vim.log.levels.INFO, { timeout = 1000 })
 	end
 end, { desc = "Toggle between main and auxiliary buffers", silent = true })
 

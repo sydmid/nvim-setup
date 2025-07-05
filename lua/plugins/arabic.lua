@@ -79,7 +79,7 @@ return {
       end, { desc = "Disable Arabic language support" })
 
       -- Add keymappings for quickly toggling Arabic mode
-      vim.keymap.set("n", "<leader>ar", ":ArabicToggle<CR>", { silent = true, desc = "Toggle Arabic Mode" })
+      vim.keymap.set("n", "<leader>ta", ":ArabicToggle<CR>", { silent = true, desc = "Toggle Arabic Mode" })
 
       -- In Arabic mode, set options for a better Arabic experience
       vim.api.nvim_create_autocmd("OptionSet", {

@@ -131,7 +131,7 @@ return {
 			-- Trigger the highlight setup immediately
 			vim.cmd("doautocmd ColorScheme")
 
-			-- Custom signature help function with better window management
+			-- Custom signature help function with better window management and focus support
 			local function show_signature_help()
 				local params = vim.lsp.util.make_position_params()
 				vim.lsp.buf_request(0, 'textDocument/signatureHelp', params, function(err, result, ctx, config)
@@ -139,7 +139,7 @@ return {
 						return
 					end
 
-					-- Custom window configuration
+					-- Custom window configuration with enhanced focus management
 					local opts = {
 						border = "rounded",
 						focusable = true,
@@ -152,7 +152,52 @@ return {
 						close_events = { "BufHidden" },
 					}
 
-					vim.lsp.handlers["textDocument/signatureHelp"](err, result, ctx, vim.tbl_extend("force", config or {}, opts))
+					local bufnr, winnr = vim.lsp.handlers["textDocument/signatureHelp"](err, result, ctx, vim.tbl_extend("force", config or {}, opts))
+
+					-- Ensure the signature help window is focusable and can be navigated
+					if winnr and vim.api.nvim_win_is_valid(winnr) then
+						-- Set up keymaps for focusing and navigation
+						vim.defer_fn(function()
+							if vim.api.nvim_win_is_valid(winnr) then
+								-- Allow focusing the signature help window with Tab
+								vim.keymap.set('n', '<Tab>', function()
+									vim.api.nvim_set_current_win(winnr)
+								end, { buffer = vim.api.nvim_get_current_buf(), desc = "Focus signature help window", nowait = true })
+
+								vim.keymap.set('i', '<Tab>', function()
+									vim.api.nvim_set_current_win(winnr)
+								end, { buffer = vim.api.nvim_get_current_buf(), desc = "Focus signature help window", nowait = true })
+
+								-- Set up keymaps within the signature help window for navigation
+								if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
+									vim.keymap.set('n', '<Esc>', function()
+										if vim.api.nvim_win_is_valid(winnr) then
+											vim.api.nvim_win_close(winnr, true)
+										end
+									end, { buffer = bufnr, nowait = true })
+
+									vim.keymap.set('n', 'q', function()
+										if vim.api.nvim_win_is_valid(winnr) then
+											vim.api.nvim_win_close(winnr, true)
+										end
+									end, { buffer = bufnr, nowait = true })
+
+									-- Allow scrolling within the signature help window
+									vim.keymap.set('n', 'j', function()
+										vim.api.nvim_win_call(winnr, function()
+											vim.cmd('normal! j')
+										end)
+									end, { buffer = bufnr, nowait = true })
+
+									vim.keymap.set('n', 'k', function()
+										vim.api.nvim_win_call(winnr, function()
+											vim.cmd('normal! k')
+										end)
+									end, { buffer = bufnr, nowait = true })
+								end
+							end
+						end, 10)
+					end
 				end)
 			end
 
@@ -646,11 +691,11 @@ return {
 					-- Use <D-S-i> (Cmd+Shift+I) to manually show function signatures when needed
 					keymap("n", "<D-S-i>", function()
 						show_signature_help()
-					end, { buffer = ev.buf, desc = "Show method signature (manual)", silent = true })
+					end, { buffer = ev.buf, desc = "Show method signature (manual & focusable)", silent = true })
 
 					keymap("i", "<D-S-i>", function()
 						show_signature_help()
-					end, { buffer = ev.buf, desc = "Show method signature (manual)", silent = true })
+					end, { buffer = ev.buf, desc = "Show method signature (manual & focusable)", silent = true })
 
 					-- Signature help navigation between overloads
 					keymap("i", "<C-k>", function()
@@ -743,7 +788,7 @@ return {
 						-- Use vim.lsp.buf.hover with enhanced configuration
 						local params = vim.lsp.util.make_position_params()
 
-						-- Create custom hover handler with enhanced styling
+						-- Create custom hover handler with enhanced styling and proper focus management
 						local function enhanced_hover_handler(err, result, ctx, config)
 							if err then
 								vim.notify("LSP hover error: " .. tostring(err), vim.log.levels.ERROR)
@@ -755,7 +800,7 @@ return {
 								return
 							end
 
-							-- Enhanced window configuration matching peek_definition style
+							-- Enhanced window configuration with proper focus management
 							local opts = vim.tbl_extend("force", config or {}, {
 								border = "rounded",
 								focusable = true,
@@ -769,12 +814,53 @@ return {
 							})
 
 							-- Call the default hover handler with our custom styling
-							vim.lsp.handlers["textDocument/hover"](err, result, ctx, opts)
+							local bufnr, winnr = vim.lsp.handlers["textDocument/hover"](err, result, ctx, opts)
+
+							-- Ensure the hover window is focusable and can be navigated
+							if winnr and vim.api.nvim_win_is_valid(winnr) then
+								-- Set up keymaps for the hover window to allow focusing
+								vim.defer_fn(function()
+									if vim.api.nvim_win_is_valid(winnr) then
+										-- Allow focusing the hover window with Tab
+										vim.keymap.set('n', '<Tab>', function()
+											vim.api.nvim_set_current_win(winnr)
+										end, { buffer = vim.api.nvim_get_current_buf(), desc = "Focus hover window", nowait = true })
+
+										-- Set up keymaps within the hover window for navigation
+										if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
+											vim.keymap.set('n', '<Esc>', function()
+												if vim.api.nvim_win_is_valid(winnr) then
+													vim.api.nvim_win_close(winnr, true)
+												end
+											end, { buffer = bufnr, nowait = true })
+
+											vim.keymap.set('n', 'q', function()
+												if vim.api.nvim_win_is_valid(winnr) then
+													vim.api.nvim_win_close(winnr, true)
+												end
+											end, { buffer = bufnr, nowait = true })
+
+											-- Allow scrolling within the hover window
+											vim.keymap.set('n', 'j', function()
+												vim.api.nvim_win_call(winnr, function()
+													vim.cmd('normal! j')
+												end)
+											end, { buffer = bufnr, nowait = true })
+
+											vim.keymap.set('n', 'k', function()
+												vim.api.nvim_win_call(winnr, function()
+													vim.cmd('normal! k')
+												end)
+											end, { buffer = bufnr, nowait = true })
+										end
+									end
+								end, 10)
+							end
 						end
 
 						-- Make the hover request with our enhanced handler
 						vim.lsp.buf_request(0, 'textDocument/hover', params, enhanced_hover_handler)
-					end, { buffer = ev.buf, desc = "Show documentation (Enhanced)", silent = true })
+					end, { buffer = ev.buf, desc = "Show documentation (Enhanced & Focusable)", silent = true })
 
 					-- Fallback hover using native LSP hover (for troubleshooting)
 					keymap("n", "<D-S-h>", function()
