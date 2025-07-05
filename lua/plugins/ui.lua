@@ -15,7 +15,9 @@
 -- Global variables to track current theme
 _G.available_themes = {
 	"iceberg",
-	"tokyonight-storm"
+	"tokyonight-storm",
+	"ofirkai",
+	"ofirkai-darkblue"
 }
 _G.current_theme_index = 1
 _G.current_theme = "iceberg"
@@ -26,29 +28,97 @@ function _G.set_theme(theme_name)
 		if theme == theme_name then
 			_G.current_theme_index = i
 			_G.current_theme = theme_name
-			vim.cmd.colorscheme(theme_name)
-			_G.save_theme_preference()
-			-- Theme-specific configurations
-			if theme_name == "iceberg" then
+
+			-- Handle ofirkai variants specially
+			if theme_name == "ofirkai" then
+				-- Configure classic ofirkai without theme parameter
+				require("ofirkai").setup({
+					theme = nil, -- Classic Monokai colors
+					custom_hlgroups = {},
+					remove_italics = false,
+				})
+				vim.cmd("colorscheme ofirkai")
 				vim.opt.background = "dark"
-				vim.notify("🧊 Set to Iceberg theme (cool blue elegance)", vim.log.levels.INFO)
-			elseif theme_name == "tokyonight-storm" then
-				vim.opt.background = "dark"
-				vim.notify("⛈️ Set to Tokyo Night Storm theme (balanced dark)", vim.log.levels.INFO)
+				vim.notify("🌙 Set to Ofirkai theme (Classic Monokai)", vim.log.levels.INFO)
+			elseif theme_name == "ofirkai-darkblue" then
+				-- Configure ofirkai with dark blue theme
+				require("ofirkai").setup({
+					theme = "dark_blue",
+					custom_hlgroups = {}, -- We'll apply custom highlights after colorscheme loads
+				})
+				vim.cmd("colorscheme ofirkai")
+
+				-- Apply custom dark blue highlights AFTER colorscheme loads
+				local dark_blue_highlights = {
+					-- Enhanced dark blue background and blue-tinted elements
+					Normal = { bg = "#0f1419", fg = "#f8f8f2" }, -- Darker blue-tinted background
+					NormalFloat = { bg = "#0f1419" },
+					SignColumn = { bg = "#0f1419" },
+					LineNr = { bg = "#0f1419", fg = "#3e4a59" },
+					CursorLine = { bg = "#1a1f29" },
+					CursorLineNr = { bg = "#1a1f29", fg = "#5c6a7a" },
+					-- Blue-tinted UI elements
+					StatusLine = { bg = "#1e2731", fg = "#a6d2ff" },
+					StatusLineNC = { bg = "#141922", fg = "#5c6a7a" },
+					TabLine = { bg = "#0f1419", fg = "#5c6a7a" },
+					TabLineFill = { bg = "#0f1419" },
+					TabLineSel = { bg = "#1e2731", fg = "#a6d2ff" },
+					-- Enhanced syntax with blue tints
+					Comment = { fg = "#5c7e9f", italic = true },
+					String = { fg = "#a2d2ff" },
+					Function = { fg = "#7db3ff" },
+					Keyword = { fg = "#6fa8dc" },
+					Type = { fg = "#9fc5e8" },
+					Constant = { fg = "#b3d9ff" },
+				}
+
+				-- Apply the highlights immediately
+				for group, opts in pairs(dark_blue_highlights) do
+					vim.api.nvim_set_hl(0, group, opts)
+				end
+
+				-- Force a redraw to ensure highlights are applied
+				vim.schedule(function()
+					vim.cmd("redraw!")
+				end)
+
+				-- Create autocmd to reapply highlights if colorscheme changes
+				vim.api.nvim_create_autocmd("ColorScheme", {
+					pattern = "ofirkai",
+					group = vim.api.nvim_create_augroup("OfirkaiDarkBlue", { clear = true }),
+					callback = function()
+						if _G.current_theme == "ofirkai-darkblue" then
+							vim.schedule(function()
+								for group, opts in pairs(dark_blue_highlights) do
+									vim.api.nvim_set_hl(0, group, opts)
+								end
+							end)
+						end
+					end,
+				})
+			else
+				vim.cmd("colorscheme " .. theme_name)
+				-- Theme-specific configurations for other themes
+				if theme_name == "iceberg" then
+					vim.opt.background = "dark"
+					vim.notify("🧊 Set to Iceberg theme (cool blue elegance)", vim.log.levels.INFO)
+				elseif theme_name == "tokyonight-storm" then
+					vim.opt.background = "dark"
+					vim.notify("⛈️ Set to Tokyo Night Storm theme (balanced dark)", vim.log.levels.INFO)
+				end
 			end
+
+			_G.save_theme_preference()
 			return
 		end
 	end
 	vim.notify("❌ Theme '" .. theme_name .. "' not found!", vim.log.levels.ERROR)
 end
 
--- Function to toggle between the two available themes
+-- Function to cycle through all available themes
 function _G.toggle_theme()
-	if _G.current_theme == "iceberg" then
-		_G.set_theme("tokyonight-storm")
-	else
-		_G.set_theme("iceberg")
-	end
+	local next_index = (_G.current_theme_index % #_G.available_themes) + 1
+	_G.set_theme(_G.available_themes[next_index])
 end
 
 -- Function to save theme preference
@@ -109,6 +179,16 @@ function _G.telescope_theme_picker()
 			name = "tokyonight-storm",
 			display = "⛈️ Tokyo Night Storm - Balanced dark",
 			description = "Balanced dark variant with storm-like atmosphere"
+		},
+		{
+			name = "ofirkai",
+			display = "� Ofirkai - Monokai for Neovim",
+			description = "Sublime Text-like Monokai theme with treesitter support"
+		},
+		{
+			name = "ofirkai-darkblue",
+			display = "🔵 Ofirkai Dark Blue - Monokai blue variant",
+			description = "Dark blue variant of Monokai with enhanced blue tones"
 		}
 	}
 
@@ -1613,7 +1693,7 @@ return {
 				end,
 			})
 
-			-- Apply immediately
+			-- Apply highlights immediately
 			vim.api.nvim_set_hl(0, "HighlightedyankRegion", {
 				fg = "#121212",
 				bg = "#F4BF75",
@@ -2128,5 +2208,16 @@ return {
 				mode = "background", -- Set the display mode
 			})
 		end,
+	},
+
+	-- Ofirkai.nvim - Monokai theme with treesitter support (default and dark blue variants)
+	{
+		"ofirgall/ofirkai.nvim",
+		priority = 998,
+		config = function()
+			-- Basic setup - actual configuration happens in set_theme function
+			-- Don't auto-load the theme - let iceberg be the default
+		end,
+		lazy = false
 	},
 }
