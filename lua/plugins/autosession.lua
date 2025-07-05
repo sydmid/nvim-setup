@@ -178,20 +178,9 @@ return {
     },
 
     keys = {
-      -- Session management keybindings using 's' prefix to avoid conflicts with workspace tabs
+      -- Minimal session management keybindings
       { "<leader>ss", "<cmd>SessionSave<cr>", desc = "Save session" },
       { "<leader>sr", "<cmd>SessionRestore<cr>", desc = "Restore session" },
-      { "<leader>sf", "<cmd>SessionSearch<cr>", desc = "Find/Restore session (Telescope)" },
-      { "<leader>sd", "<cmd>SessionDelete<cr>", desc = "Delete current session" },
-      { "<leader>sD", "<cmd>SessionDelete ", desc = "Delete specific session" },
-      { "<leader>sS", "<cmd>SessionSave ", desc = "Save session with custom name" },
-      { "<leader>st", "<cmd>SessionToggleAutoSave<cr>", desc = "Toggle auto-save" },
-      { "<leader>sp", "<cmd>SessionPurgeOrphaned<cr>", desc = "Purge orphaned sessions" },
-
-      -- Quick access session commands (alternative keybindings)
-      { "<leader>se", "<cmd>SessionSave<cr>", desc = "󰅩 Save session (alias)" },
-      { "<leader>sl", "<cmd>SessionRestore<cr>", desc = "󰅩 Load session (alias)" },
-      { "<leader>so", "<cmd>SessionSearch<cr>", desc = "󰅩 Open session picker (alias)" },
     },
 
     config = function(_, opts)
