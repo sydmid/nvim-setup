@@ -1336,11 +1336,10 @@ map("n", "<D-w>", smart_buffer_delete, { desc = "Close buffer (with confirmation
 map("n", "<leader>bd", smart_buffer_delete, { desc = "Smart delete buffer", silent = true })
 map({ "n", "i", "v" }, "<D-S-s>", save_all_modified, { desc = "Save all modified buffers", noremap = true, silent = true })
 
--- Theme selector keymap
+-- Background mode selector keymap
 map("n", "<leader>tt", function()
-	_G.telescope_theme_picker()
-end, { desc = "🎨 Select theme", silent = true })
-
+	_G.telescope_background_picker()
+end, { desc = "🎨 Select background mode", silent = true })
 
 
 

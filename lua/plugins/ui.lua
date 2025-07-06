@@ -1,150 +1,97 @@
-
--- Global variables to track current theme
-_G.available_themes = {
-	"iceberg",
-	"tokyonight-storm",
-	"ofirkai",
-	"ofirkai-darkblue"
+-- Global variables to track current background mode
+_G.background_modes = {
+	{ bg = "#121212", cursorline = "#272727", name = "Dark" },
+	{ bg = "#1f1f19", cursorline = "#333227", name = "Warm" },
+	{ bg = "#0f1419", cursorline = "#1a1f29", name = "Cool" }
 }
-_G.current_theme_index = 4
-_G.current_theme = "ofirkai-darkblue"
+_G.current_bg_index = 1
 
--- Function to set a specific theme by name
-function _G.set_theme(theme_name)
-	for i, theme in ipairs(_G.available_themes) do
-		if theme == theme_name then
-			_G.current_theme_index = i
-			_G.current_theme = theme_name
-
-			-- Handle ofirkai variants specially
-			if theme_name == "ofirkai" then
-				-- Configure classic ofirkai without theme parameter
-				require("ofirkai").setup({
-					theme = nil, -- Classic Monokai colors
-					custom_hlgroups = {},
-					remove_italics = false,
-				})
-				vim.cmd("colorscheme ofirkai")
-				vim.opt.background = "dark"
-				-- vim.notify("🌙 Set to Ofirkai theme (Classic Monokai)", vim.log.levels.INFO)
-			elseif theme_name == "ofirkai-darkblue" then
-				-- Configure ofirkai with dark blue theme
-				require("ofirkai").setup({
-					theme = "dark_blue",
-					custom_hlgroups = {}, -- We'll apply custom highlights after colorscheme loads
-				})
-				vim.cmd("colorscheme ofirkai")
-
-				-- Apply custom dark blue highlights AFTER colorscheme loads
-				local dark_blue_highlights = {
-					-- Enhanced dark blue background and blue-tinted elements
-					Normal = { bg = "#0f1419", fg = "#f8f8f2" }, -- Darker blue-tinted background
-					NormalFloat = { bg = "#0f1419" },
-					SignColumn = { bg = "#0f1419" },
-					LineNr = { bg = "#0f1419", fg = "#3e4a59" },
-					CursorLine = { bg = "#1a1f29" },
-					CursorLineNr = { bg = "#1a1f29", fg = "#5c6a7a" },
-					-- Blue-tinted UI elements
-					StatusLine = { bg = "#1e2731", fg = "#a6d2ff" },
-					StatusLineNC = { bg = "#141922", fg = "#5c6a7a" },
-					TabLine = { bg = "#0f1419", fg = "#5c6a7a" },
-					TabLineFill = { bg = "#0f1419" },
-					TabLineSel = { bg = "#1e2731", fg = "#a6d2ff" },
-					-- Enhanced syntax with blue tints
-					Comment = { fg = "#5c7e9f", italic = true },
-					String = { fg = "#a2d2ff" },
-					Function = { fg = "#7db3ff" },
-					Keyword = { fg = "#6fa8dc" },
-					Type = { fg = "#9fc5e8" },
-					Constant = { fg = "#b3d9ff" },
-				}
-
-				-- Apply the highlights immediately
-				for group, opts in pairs(dark_blue_highlights) do
-					vim.api.nvim_set_hl(0, group, opts)
-				end
-
-				-- Force a redraw to ensure highlights are applied
-				vim.schedule(function()
-					vim.cmd("redraw!")
-				end)
-
-				-- Create autocmd to reapply highlights if colorscheme changes
-				vim.api.nvim_create_autocmd("ColorScheme", {
-					pattern = "ofirkai",
-					group = vim.api.nvim_create_augroup("OfirkaiDarkBlue", { clear = true }),
-					callback = function()
-						if _G.current_theme == "ofirkai-darkblue" then
-							vim.schedule(function()
-								for group, opts in pairs(dark_blue_highlights) do
-									vim.api.nvim_set_hl(0, group, opts)
-								end
-							end)
-						end
-					end,
-				})
-			else
-				vim.cmd("colorscheme " .. theme_name)
-				-- Theme-specific configurations for other themes
-				if theme_name == "iceberg" then
-					vim.opt.background = "dark"
-					-- vim.notify("🧊 Set to Iceberg theme (cool blue elegance)", vim.log.levels.INFO)
-				elseif theme_name == "tokyonight-storm" then
-					vim.opt.background = "dark"
-					-- vim.notify("⛈️ Set to Tokyo Night Storm theme (balanced dark)", vim.log.levels.INFO)
-				end
-			end
-
-			_G.save_theme_preference()
-			return
-		end
+-- Function to set background mode
+function _G.set_background_mode(mode_index)
+	if mode_index < 1 or mode_index > #_G.background_modes then
+		vim.notify("❌ Invalid background mode index!", vim.log.levels.ERROR)
+		return
 	end
-	vim.notify("❌ Theme '" .. theme_name .. "' not found!", vim.log.levels.ERROR)
+
+	_G.current_bg_index = mode_index
+	local mode = _G.background_modes[mode_index]
+
+	-- Apply custom background highlights
+	local bg_highlights = {
+		Normal = { bg = mode.bg },
+		NormalFloat = { bg = mode.bg },
+		SignColumn = { bg = mode.bg },
+		LineNr = { bg = mode.bg },
+		CursorLine = { bg = mode.cursorline },
+		CursorLineNr = { bg = mode.cursorline },
+		StatusLine = { bg = mode.cursorline },
+		TabLineFill = { bg = mode.bg },
+		Pmenu = { bg = mode.bg },
+		PmenuBorder = { bg = mode.bg },
+		TelescopeNormal = { bg = mode.bg },
+		TelescopeBorder = { bg = mode.bg },
+		TelescopeResultsNormal = { bg = mode.bg },
+		TelescopeResultsBorder = { bg = mode.bg },
+		TelescopePreviewNormal = { bg = mode.bg },
+		TelescopePreviewBorder = { bg = mode.bg },
+		NoiceCmdlinePopup = { bg = mode.bg },
+		NoiceCmdlinePopupBorder = { bg = mode.bg },
+		NoicePopup = { bg = mode.bg },
+		NoicePopupBorder = { bg = mode.bg },
+		NoiceConfirm = { bg = mode.bg },
+		NoiceConfirmBorder = { bg = mode.bg },
+	}
+
+	-- Apply the highlights
+	for group, opts in pairs(bg_highlights) do
+		local current_hl = vim.api.nvim_get_hl(0, { name = group })
+		vim.api.nvim_set_hl(0, group, vim.tbl_extend("force", current_hl, opts))
+	end
+
+	_G.save_background_preference()
+	vim.notify("🎨 Background mode: " .. mode.name, vim.log.levels.INFO)
 end
 
--- Function to cycle through all available themes
-function _G.toggle_theme()
-	local next_index = (_G.current_theme_index % #_G.available_themes) + 1
-	_G.set_theme(_G.available_themes[next_index])
+-- Function to cycle through background modes
+function _G.toggle_background_mode()
+	local next_index = (_G.current_bg_index % #_G.background_modes) + 1
+	_G.set_background_mode(next_index)
 end
 
--- Function to save theme preference
-function _G.save_theme_preference()
-	local theme_file = vim.fn.stdpath("data") .. "/theme_preference.lua"
-	local file = io.open(theme_file, "w")
+-- Function to save background preference
+function _G.save_background_preference()
+	local bg_file = vim.fn.stdpath("data") .. "/background_preference.lua"
+	local file = io.open(bg_file, "w")
 	if file then
 		file:write("return {\n")
-		file:write("  theme = \"" .. _G.current_theme .. "\",\n")
-		file:write("  index = " .. _G.current_theme_index .. "\n")
+		file:write("  mode_index = " .. _G.current_bg_index .. "\n")
 		file:write("}\n")
 		file:close()
 	end
 end
 
--- Function to load theme preference
-function _G.load_theme_preference()
-	local theme_file = vim.fn.stdpath("data") .. "/theme_preference.lua"
-	if vim.fn.filereadable(theme_file) == 1 then
-		local ok, prefs = pcall(dofile, theme_file)
-		if ok and prefs and prefs.theme then
-			for i, theme in ipairs(_G.available_themes) do
-				if theme == prefs.theme then
-					_G.current_theme_index = i
-					_G.current_theme = prefs.theme
-					return
-				end
-			end
+-- Function to load background preference
+function _G.load_background_preference()
+	local bg_file = vim.fn.stdpath("data") .. "/background_preference.lua"
+	if vim.fn.filereadable(bg_file) == 1 then
+		local ok, prefs = pcall(dofile, bg_file)
+		if ok and prefs and prefs.mode_index then
+			_G.current_bg_index = prefs.mode_index
 		end
 	end
 end
 
--- Function to list all available themes
-function _G.list_themes()
-	-- vim.notify("Available themes: " .. table.concat(_G.available_themes, ", ") .. "\nCurrent: " .. _G.current_theme, vim.log.levels.INFO)
+-- Function to list all available background modes
+function _G.list_background_modes()
+	local mode_names = {}
+	for i, mode in ipairs(_G.background_modes) do
+		table.insert(mode_names, mode.name)
+	end
+	vim.notify("Background modes: " .. table.concat(mode_names, ", ") .. "\nCurrent: " .. _G.background_modes[_G.current_bg_index].name, vim.log.levels.INFO)
 end
 
--- Function to create a Telescope theme picker
-function _G.telescope_theme_picker()
+-- Function to create a Telescope background mode picker
+function _G.telescope_background_picker()
 	if not pcall(require, "telescope") then
 		vim.notify("Telescope not available", vim.log.levels.WARN)
 		return
@@ -156,47 +103,36 @@ function _G.telescope_theme_picker()
 	local actions = require("telescope.actions")
 	local action_state = require("telescope.actions.state")
 
-	local theme_info = {
-		{
-			name = "iceberg",
-			display = "🧊 Iceberg - Cool blue elegance",
-			description = "Cool blue theme with elegant contrast and readability"
-		},
-		{
-			name = "tokyonight-storm",
-			display = "⛈️ Tokyo Night Storm - Balanced dark",
-			description = "Balanced dark variant with storm-like atmosphere"
-		},
-		{
-			name = "ofirkai",
-			display = "� Ofirkai - Monokai for Neovim",
-			description = "Sublime Text-like Monokai theme with treesitter support"
-		},
-		{
-			name = "ofirkai-darkblue",
-			display = "🔵 Ofirkai Dark Blue - Monokai blue variant",
-			description = "Dark blue variant of Monokai with enhanced blue tones"
-		}
-	}
+	local mode_info = {}
+	for i, mode in ipairs(_G.background_modes) do
+		table.insert(mode_info, {
+			index = i,
+			name = mode.name,
+			bg = mode.bg,
+			cursorline = mode.cursorline,
+			display = string.format("🎨 %s - BG: %s, Line: %s", mode.name, mode.bg, mode.cursorline),
+			description = string.format("Background: %s, Active line: %s", mode.bg, mode.cursorline)
+		})
+	end
 
 	pickers.new({}, {
-		prompt_title = "🎨 Theme Selector (Current: " .. _G.current_theme .. ")",
+		prompt_title = "🎨 Background Mode Selector (Current: " .. _G.background_modes[_G.current_bg_index].name .. ")",
 		initial_mode = "normal",
 		finder = finders.new_table({
-			results = theme_info,
+			results = mode_info,
 			entry_maker = function(entry)
 				local display_text = entry.display
-				-- Add current theme indicator with special styling
-				if entry.name == _G.current_theme then
+				-- Add current mode indicator
+				if entry.index == _G.current_bg_index then
 					display_text = "✓ " .. entry.display .. " 🎯 (CURRENT)"
 				end
 
 				return {
-					value = entry.name,
+					value = entry.index,
 					display = display_text,
 					ordinal = entry.name .. " " .. entry.display,
-					theme_info = entry,
-					is_current = entry.name == _G.current_theme
+					mode_info = entry,
+					is_current = entry.index == _G.current_bg_index
 				}
 			end
 		}),
@@ -206,7 +142,7 @@ function _G.telescope_theme_picker()
 				actions.close(prompt_bufnr)
 				local selection = action_state.get_selected_entry()
 				if selection then
-					_G.set_theme(selection.value)
+					_G.set_background_mode(selection.value)
 				end
 			end)
 			return true
@@ -214,42 +150,7 @@ function _G.telescope_theme_picker()
 	}):find()
 end
 
--- Function to add new themes dynamically
-function _G.add_theme(theme_name, description, setup_function)
-	if not vim.tbl_contains(_G.available_themes, theme_name) then
-		table.insert(_G.available_themes, theme_name)
-		-- vim.notify("✅ Added theme: " .. theme_name, vim.log.levels.INFO)
 
-		-- Run setup function if provided
-		if setup_function and type(setup_function) == "function" then
-			setup_function()
-		end
-	else
-		vim.notify("⚠️ Theme '" .. theme_name .. "' already exists", vim.log.levels.WARN)
-	end
-end
-
--- Function to remove themes
-function _G.remove_theme(theme_name)
-	if theme_name == "iceberg" then
-		vim.notify("❌ Cannot remove default theme: " .. theme_name, vim.log.levels.ERROR)
-		return
-	end
-
-	for i, theme in ipairs(_G.available_themes) do
-		if theme == theme_name then
-			table.remove(_G.available_themes, i)
-			-- vim.notify("🗑️ Removed theme: " .. theme_name, vim.log.levels.INFO)
-
-			-- Switch to default theme if current theme was removed
-			if _G.current_theme == theme_name then
-				_G.set_theme("iceberg")
-			end
-			return
-		end
-	end
-	vim.notify("❌ Theme '" .. theme_name .. "' not found", vim.log.levels.ERROR)
-end
 
 
 
@@ -438,111 +339,71 @@ local function config_theme()
 	-- Apply all highlights immediately after theme load
 	vim.schedule(function()
 		vim.cmd("doautocmd ColorScheme")
-	end)
+	end)		-- Create user commands for background mode management
+		vim.api.nvim_create_user_command("BackgroundSet", function(opts)
+			local mode_index = tonumber(opts.args)
+			if mode_index then
+				_G.set_background_mode(mode_index)
+			else
+				vim.notify("❌ Please provide a valid mode index (1-3)", vim.log.levels.ERROR)
+			end
+		end, {
+			desc = "Set a specific background mode",
+			nargs = 1,
+		})
 
-	-- Create user commands for theme management
-	vim.api.nvim_create_user_command("ThemeSet", function(opts)
-		_G.set_theme(opts.args)
-	end, {
-		desc = "Set a specific theme",
-		nargs = 1,
-		complete = function(ArgLead, CmdLine, CursorPos)
-			return vim.tbl_filter(function(theme)
-				return theme:match("^" .. ArgLead)
-			end, _G.available_themes)
-		end
-	})
+		vim.api.nvim_create_user_command("BackgroundList", function()
+			_G.list_background_modes()
+		end, { desc = "List all available background modes" })
 
-	vim.api.nvim_create_user_command("ThemeList", function()
-		_G.list_themes()
-	end, { desc = "List all available themes" })
-
-	vim.api.nvim_create_user_command("ThemeSelect", function()
-		_G.telescope_theme_picker()
-	end, { desc = "Select theme with Telescope" })
-
-	vim.api.nvim_create_user_command("ThemeAdd", function(opts)
-		_G.add_theme(opts.args)
-	end, {
-		desc = "Add a new theme to the cycle",
-		nargs = 1
-	})
-
-	vim.api.nvim_create_user_command("ThemeRemove", function(opts)
-		_G.remove_theme(opts.args)
-	end, {
-		desc = "Remove a theme from the cycle",
-		nargs = 1,
-		complete = function(ArgLead, CmdLine, CursorPos)
-			return vim.tbl_filter(function(theme)
-				return theme:match("^" .. ArgLead) and not vim.tbl_contains({"oxocarbon", "no-clown-fiesta"}, theme)
-			end, _G.available_themes)
-		end
-	})
+		vim.api.nvim_create_user_command("BackgroundSelect", function()
+			_G.telescope_background_picker()
+		end, { desc = "Select background mode with Telescope" })
 end
 return {
-	-- Default colorscheme - Iceberg (cool blue elegance)
+	-- One Monokai colorscheme - the only theme we need
 	{
-		"cocopon/iceberg.vim",
+		"cpea2506/one_monokai.nvim",
 		priority = 1000,
 		config = function()
-			-- Configure Iceberg theme
-			vim.g.iceberg_transparent = 0
-
-			-- Load saved theme preference or use iceberg as default
-			_G.load_theme_preference()
-
-			-- Configure background and set the theme
-			vim.opt.background = "dark"
-			vim.cmd.colorscheme(_G.current_theme)
-		end,
-		lazy = false
-	},
-
-	-- Colorscheme - Tokyo Night Storm (balanced dark)
-	{
-		"folke/tokyonight.nvim",
-		priority = 999,
-		config = function()
-			-- Configure Tokyo Night theme
-			require("tokyonight").setup({
-				-- use the storm style by default
-				style = "storm", -- The theme comes in four styles: storm, moon, night and day
-				-- transparent background
+			-- Configure One Monokai theme
+			require("one_monokai").setup({
 				transparent = false,
-				-- configure the terminal colors
-				terminal_colors = true,
-				styles = {
-					-- style for comments
-					comments = { italic = true },
-					-- style for keywords
-					keywords = { italic = true },
-					-- style for functions
-					functions = {},
-					-- style for variables
-					variables = {},
-					-- Background styles: dark, transparent, normal
-					sidebars = "dark", -- style for sidebars
-					floats = "dark", -- style for floating windows
-				},
-				sidebars = { "qf", "help" }, -- Set a darker background on sidebar-like windows
-				day_brightness = 0.3, -- Adjusts the brightness of the colors of the Day style
-				hide_inactive_statusline = false, -- Enabling this option, will hide inactive statuslines
-				dim_inactive = false, -- dims inactive windows
-				lualine_bold = false, -- When true, section headers in the lualine theme will be bold
-
-				--- You can override specific color groups to use other groups or a hex color
-				--- function will be called with a ColorScheme table
-				---@param colors ColorScheme
-				on_colors = function(colors) end,
-
-				--- You can override specific highlights to use other groups or a hex color
-				--- function will be called with a Highlights and ColorScheme table
-				---@param highlights Highlights
-				---@param colors ColorScheme
-				on_highlights = function(highlights, colors) end,
+				colors = {},
+				highlights = function(colors)
+					return {}
+				end,
+				italics = true,
 			})
-			-- Don't auto-load the theme - let iceberg be the default
+
+			-- Load saved background preference
+			_G.load_background_preference()
+
+			-- Set the colorscheme
+			vim.opt.background = "dark"
+			vim.cmd.colorscheme("one_monokai")
+
+			-- Apply the current background mode
+			_G.set_background_mode(_G.current_bg_index)
+
+			-- Create autocmd to reapply background highlights when colorscheme changes
+			vim.api.nvim_create_autocmd("ColorScheme", {
+				pattern = "one_monokai",
+				group = vim.api.nvim_create_augroup("OneMonokaiBackground", { clear = true }),
+				callback = function()
+					-- Reapply current background mode
+					_G.set_background_mode(_G.current_bg_index)
+				end,
+			})
+
+			-- Add keymaps for background mode
+			vim.keymap.set("n", "<leader>bb", function()
+				_G.toggle_background_mode()
+			end, { desc = "🎨 Toggle background mode", silent = true })
+
+			vim.keymap.set("n", "<leader>bs", function()
+				_G.telescope_background_picker()
+			end, { desc = "🎨 Select background mode", silent = true })
 		end,
 		lazy = false
 	},
@@ -2197,14 +2058,4 @@ return {
 		end,
 	},
 
-	-- Ofirkai.nvim - Monokai theme with treesitter support (default and dark blue variants)
-	{
-		"ofirgall/ofirkai.nvim",
-		priority = 998,
-		config = function()
-			-- Basic setup - actual configuration happens in set_theme function
-			-- Don't auto-load the theme - let iceberg be the default
-		end,
-		lazy = false
-	},
 }
