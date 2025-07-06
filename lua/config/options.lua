@@ -50,13 +50,12 @@ opt.ttimeoutlen = 0               -- Eliminate escape delay completely
 opt.matchpairs:append("<:>")      -- Add <> to matching pairs
 opt.termguicolors = true          -- True color support
 opt.background = "dark"
-opt.signcolumn = "yes"
+opt.signcolumn = "yes:2"          -- Always show sign column with fixed width of 2
 opt.updatetime = 100              -- Faster updates
 opt.scrolloff = 8                 -- Keep lines visible around cursor
 opt.sidescrolloff = 8             -- Keep columns visible around cursor
 opt.wrap = false                  -- Don't wrap lines
 opt.mouse = "a"                   -- Enable mouse in all modes
-opt.signcolumn = "yes"            -- Always show sign column
 
 -- backspace
 opt.backspace = "indent,eol,start" -- allow backspace on indent, end of line or insert mode start position

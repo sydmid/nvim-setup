@@ -54,8 +54,8 @@ return {
       color_mode = true,
     },
     lightbulb = {
-      enable = true,
-      sign = true,
+      enable = false,
+      sign = false,
       virtual_text = false,
     },
     beacon = {
