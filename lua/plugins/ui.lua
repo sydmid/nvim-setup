@@ -1,16 +1,3 @@
---
--- Comprehensive UI theming for Neovim with no-clown-fiesta theme
--- Features:
--- - Consistent #121212 background across ALL UI elements (main editor, Telescope, LSP floating windows, command line)
--- - Enhanced syntax highlighting with better contrast and vibrancy
--- - Telescope theming with proper title colors and selection highlighting
--- - LSP hover/signature help windows styled to match the theme
--- - Command line (noice) floating windows with consistent background
--- - Completion menu (nvim-cmp) styled with theme colors
--- - LSP Saga windows themed consistently
--- - Auto-persistence of custom highlights after theme changes via ColorScheme autocmd
--- - Theme selector with <leader>tt for choosing between available themes
---
 
 -- Global variables to track current theme
 _G.available_themes = {
@@ -19,8 +6,8 @@ _G.available_themes = {
 	"ofirkai",
 	"ofirkai-darkblue"
 }
-_G.current_theme_index = 1
-_G.current_theme = "iceberg"
+_G.current_theme_index = 4
+_G.current_theme = "ofirkai-darkblue"
 
 -- Function to set a specific theme by name
 function _G.set_theme(theme_name)
@@ -880,7 +867,7 @@ return {
 		"nvim-telescope/telescope.nvim",
 		keys = {
 			{
-				"<D-o>",
+				"<D-S-o>",
 				function()
 					-- Create advanced symbol picker with hierarchical document order
 					local function ordered_symbols_picker()
@@ -1131,7 +1118,7 @@ return {
 				desc = "Document Symbols (Hierarchical)",
 			},
 			{
-				"<D-S-o>", -- Cmd+Shift+O for filtering
+				"<D-o>", -- Cmd+Shift+O for filtering
 				function()
 					-- Create symbol type filter picker
 					local function symbol_type_filter_picker()

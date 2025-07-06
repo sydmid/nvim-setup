@@ -30,9 +30,7 @@ return {
 						[vim.diagnostic.severity.HINT] = " ",
 					}
 				},
-				underline = {
-					severity = { min = vim.diagnostic.severity.HINT } -- Underline all diagnostics
-				},
+				underline = false, -- Disabled - No diagnostic underlines
 				update_in_insert = false,
 				severity_sort = true,
 				float = {
