@@ -9,8 +9,7 @@ return {
 		config = function()
 			-- Setup tiny-inline-diagnostic with modern configuration
 			require("tiny-inline-diagnostic").setup({
-				-- Use minimal preset for better space management
-				preset = "minimal", -- Changed from "modern" to "minimal" for better overflow handling
+				preset = "powerline",
 
 				-- Background styling for better visibility
 				transparent_bg = false,
@@ -27,16 +26,6 @@ return {
 					mixing_color = "#1e1e1e", -- Dark mixing color for better contrast
 				},
 
-				-- Custom signs and blend for better visual appeal
-			  signs = {
-    left = "",
-    right = "",
-    diag = "●",
-    arrow = "    ",
-    up_arrow = "    ",
-    vertical = " │",
-    vertical_end = " └",
-  },
 				blend = {
 					factor = 0.27, -- Slightly more blending for softer appearance
 				},
