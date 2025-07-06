@@ -1396,3 +1396,8 @@ end, { desc = "Set 4-space indentation" })
 -- Code Runner - Run code snippets and files
 map("n", "<leader>sr", "<cmd>RunCode<CR>", { desc = "Run code in current buffer" })
 map("v", "<leader>sr", "<cmd>RunCode<CR>", { desc = "Run selected code" })
+
+-- Notification filtering toggle
+map("n", "<leader>un", function()
+  _G.toggle_notification_filter()
+end, { desc = "Toggle notification filter (errors only)" })

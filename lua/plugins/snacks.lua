@@ -14,6 +14,28 @@ return {
     notifier = {
       enabled = true,
       timeout = 3000,
+      -- Only show error notifications by default
+      style = "compact",
+      top_down = true,
+      width = { min = 40, max = 0.4 },
+      height = { min = 1, max = 0.6 },
+      -- Custom filter to only show errors and warnings
+      filter = function(notif)
+        -- Handle both string and number levels
+        local level = notif.level
+        if type(level) == "string" then
+          -- Convert string levels to numbers
+          local level_map = {
+            ERROR = vim.log.levels.ERROR,
+            WARN = vim.log.levels.WARN,
+            INFO = vim.log.levels.INFO,
+            DEBUG = vim.log.levels.DEBUG,
+          }
+          level = level_map[level] or vim.log.levels.INFO
+        end
+        -- Only show ERROR and WARN level notifications
+        return level and level >= vim.log.levels.WARN
+      end,
     },
     picker = {
       enabled = true,

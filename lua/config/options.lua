@@ -73,3 +73,30 @@ opt.swapfile = false
 -- Set cursor to block shape in all modes
 -- opt.guicursor = "" -- Empty string makes cursor block in all modes
 -- opt.guicursor = "n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50"
+
+-- Notification filtering - only show errors and warnings
+-- Store the original vim.notify function
+local original_notify = vim.notify
+local notifications_filtered = true
+
+-- Override vim.notify to filter out info messages
+vim.notify = function(msg, level, opts)
+  -- Only show ERROR and WARN level notifications when filtering is enabled
+  if notifications_filtered and level and (level >= vim.log.levels.WARN) then
+    return original_notify(msg, level, opts)
+  elseif not notifications_filtered then
+    return original_notify(msg, level, opts)
+  end
+  -- Silently ignore INFO and DEBUG messages when filtering is enabled
+  return
+end
+
+-- Function to toggle notification filtering
+function _G.toggle_notification_filter()
+  notifications_filtered = not notifications_filtered
+  if notifications_filtered then
+    vim.notify("Notification filtering enabled (errors/warnings only)", vim.log.levels.WARN)
+  else
+    vim.notify("Notification filtering disabled (all messages)", vim.log.levels.WARN)
+  end
+end

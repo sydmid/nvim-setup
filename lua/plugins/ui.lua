@@ -26,7 +26,7 @@ function _G.set_theme(theme_name)
 				})
 				vim.cmd("colorscheme ofirkai")
 				vim.opt.background = "dark"
-				vim.notify("🌙 Set to Ofirkai theme (Classic Monokai)", vim.log.levels.INFO)
+				-- vim.notify("🌙 Set to Ofirkai theme (Classic Monokai)", vim.log.levels.INFO)
 			elseif theme_name == "ofirkai-darkblue" then
 				-- Configure ofirkai with dark blue theme
 				require("ofirkai").setup({
@@ -88,10 +88,10 @@ function _G.set_theme(theme_name)
 				-- Theme-specific configurations for other themes
 				if theme_name == "iceberg" then
 					vim.opt.background = "dark"
-					vim.notify("🧊 Set to Iceberg theme (cool blue elegance)", vim.log.levels.INFO)
+					-- vim.notify("🧊 Set to Iceberg theme (cool blue elegance)", vim.log.levels.INFO)
 				elseif theme_name == "tokyonight-storm" then
 					vim.opt.background = "dark"
-					vim.notify("⛈️ Set to Tokyo Night Storm theme (balanced dark)", vim.log.levels.INFO)
+					-- vim.notify("⛈️ Set to Tokyo Night Storm theme (balanced dark)", vim.log.levels.INFO)
 				end
 			end
 
@@ -140,7 +140,7 @@ end
 
 -- Function to list all available themes
 function _G.list_themes()
-	vim.notify("Available themes: " .. table.concat(_G.available_themes, ", ") .. "\nCurrent: " .. _G.current_theme, vim.log.levels.INFO)
+	-- vim.notify("Available themes: " .. table.concat(_G.available_themes, ", ") .. "\nCurrent: " .. _G.current_theme, vim.log.levels.INFO)
 end
 
 -- Function to create a Telescope theme picker
@@ -218,7 +218,7 @@ end
 function _G.add_theme(theme_name, description, setup_function)
 	if not vim.tbl_contains(_G.available_themes, theme_name) then
 		table.insert(_G.available_themes, theme_name)
-		vim.notify("✅ Added theme: " .. theme_name, vim.log.levels.INFO)
+		-- vim.notify("✅ Added theme: " .. theme_name, vim.log.levels.INFO)
 
 		-- Run setup function if provided
 		if setup_function and type(setup_function) == "function" then
@@ -239,7 +239,7 @@ function _G.remove_theme(theme_name)
 	for i, theme in ipairs(_G.available_themes) do
 		if theme == theme_name then
 			table.remove(_G.available_themes, i)
-			vim.notify("🗑️ Removed theme: " .. theme_name, vim.log.levels.INFO)
+			-- vim.notify("🗑️ Removed theme: " .. theme_name, vim.log.levels.INFO)
 
 			-- Switch to default theme if current theme was removed
 			if _G.current_theme == theme_name then
@@ -2147,7 +2147,7 @@ return {
 				"<leader>usd",
 				function()
 					vim.cmd("SatelliteDisable")
-					vim.notify("Satellite scrollbars disabled", vim.log.levels.INFO)
+					-- vim.notify("Satellite scrollbars disabled", vim.log.levels.INFO)
 				end,
 				desc = "Disable Satellite scrollbars",
 			},
@@ -2155,7 +2155,7 @@ return {
 				"<leader>use",
 				function()
 					vim.cmd("SatelliteEnable")
-					vim.notify("Satellite scrollbars enabled", vim.log.levels.INFO)
+					-- vim.notify("Satellite scrollbars enabled", vim.log.levels.INFO)
 				end,
 				desc = "Enable Satellite scrollbars",
 			},
@@ -2163,7 +2163,7 @@ return {
 				"<leader>usr",
 				function()
 					vim.cmd("SatelliteRefresh")
-					vim.notify("Satellite scrollbars refreshed", vim.log.levels.INFO)
+					-- vim.notify("Satellite scrollbars refreshed", vim.log.levels.INFO)
 				end,
 				desc = "Refresh Satellite scrollbars",
 			},
