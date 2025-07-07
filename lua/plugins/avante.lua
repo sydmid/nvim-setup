@@ -20,7 +20,7 @@ return {
       providers = {
         copilot = {
           endpoint = "https://api.githubcopilot.com",
-          model = "gpt-4o-2024-05-13",
+          model = "gpt-4.1",
           proxy = nil,
           allow_insecure = false,
           timeout = 30000,
@@ -64,7 +64,7 @@ return {
         width = 35,
         wrap = true,
         sidebar_header = {
-          enabled = true,
+          enabled = false,
           align = "center",
           rounded = true,
         },
@@ -73,7 +73,7 @@ return {
           height = 8,
         },
         ask = {
-          floating = false,
+          floating = true,
           start_insert = true,
           border = "rounded",
           focus_on_apply = "ours",
@@ -111,7 +111,7 @@ return {
         },
         submit = {
           normal = "<CR>",
-          insert = "<C-s>",
+          insert = "<C-CR>",
         },
         sidebar = {
           apply_all = "A",
