@@ -1386,3 +1386,10 @@ map("v", "<leader>sr", "<cmd>RunCode<CR>", { desc = "Run selected code" })
 map("n", "<leader>un", function()
   _G.toggle_notification_filter()
 end, { desc = "Toggle notification filter (errors only)" })
+-- Normal mode: ⌘+/ (comment line and move down)
+map("n", "<D-/>", function()
+	require("Comment.api").toggle.linewise.current()
+	vim.cmd("normal! j") -- move down a line
+end, { silent = true, desc = "Toggle comment line and move down" })
+
+map("v", "<D-/>", "<ESC><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<CR>", { silent = true, desc = "Toggle comment (visual)" })

@@ -179,8 +179,8 @@ return {
 
     keys = {
       -- Minimal session management keybindings
-      { "<leader>ss", "<cmd>SessionSave<cr>", desc = "Save session" },
-      { "<leader>sr", "<cmd>SessionRestore<cr>", desc = "Restore session" },
+      -- { "<leader>ss", "<cmd>SessionSave<cr>", desc = "Save session" },
+      -- { "<leader>sr", "<cmd>SessionRestore<cr>", desc = "Restore session" },
     },
 
     config = function(_, opts)

@@ -2,6 +2,7 @@
 _G.background_modes = {
 	{ bg = "#121212", cursorline = "#272727", name = "Dark" },
 	{ bg = "#1f1f19", cursorline = "#333227", name = "Warm" },
+	{ bg = "#282c34", cursorline = "#383e4a", name = "MonoKai" },
 	{ bg = "#0f1419", cursorline = "#1a1f29", name = "Cool" }
 }
 _G.current_bg_index = 1
@@ -165,201 +166,6 @@ local theme_opts = {
 	},
 }
 
-local function config_theme()
-	local plugin = require("no-clown-fiesta")
-	plugin.setup(theme_opts)
-	-- Don't auto-load the theme - let oxocarbon be the default
-	-- plugin.load()
-
-	-- Apply additional highlight enhancements for better vibrancy and contrast
-	local enhancements = {
-		-- Enhance syntax highlighting with better contrast
-		Normal = { fg = "#E1E1E1", bg = "#121212" }, -- Match Telescope background exactly
-		NormalNC = { fg = "#E1E1E1", bg = "#121212" }, -- Non-current window background
-		Function = { fg = "#88afa2", bold = true }, -- Enhanced cyan for functions
-		Keyword = { fg = "#7E97AB", bold = true }, -- Enhanced gray-blue for keywords
-		String = { fg = "#A2B5C1" }, -- Brighter string color
-		Number = { fg = "#b46958", bold = true }, -- Enhanced red for numbers
-		Comment = { fg = "#727272", italic = true }, -- Italic comments
-		Type = { fg = "#E1E1E1", bold = true }, -- Bold types
-		Constant = { fg = "#E1E1E1", bold = true }, -- Bold constants
-		Special = { fg = "#FFA557" }, -- Orange for special characters
-		PreProc = { fg = "#AA749F" }, -- Purple for preprocessor
-		Identifier = { fg = "#BAD7FF" }, -- Blue for identifiers
-		Statement = { fg = "#7E97AB", bold = true }, -- Bold statements
-
-		-- Enhanced UI elements
-		Visual = { bg = "#2A2A2A" }, -- Darker visual selection for better contrast
-		Search = { fg = "#121212", bg = "#FFA557", bold = true }, -- High contrast search
-		IncSearch = { fg = "#121212", bg = "#F4BF75", bold = true }, -- High contrast incremental search
-		CursorLine = { bg = "#1A1A1A" }, -- Subtle cursor line
-		LineNr = { fg = "#505050" }, -- Brighter line numbers
-		CursorLineNr = { fg = "#AFAFAF", bold = true }, -- Bright current line number
-		StatusLine = { fg = "#E1E1E1", bg = "#202020" }, -- Enhanced statusline
-		WinSeparator = { fg = "#404040" }, -- Brighter window separators
-
-		-- Ensure floating windows match the main background
-		NormalFloat = { fg = "#E1E1E1", bg = "#121212" }, -- Floating windows background
-		FloatBorder = { fg = "#505050", bg = "#121212" }, -- Floating window borders
-
-		-- Enhanced diagnostic colors for better visibility
-		DiagnosticError = { fg = "#E74C3C" }, -- Brighter red
-		DiagnosticWarn = { fg = "#F39C12" }, -- Brighter orange
-		DiagnosticInfo = { fg = "#3498DB" }, -- Brighter blue
-		DiagnosticHint = { fg = "#17A2B8" }, -- Brighter cyan
-
-		-- Enhanced git colors
-		GitSignsAdd = { fg = "#27AE60" }, -- Brighter green
-		GitSignsChange = { fg = "#3498DB" }, -- Brighter blue
-		GitSignsDelete = { fg = "#E74C3C" }, -- Brighter red
-
-		-- Enhanced popup menu
-		Pmenu = { fg = "#E1E1E1", bg = "#121212" }, -- Better contrast popup menu to match theme
-		PmenuSel = { fg = "#121212", bg = "#BAD7FF", bold = true }, -- High contrast selection
-		PmenuBorder = { fg = "#505050", bg = "#121212" }, -- Visible popup border to match theme
-		PmenuKind = { fg = "#88afa2", bg = "#121212" }, -- LSP kind indicators
-		PmenuKindSel = { fg = "#121212", bg = "#BAD7FF", bold = true }, -- Selected LSP kind
-		PmenuExtra = { fg = "#AFAFAF", bg = "#121212" }, -- Extra text
-		PmenuExtraSel = { fg = "#121212", bg = "#BAD7FF" }, -- Selected extra text
-
-		-- Enhanced Telescope theming for consistency with no-clown-fiesta
-		TelescopeNormal = { fg = "#E1E1E1", bg = "#121212" },
-		TelescopeBorder = { fg = "#505050", bg = "#121212" },
-		TelescopePromptNormal = { fg = "#E1E1E1", bg = "#1A1A1A" },
-		TelescopePromptBorder = { fg = "#BAD7FF", bg = "#1A1A1A" },
-		TelescopePromptTitle = { fg = "#121212", bg = "#BAD7FF", bold = true },
-		TelescopePromptPrefix = { fg = "#88afa2", bold = true },
-		TelescopePromptCounter = { fg = "#F4BF75" },
-		TelescopeResultsNormal = { fg = "#E1E1E1", bg = "#121212" },
-		TelescopeResultsBorder = { fg = "#505050", bg = "#121212" },
-		TelescopeResultsTitle = { fg = "#121212", bg = "#90A959", bold = true },
-		TelescopePreviewNormal = { fg = "#E1E1E1", bg = "#121212" },
-		TelescopePreviewBorder = { fg = "#505050", bg = "#121212" },
-		TelescopePreviewTitle = { fg = "#121212", bg = "#FFA557", bold = true },
-		TelescopeSelection = { fg = "#B46958", bg = "#2A2A2A", bold = true },
-		TelescopeSelectionCaret = { fg = "#88afa2", bold = true },
-		TelescopeMatching = { fg = "#F4BF75", bold = true },
-		TelescopeMultiSelection = { fg = "#AA749F", bold = true },
-		TelescopeMultiIcon = { fg = "#AA749F" },
-
-		-- LSP Saga theming for consistency
-		SagaNormal = { fg = "#E1E1E1", bg = "#121212" },
-		SagaBorder = { fg = "#505050", bg = "#121212" },
-		SagaTitle = { fg = "#121212", bg = "#BAD7FF", bold = true },
-		SagaHover = { fg = "#E1E1E1", bg = "#121212" },
-		SagaCodeAction = { fg = "#F4BF75", bold = true },
-		SagaRename = { fg = "#E1E1E1", bg = "#121212" },
-		SagaFinderSelection = { fg = "#E1E1E1", bg = "#2A2A2A", bold = true },
-	}
-
-	-- Apply the enhancements
-	for group, opts in pairs(enhancements) do
-		vim.api.nvim_set_hl(0, group, opts)
-	end
-
-	-- Ensure Telescope highlights are applied after theme load
-	vim.api.nvim_create_autocmd("ColorScheme", {
-		group = vim.api.nvim_create_augroup("TelescopeThemeEnhancements", { clear = true }),
-		callback = function()
-			-- Ensure main background matches Telescope background exactly
-			vim.api.nvim_set_hl(0, "Normal", { fg = "#E1E1E1", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "NormalNC", { fg = "#E1E1E1", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "NormalFloat", { fg = "#E1E1E1", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "FloatBorder", { fg = "#505050", bg = "#121212" })
-
-			-- Re-apply Telescope highlights to ensure they persist after theme changes
-			local telescope_highlights = {
-				TelescopeNormal = { fg = "#E1E1E1", bg = "#121212" },
-				TelescopeBorder = { fg = "#505050", bg = "#121212" },
-				TelescopePromptNormal = { fg = "#E1E1E1", bg = "#1A1A1A" },
-				TelescopePromptBorder = { fg = "#BAD7FF", bg = "#1A1A1A" },
-				TelescopePromptTitle = { fg = "#121212", bg = "#BAD7FF", bold = true },
-				TelescopePromptPrefix = { fg = "#88afa2", bold = true },
-				TelescopePromptCounter = { fg = "#F4BF75" },
-				TelescopeResultsNormal = { fg = "#E1E1E1", bg = "#121212" },
-				TelescopeResultsBorder = { fg = "#505050", bg = "#121212" },
-				TelescopeResultsTitle = { fg = "#121212", bg = "#90A959", bold = true },
-				TelescopePreviewNormal = { fg = "#E1E1E1", bg = "#121212" },
-				TelescopePreviewBorder = { fg = "#505050", bg = "#121212" },
-				TelescopePreviewTitle = { fg = "#121212", bg = "#FFA557", bold = true },
-				TelescopeSelection = { fg = "#B46958", bg = "#2A2A2A", bold = true },
-				TelescopeSelectionCaret = { fg = "#88afa2", bold = true },
-				TelescopeMatching = { fg = "#F4BF75", bold = true },
-				TelescopeMultiSelection = { fg = "#AA749F", bold = true },
-				TelescopeMultiIcon = { fg = "#AA749F" },
-			}
-
-			for group, opts in pairs(telescope_highlights) do
-				vim.api.nvim_set_hl(0, group, opts)
-			end
-
-			-- Re-apply LSP floating window highlights
-			vim.api.nvim_set_hl(0, "LspSignatureActiveParameter", {
-				bg = "#2A2A2A",
-				fg = "#F4BF75",
-				bold = true,
-				italic = true
-			})
-			vim.api.nvim_set_hl(0, "FloatTitle", {
-				bg = "#BAD7FF",
-				fg = "#121212",
-				bold = true
-			})
-
-			-- Re-apply noice highlights
-			vim.api.nvim_set_hl(0, "NoiceCmdlinePopup", { fg = "#E1E1E1", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "NoiceCmdlinePopupBorder", { fg = "#505050", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "NoiceCmdlinePrompt", { fg = "#BAD7FF", bold = true })
-			vim.api.nvim_set_hl(0, "NoiceCmdlineIcon", { fg = "#88afa2" })
-			vim.api.nvim_set_hl(0, "NoicePopup", { fg = "#E1E1E1", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "NoicePopupBorder", { fg = "#505050", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "NoiceConfirm", { fg = "#E1E1E1", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "NoiceConfirmBorder", { fg = "#505050", bg = "#121212" })
-
-			-- Re-apply popup menu highlights for consistency
-			vim.api.nvim_set_hl(0, "Pmenu", { fg = "#E1E1E1", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "PmenuSel", { fg = "#121212", bg = "#BAD7FF", bold = true })
-			vim.api.nvim_set_hl(0, "PmenuBorder", { fg = "#505050", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "PmenuKind", { fg = "#88afa2", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "PmenuKindSel", { fg = "#121212", bg = "#BAD7FF", bold = true })
-			vim.api.nvim_set_hl(0, "PmenuExtra", { fg = "#AFAFAF", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "PmenuExtraSel", { fg = "#121212", bg = "#BAD7FF" })
-
-			-- LSP Saga specific highlights to match theme
-			vim.api.nvim_set_hl(0, "SagaNormal", { fg = "#E1E1E1", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "SagaBorder", { fg = "#505050", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "SagaTitle", { fg = "#121212", bg = "#BAD7FF", bold = true })
-			vim.api.nvim_set_hl(0, "SagaHover", { fg = "#E1E1E1", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "SagaCodeAction", { fg = "#F4BF75", bold = true })
-			vim.api.nvim_set_hl(0, "SagaRename", { fg = "#E1E1E1", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "SagaFinderSelection", { fg = "#E1E1E1", bg = "#2A2A2A", bold = true })
-		end,
-	})
-
-	-- Apply all highlights immediately after theme load
-	vim.schedule(function()
-		vim.cmd("doautocmd ColorScheme")
-	end)		-- Create user commands for background mode management
-		vim.api.nvim_create_user_command("BackgroundSet", function(opts)
-			local mode_index = tonumber(opts.args)
-			if mode_index then
-				_G.set_background_mode(mode_index)
-			else
-				vim.notify("❌ Please provide a valid mode index (1-3)", vim.log.levels.ERROR)
-			end
-		end, {
-			desc = "Set a specific background mode",
-			nargs = 1,
-		})
-
-		vim.api.nvim_create_user_command("BackgroundList", function()
-			_G.list_background_modes()
-		end, { desc = "List all available background modes" })
-
-		vim.api.nvim_create_user_command("BackgroundSelect", function()
-			_G.telescope_background_picker()
-		end, { desc = "Select background mode with Telescope" })
-end
 return {
 	-- One Monokai colorscheme - the only theme we need
 	{
@@ -716,14 +522,7 @@ return {
 
 	-- Telescope symbols (replaces symbols-outline with beautiful telescope UI)
 	-- Features:
-	-- - ⌘+O: Document symbols with hierarchical ordering
-	-- - ⌘+Shift+O: Workspace symbols
-	-- - Ctrl+F: Filter by symbol type (Class, Method, Function, etc.)
-	-- - Ctrl+H: Toggle between hierarchical and flat view
-	-- - Beautiful Nerd Font icons for all symbol types
-	-- - Maintains document order while preserving hierarchy
-	-- - Live preview and fuzzy search
-	-- - Shows symbol counts in filter menu
+	-- Maintains document order while preserving hierarchy
 	{
 		"nvim-telescope/telescope.nvim",
 		keys = {
@@ -909,27 +708,10 @@ return {
 								previewer = conf.grep_previewer({}), -- Use grep_previewer for line-aware preview
 								initial_mode = "normal",
 								attach_mappings = function(prompt_bufnr, map)
-									-- Enhanced toggle between hierarchical and flat view
-									map("i", "<C-h>", function()
-										local current_picker = action_state.get_current_picker(prompt_bufnr)
-
-										-- Toggle between hierarchical and flat view
-										local flat_symbols = vim.deepcopy(symbols)
-										for _, sym in ipairs(flat_symbols) do
-											sym.indent = ""  -- Remove indentation for flat view
-										end
-
-										current_picker:refresh(finders.new_table({
-											results = flat_symbols,
-											entry_maker = make_symbol_entry,
-										}), { reset_prompt = false })
-									end)
-
 									-- Add proper Esc handling
 									map("i", "<Esc>", actions.close)
 									map("n", "<Esc>", actions.close)
 									map("n", "q", actions.close)
-
 									-- Enhanced default action with better visual feedback
 									actions.select_default:replace(function()
 										local selection = action_state.get_selected_entry()
@@ -973,13 +755,12 @@ return {
 							})
 							:find()
 					end
-
 					ordered_symbols_picker()
 				end,
 				desc = "Document Symbols (Hierarchical)",
 			},
 			{
-				"<D-o>", -- Cmd+Shift+O for filtering
+				"<D-o>",
 				function()
 					-- Create symbol type filter picker
 					local function symbol_type_filter_picker()
@@ -1259,108 +1040,6 @@ return {
 		},
 	},
 
-	-- Symbols Outline - Traditional sidebar view (complements Telescope symbols)
-	-- Provides a persistent sidebar with document symbols for quick overview
-	-- Works great alongside the Telescope symbol pickers for different workflows
-	{
-		"simrat39/symbols-outline.nvim",
-		keys = {
-			{
-				"<leader>ss",
-				function()
-					require("symbols-outline").toggle_outline()
-				end,
-				desc = "Toggle Symbols Outline",
-			},
-		},
-		config = function()
-			require("symbols-outline").setup({
-				-- Enhanced symbols outline configuration with minimal padding
-				highlight_hovered_item = true,
-				show_guides = true,
-				auto_preview = false, -- Disable auto preview to avoid conflicts with Telescope
-				position = "right", -- Position on the right side
-				relative_width = true,
-				width = 25, -- 25% of screen width
-				auto_close = false,
-				show_numbers = false,
-				show_relative_numbers = false,
-				show_symbol_details = false, -- Reduce clutter by hiding extra details
-				preview_bg_highlight = "Pmenu",
-				autofold_depth = nil, -- Don't auto-fold any levels
-				auto_unfold_hover = true,
-				fold_markers = { "", "" }, -- Minimal fold markers
-				wrap = false,
-				-- Minimize spacing and padding for maximum space efficiency
-				winblend = 0,
-				border = "none", -- Remove border to save space
-				cursor_follows_symbol = true,
-				keymaps = { -- Custom keymaps for symbols outline
-					close = {"<Esc>", "q"},
-					goto_location = "<Cr>",
-					focus_location = "o",
-					hover_symbol = "<C-space>",
-					toggle_preview = "K",
-					rename_symbol = "r",
-					code_actions = "a",
-					fold = "h",
-					unfold = "l",
-					fold_all = "zM",
-					unfold_all = "zR",
-					fold_reset = "zE",
-				},
-				lsp_blacklist = {},
-				symbol_blacklist = {},
-				-- Optimize display for maximum space efficiency
-				symbols_padding = 0, -- Remove symbol padding
-				show_guides = false, -- Disable guide lines for cleaner look
-				-- Enhanced symbol icons using the same icons as Telescope
-				symbols = {
-					File = { icon = "󰈔", hl = "@text.uri" },
-					Module = { icon = "󰏖", hl = "@namespace" },
-					Namespace = { icon = "󰌗", hl = "@namespace" },
-					Package = { icon = "󰏗", hl = "@namespace" },
-					Class = { icon = "󰠱", hl = "@type" },
-					Method = { icon = "󰊕", hl = "@method" },
-					Property = { icon = "󰜢", hl = "@method" },
-					Field = { icon = "󰓹", hl = "@field" },
-					Constructor = { icon = "󰆧", hl = "@constructor" },
-					Enum = { icon = "󰕘", hl = "@type" },
-					Interface = { icon = "󰜰", hl = "@type" },
-					Function = { icon = "󰡱", hl = "@function" },
-					Variable = { icon = "󰀫", hl = "@constant" },
-					Constant = { icon = "󰏿", hl = "@constant" },
-					String = { icon = "󰀬", hl = "@string" },
-					Number = { icon = "󰎠", hl = "@number" },
-					Boolean = { icon = "󰨙", hl = "@boolean" },
-					Array = { icon = "󰅪", hl = "@constant" },
-					Object = { icon = "󰅩", hl = "@type" },
-					Key = { icon = "󰌋", hl = "@type" },
-					Null = { icon = "󰟢", hl = "@type" },
-					EnumMember = { icon = "󰕘", hl = "@field" },
-					Struct = { icon = "󰙅", hl = "@type" },
-					Event = { icon = "󰉁", hl = "@type" },
-					Operator = { icon = "󰆕", hl = "@operator" },
-					TypeParameter = { icon = "󰊄", hl = "@parameter" },
-				},
-			})
-
-			-- Additional optimization: set compact window options when outline opens
-			vim.api.nvim_create_autocmd("FileType", {
-				pattern = "Outline",
-				callback = function()
-					-- Maximize space utilization in the outline window
-					vim.opt_local.signcolumn = "no"  -- Remove sign column
-					vim.opt_local.foldcolumn = "0"   -- Remove fold column
-					vim.opt_local.number = false     -- Ensure no line numbers
-					vim.opt_local.relativenumber = false
-					vim.opt_local.wrap = false       -- Ensure no wrapping
-					vim.opt_local.cursorline = true  -- Highlight current line for better visibility
-				end,
-			})
-		end,
-	},
-
 	-- Tmux Tab Navigator
 	{
 		"christoomey/vim-tmux-navigator",
@@ -1419,81 +1098,81 @@ return {
 				},
 				icons = {
 					breadcrumb = "»",
-					separator = "➜",
+					separator = "|",
 					group = "+",
 				},
 				layout = {
 					height = { min = 4, max = 25 },
 					width = { min = 20, max = 50 },
 					spacing = 3,
-					align = "left",
+					-- align = "center",
 				},
-				show_help = true,
+				show_help = false,
 			})
 
 			-- Register all the key groups
 			wk.add({
 				-- AI/Avante group with streamlined commands
-				{ "<leader>a", group = "🤖 AI/Avante" },
-				{ "<leader>ac", desc = "󰭻 Toggle chat" },
-				{ "<leader>ai", desc = "󰭺 Ask input" },
-				{ "<leader>af", desc = "󰍉 Focus chat" },
-				{ "<leader>al", desc = "󰃢 Clear chat" },
+				{ "<leader>a", group = "AI" },
+				{ "<leader>ac", desc = "Toggle chat" },
+				{ "<leader>ai", desc = "Ask input" },
+				{ "<leader>af", desc = "Focus chat" },
+				{ "<leader>al", desc = "Clear chat" },
 				-- Native Avante history features
-				{ "<leader>ah", desc = "📂 Avante history" },
-				{ "[a", desc = "📚 Chat history selector" },
-				{ "]a", desc = "📚 Chat history selector" },
+				{ "<leader>ah", desc = "Avante history" },
+				{ "[a", desc = "Chat history selector" },
+				{ "]a", desc = "Chat history selector" },
 				-- Code assistance (visual mode)
-				{ "<leader>ae", desc = "� Explain code" },
-				{ "<leader>at", desc = "󰙨 Generate tests" },
-				{ "<leader>ar", desc = "� Review code" },
-				{ "<leader>ad", desc = "󰃤 Add docs" },
-				{ "<leader>ao", desc = "⚡ Optimize code" },
+				{ "<leader>ae", desc = "Explain code" },
+				{ "<leader>at", desc = "Generate tests" },
+				{ "<leader>ar", desc = "Review code" },
+				{ "<leader>ad", desc = "Add docs" },
+				{ "<leader>ao", desc = "Optimize code" },
 				-- Git integration
-				{ "<leader>am", desc = "󰊢 Commit message" },
+				{ "<leader>am", desc = "Commit message" },
 				-- Provider management
-				{ "<leader>ap", desc = "⚙️ Switch provider" },
-				{ "<leader>aT", desc = "🦙 Test Ollama" },
-				{ "<leader>aP", desc = "🔍 Test current provider" },
+				{ "<leader>ap", desc = "Switch provider" },
+				{ "<leader>aT", desc = "Test Ollama" },
+				{ "<leader>aP", desc = "Test current provider" },
 
 				-- Other groups
-				{ "<leader>b", group = "󰓩 Buffer" },
-				{ "<leader>c", group = "󰒓 Context/Code-Actions" },
-				{ "<leader>ch", desc = "🔄 Toggle context header (robust)" },
-				{ "<leader>cj", desc = "🔗 Jump to context" },
-				{ "<leader>cd", desc = "🐛 Debug context state" },
-				{ "<leader>ce", desc = "✅ Force enable context" },
-				{ "<leader>cx", desc = "❌ Force disable context" },
-				{ "<leader>cs", desc = "🔍 Context status & health" },
-				{ "<leader>d", group = "󰃤 Debug" },
-				{ "<leader>e", group = "🔍 Error Lens/Explorer" },
-				{ "<leader>el", desc = "🔍 Toggle Error Lens (ThePrimeagen style)" },
-				{ "<leader>ee", desc = "✅ Enable Error Lens" },
-				{ "<leader>ed", desc = "❌ Disable Error Lens" },
-				{ "<leader>er", desc = "🔄 Refresh Error Lens" },
-				{ "<leader>en", desc = "⬇️ Next diagnostic (with Error Lens)" },
-				{ "<leader>ep", desc = "⬆️ Previous diagnostic (with Error Lens)" },
-				{ "<leader>f", group = "󰈞 File/Find" },
-				{ "<leader>g", group = "󰊢 Git/Goto" },
-				{ "<leader>h", group = "󰊢 Hunks/Git-Stage" },
-				{ "<leader>i", group = "󰋼 Info/Implementations" },
-				{ "<leader>j", group = "󰒐 Jump" },
-				{ "<leader>k", group = "󰒊 Jump/Flash" },
-				{ "<leader>l", group = "󰿘 LSP" },
-				{ "<leader>m", group = "󰃀 Marks" },
-				{ "<leader>n", group = "󰑮 Navigation" },
-				{ "<leader>o", group = "󰌸 Overseer/Tasks" },
-				{ "<leader>p", group = "󰭷 Peek/Preview" },
-				{ "<leader>r", group = "󰑕 Rename/Refactor" },
-				{ "<leader>s", group = "󰯌 Session/Split" },
-				{ "<leader>t", group = "󰆍 Terminal/Tabs/Themes" },
-				{ "<leader>tt", desc = "🎨 Select theme" },
-				{ "<leader>u", group = "󰙨 Test/Utils" },
-				{ "<leader>v", group = "󰒉 Visual/View" },
-				{ "<leader>w", group = "󰓩 Workspace/Tabs" },
-				{ "<leader>x", group = "󰒡 Diagnostics/Trouble" },
-				{ "<leader>z", group = "󰗘 Fold" },
-				{ "g", group = "󰳽 Goto" },
+				{ "<leader>b", group = "Buffer" },
+				{ "<leader>c", group = "Context/Code-Actions" },
+				{ "<leader>ch", desc = "Toggle context header (robust)" },
+				{ "<leader>cj", desc = "Jump to context" },
+				{ "<leader>cd", desc = "Debug context state" },
+				{ "<leader>ce", desc = "Force enable context" },
+				{ "<leader>cx", desc = "Force disable context" },
+				{ "<leader>cs", desc = "Context status & health" },
+				{ "<leader>d", group = "Debug" },
+				{ "<leader>e", group = "Error Lens/Explorer" },
+				{ "<leader>el", desc = "Toggle Error Lens (ThePrimeagen style)" },
+				{ "<leader>ee", desc = "Enable Error Lens" },
+				{ "<leader>ed", desc = "Disable Error Lens" },
+				{ "<leader>er", desc = "Refresh Error Lens" },
+				{ "<leader>en", desc = "Next diagnostic (with Error Lens)" },
+				{ "<leader>ep", desc = "Previous diagnostic (with Error Lens)" },
+				{ "<leader>f", group = "File/Find" },
+				{ "<leader>g", group = "Git/Goto" },
+				{ "<leader>h", group = "Hunks/Git-Stage" },
+				{ "<leader>i", group = "Info/Implementations" },
+				{ "<leader>j", group = "Jump" },
+				{ "<leader>k", group = "Jump/Flash" },
+				{ "<leader>l", group = "LSP" },
+				{ "<leader>m", group = "Marks" },
+				{ "<leader>n", group = "Navigation" },
+				{ "<leader>o", group = "Overseer/Tasks" },
+				{ "<leader>p", group = "Peek/Preview" },
+				{ "<leader>r", group = "Rename/Refactor" },
+				{ "<leader>s", group = "Snacks/Split" },
+				{ "<leader>t", group = "Terminal/Tabs/Themes" },
+				{ "<leader>tt", desc = "Select theme" },
+				{ "<leader>u", group = "Test/Utils" },
+				{ "<leader>v", group = "Visual/View" },
+				{ "<leader>w", group = "Workspace/Tabs" },
+				{ "<leader>x", group = "Diagnostics/Trouble" },
+				{ "<leader>z", group = "Fold" },
+				{ "g", group = "Goto" },
 			})
 		end,
 		keys = {
@@ -1549,319 +1228,7 @@ return {
 			})
 		end,
 	},
-
-	-- Dashboard - Fancy and Blazing Fast start screen
-	{
-		"nvimdev/dashboard-nvim",
-		event = "VimEnter",
-		dependencies = { "nvim-tree/nvim-web-devicons" },
-		opts = {
-			theme = "hyper", -- Use hyper theme for modern look
-			disable_move = false, -- Allow movement in dashboard
-			shortcut_type = "letter", -- Use letters for shortcuts
-			shuffle_letter = false, -- Keep ordered letters
-			change_to_vcs_root = true, -- Change to VCS root when opening files
-			preview = {
-				command = "", -- Disable preview command to avoid vertical lines
-				file_path = "",
-				file_height = 0,
-				file_width = 0,
-			},
-			config = {
-				week_header = {
-					enable = true, -- Show week header
-					concat = " Eyes on Target ", -- Custom message
-				},
-				shortcut = {
-					{
-						desc = " Find File",
-						group = "DashboardShortCutIcon",
-						action = "Telescope find_files",
-						key = "f",
-					},
-					{
-						desc = " Recent Files",
-						group = "DashboardFiles",
-						action = "Telescope oldfiles",
-						key = "r",
-					},
-					{
-						desc = " Find Text",
-						group = "DashboardShortCutIcon",
-						action = "Telescope live_grep",
-						key = "g",
-					},
-					{
-						desc = " Config",
-						group = "DashboardShortCutIcon",
-						action = "edit ~/.config/nvim/init.lua",
-						key = "c",
-					},
-					{
-						desc = " LazyGit",
-						group = "DashboardShortCutIcon",
-						action = "LazyGit",
-						key = "l",
-					},
-					{
-						desc = " Quit",
-						group = "DashboardShortCutIcon",
-						action = "qa",
-						key = "q",
-					},
-				},
-				packages = { enable = false }, -- Not Show plugin count
-				project = {
-					enable = true,
-					limit = 8,
-					icon = " ",
-					label = " Recent Projects:",
-					action = function(path)
-						-- Use telescope oldfiles (recent files) with the project path
-						require("telescope.builtin").oldfiles({
-							cwd = path,
-							cwd_only = true, -- Only show recent files from this project
-							previewer = true,
-						})
-					end,
-				},
-				mru = {
-					enable = true,
-					limit = 15, -- Increased from 10 to show more recent files
-					icon = " ",
-					label = " Recent Files:",
-					cwd_only = false, -- Show files from all directories
-				},
-				footer = {
-					"",
-					-- "🚀 Neovim configured for maximum productivity",
-					-- "⚡ Powered by lazy.nvim and modern plugins",
-				},
-			},
-			hide = {
-				statusline = true, -- Hide statusline on dashboard
-				tabline = true, -- Hide tabline on dashboard
-				winbar = true, -- Hide winbar on dashboard
-			},
-		},		config = function(_, opts)
-			require("dashboard").setup(opts)
-
-			-- Enhanced project root detection function
-			local function get_project_root()
-				local cwd = vim.fn.getcwd()
-				-- Try git root first
-				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
-				if vim.v.shell_error == 0 and git_root then
-					return git_root
-				end
-				-- Fallback to current directory
-				return cwd
-			end
-
-			-- Override dashboard's default project detection if needed
-			vim.api.nvim_create_autocmd("User", {
-				pattern = "DashboardLoaded",
-				callback = function()
-					-- If no projects are showing up, you can add manual project paths here
-					-- This is useful if you want to ensure certain projects always appear
-					local home = vim.fn.expand("~")
-					local common_project_paths = {
-						home .. "/.config/nvim",  -- Your Neovim config
-						home .. "/Projects",     -- Common project directory
-						home .. "/Documents",    -- Document projects
-						get_project_root(),      -- Current project root
-					}
-
-					-- Register project paths with dashboard if they exist and are git repos
-					for _, path in ipairs(common_project_paths) do
-						if vim.fn.isdirectory(path) == 1 and vim.fn.isdirectory(path .. "/.git") == 1 then
-							-- This ensures valid git repositories are available for dashboard
-							vim.g.dashboard_custom_projects = vim.g.dashboard_custom_projects or {}
-							table.insert(vim.g.dashboard_custom_projects, path)
-						end
-					end
-				end,
-			})
-
-			-- COMPREHENSIVE dashboard cleanup to remove ALL vertical lines
-			vim.api.nvim_create_autocmd({ "FileType", "BufEnter", "BufWinEnter" }, {
-				pattern = "dashboard",
-				callback = function()
-					local bufnr = vim.api.nvim_get_current_buf()
-
-					-- Remove ANY potential line indicators/separators
-					vim.opt_local.signcolumn = "no"
-					vim.opt_local.foldcolumn = "0"
-					vim.opt_local.number = false
-					vim.opt_local.relativenumber = false
-					vim.opt_local.cursorline = false
-					vim.opt_local.cursorcolumn = false
-					vim.opt_local.colorcolumn = ""
-					vim.opt_local.list = false -- This disables whitespace characters that might show as vertical lines
-					vim.opt_local.listchars = "" -- Clear any list characters completely
-					vim.opt_local.fillchars = "" -- Clear fill characters
-
-					-- FORCEFULLY disable ALL plugins that might cause vertical lines
-					vim.b[bufnr].indent_blankline_enabled = false
-					vim.b[bufnr].miniindentscope_disable = true
-					vim.b[bufnr].visual_whitespace_enabled = false
-					vim.b[bufnr].ibl_enable = false
-					vim.b[bufnr].mini_indentscope_disable = true
-
-					-- Force disable indent-blankline for this buffer completely
-					if package.loaded["ibl"] then
-						pcall(function()
-							require("ibl").setup_buffer(bufnr, { enabled = false })
-						end)
-					end
-
-					-- Force disable visual-whitespace for this buffer
-					if package.loaded["visual-whitespace"] then
-						pcall(function()
-							require("visual-whitespace").disable()
-						end)
-					end
-
-					-- Force disable mini.indentscope if loaded
-					if package.loaded["mini.indentscope"] then
-						pcall(function()
-							vim.b[bufnr].miniindentscope_disable = true
-						end)
-					end
-
-					-- Clear any existing concealed characters that might show as lines
-					vim.opt_local.conceallevel = 0
-					vim.opt_local.concealcursor = ""
-
-					-- Set buffer background to your specified color
-					vim.cmd("setlocal winhighlight=Normal:DashboardNormal,NormalNC:DashboardNormal")
-
-					-- Force window redraw to ensure changes take effect
-					vim.schedule(function()
-						vim.cmd("redraw!")
-					end)
-				end,
-			})
-
-			-- Custom highlight groups for dashboard with your specified colors
-			vim.api.nvim_create_autocmd("ColorScheme", {
-				group = vim.api.nvim_create_augroup("DashboardTheme", { clear = true }),
-				callback = function()
-					-- Set dashboard background to your specified color
-					vim.api.nvim_set_hl(0, "DashboardNormal", {
-						fg = "#A5B4FD",
-						bg = "#101827"
-					})
-
-					-- Dashboard header with your specified colors
-					vim.api.nvim_set_hl(0, "DashboardHeader", {
-						fg = "#A5B4FD",
-						bg = "#101827",
-						bold = true
-					})
-
-					-- Dashboard footer with your specified colors
-					vim.api.nvim_set_hl(0, "DashboardFooter", {
-						fg = "#A5B4FD",
-						bg = "#101827",
-						italic = true
-					})
-
-					-- Project title with your specified colors
-					vim.api.nvim_set_hl(0, "DashboardProjectTitle", {
-						fg = "#A5B4FD",
-						bg = "#101827",
-						bold = true
-					})
-
-					-- Project title icon with your specified colors
-					vim.api.nvim_set_hl(0, "DashboardProjectTitleIcon", {
-						fg = "#A5B4FD",
-						bg = "#101827",
-						bold = true
-					})
-
-					-- Project icon with your specified colors
-					vim.api.nvim_set_hl(0, "DashboardProjectIcon", {
-						fg = "#A5B4FD",
-						bg = "#101827"
-					})
-
-					-- MRU title with your specified colors
-					vim.api.nvim_set_hl(0, "DashboardMruTitle", {
-						fg = "#A5B4FD",
-						bg = "#101827",
-						bold = true
-					})
-
-					-- MRU icon with your specified colors
-					vim.api.nvim_set_hl(0, "DashboardMruIcon", {
-						fg = "#A5B4FD",
-						bg = "#101827"
-					})
-
-					-- Files with your specified colors
-					vim.api.nvim_set_hl(0, "DashboardFiles", {
-						fg = "#A5B4FD",
-						bg = "#101827"
-					})
-
-					-- Shortcut icons with your specified colors
-					vim.api.nvim_set_hl(0, "DashboardShortCutIcon", {
-						fg = "#A5B4FD",
-						bg = "#101827",
-						bold = true
-					})
-
-					-- Shortcut description text with your specified colors
-					vim.api.nvim_set_hl(0, "DashboardDesc", {
-						fg = "#A5B4FD",
-						bg = "#101827"
-					})
-
-					-- Shortcut key with your specified colors
-					vim.api.nvim_set_hl(0, "DashboardKey", {
-						fg = "#A5B4FD",
-						bg = "#101827",
-						bold = true
-					})
-
-					-- Dashboard text elements
-					vim.api.nvim_set_hl(0, "DashboardText", {
-						fg = "#A5B4FD",
-						bg = "#101827"
-					})
-
-					-- Remove any vertical separators or lines by setting them to background color
-					vim.api.nvim_set_hl(0, "DashboardSeparator", {
-						fg = "#101827",
-						bg = "#101827"
-					})
-
-					-- Ensure all dashboard highlights use consistent background
-					vim.api.nvim_set_hl(0, "DashboardCenter", {
-						fg = "#A5B4FD",
-						bg = "#101827"
-					})
-
-					vim.api.nvim_set_hl(0, "DashboardHyper", {
-						fg = "#A5B4FD",
-						bg = "#101827"
-					})
-				end,
-			})
-
-			-- Apply highlights immediately
-			vim.schedule(function()
-				vim.cmd("doautocmd ColorScheme")
-			end)
-		end,
-	},
-
-	-- Enhanced scrollbars with decorations - satellite.nvim
-	-- Displays decorated scrollbars with marks for different kinds of decorations
 	-- Features: Cursor position, Search results, Diagnostics, Git hunks, Marks, Quickfix
-	-- Works with gitsigns.nvim for git integration and provides mouse support
 	{
 		"lewis6991/satellite.nvim",
 		event = "VeryLazy",
@@ -1903,15 +1270,15 @@ return {
 					diagnostic = {
 						enable = true,
 						-- Different symbols for different diagnostic severities
-						signs = { "-", "=", "≡" },
-						min_severity = vim.diagnostic.severity.HINT,
+						-- signs = { "-", "=", "≡" },
+						min_severity = vim.diagnostic.severity.ERROR,
 						-- Shows all diagnostic levels including hints
 					},
 					gitsigns = {
 						enable = true,
 						signs = {
-							add = "│", -- Git addition indicator
-							change = "│", -- Git change indicator
+							add = "+", -- Git addition indicator
+							change = "~", -- Git change indicator
 							delete = "-", -- Git deletion indicator
 						},
 						-- Uses SatelliteGitSignsAdd, SatelliteGitSignsChange, SatelliteGitSignsDelete
@@ -1923,114 +1290,12 @@ return {
 						-- Uses SatelliteMark highlight
 					},
 					quickfix = {
-						enable = true,
-						signs = { "-", "=", "≡" },
-						-- Uses SatelliteQuickfix highlight
+						enable = false,
 					},
 				},
 			})
-
-			-- Custom highlight groups to match no-clown-fiesta theme
-			local function setup_satellite_highlights()
-				-- Cursor position indicator
-				vim.api.nvim_set_hl(0, "SatelliteCursor", {
-					fg = "#88afa2", -- Cyan color for cursor
-					bold = true,
-				})
-
-				-- Search result indicators
-				vim.api.nvim_set_hl(0, "SatelliteSearch", {
-					fg = "#F4BF75", -- Yellow for search matches
-					bold = true,
-				})
-				vim.api.nvim_set_hl(0, "SatelliteSearchCurrent", {
-					fg = "#FFA557", -- Orange for current search match
-					bold = true,
-				})
-
-				-- Diagnostic indicators with theme colors
-				vim.api.nvim_set_hl(0, "SatelliteDiagnosticError", {
-					fg = "#b46958", -- Red for errors
-					bold = true,
-				})
-				vim.api.nvim_set_hl(0, "SatelliteDiagnosticWarn", {
-					fg = "#F4BF75", -- Yellow for warnings
-					bold = true,
-				})
-				vim.api.nvim_set_hl(0, "SatelliteDiagnosticInfo", {
-					fg = "#BAD7FF", -- Blue for info
-					bold = true,
-				})
-				vim.api.nvim_set_hl(0, "SatelliteDiagnosticHint", {
-					fg = "#88afa2", -- Cyan for hints
-					bold = true,
-				})
-
-				-- Git status indicators
-				vim.api.nvim_set_hl(0, "SatelliteGitSignsAdd", {
-					fg = "#90A959", -- Green for additions
-					bold = true,
-				})
-				vim.api.nvim_set_hl(0, "SatelliteGitSignsChange", {
-					fg = "#F4BF75", -- Yellow for changes
-					bold = true,
-				})
-				vim.api.nvim_set_hl(0, "SatelliteGitSignsDelete", {
-					fg = "#b46958", -- Red for deletions
-					bold = true,
-				})
-
-				-- Mark indicators
-				vim.api.nvim_set_hl(0, "SatelliteMark", {
-					fg = "#AA749F", -- Purple for marks
-					bold = true,
-				})
-
-				-- Quickfix indicators
-				vim.api.nvim_set_hl(0, "SatelliteQuickfix", {
-					fg = "#FFA557", -- Orange for quickfix
-					bold = true,
-				})
-			end
-
-			-- Apply highlights immediately
-			setup_satellite_highlights()
-
-			-- Ensure highlights persist after theme changes
-			vim.api.nvim_create_autocmd("ColorScheme", {
-				group = vim.api.nvim_create_augroup("SatelliteTheme", { clear = true }),
-				callback = setup_satellite_highlights,
-			})
 		end,
-		keys = {
-			-- Add keymaps for satellite commands
-			{
-				"<leader>usd",
-				function()
-					vim.cmd("SatelliteDisable")
-					-- vim.notify("Satellite scrollbars disabled", vim.log.levels.INFO)
-				end,
-				desc = "Disable Satellite scrollbars",
-			},
-			{
-				"<leader>use",
-				function()
-					vim.cmd("SatelliteEnable")
-					-- vim.notify("Satellite scrollbars enabled", vim.log.levels.INFO)
-				end,
-				desc = "Enable Satellite scrollbars",
-			},
-			{
-				"<leader>usr",
-				function()
-					vim.cmd("SatelliteRefresh")
-					-- vim.notify("Satellite scrollbars refreshed", vim.log.levels.INFO)
-				end,
-				desc = "Refresh Satellite scrollbars",
-			},
-		},
 	},
-
 	-- High-performance color highlighter
 	{
 		"norcalli/nvim-colorizer.lua",

@@ -58,6 +58,13 @@ return {
   keys = {
     -- File/Find group (<leader>f) - Core file operations
     {
+      "<leader>f?",
+      function()
+        Snacks.picker()
+      end,
+      desc = "Find Files",
+    },
+    {
       "<leader>ff",
       function()
         Snacks.picker.files()
@@ -166,7 +173,8 @@ return {
         -- Get current project root
         local function get_project_root()
           local cwd = vim.fn.getcwd()
-          local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
+          local git_root = vim.fn.systemlist("git -C " ..
+          vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
           return (vim.v.shell_error == 0 and git_root) or cwd
         end
 
@@ -195,7 +203,8 @@ return {
         end
 
         if #project_marks == 0 then
-          vim.notify("📍 No marks found in current project: " .. vim.fn.fnamemodify(project_root, ":t"), vim.log.levels.INFO)
+          vim.notify("📍 No marks found in current project: " .. vim.fn.fnamemodify(project_root, ":t"),
+            vim.log.levels.INFO)
           return
         end
 
@@ -250,7 +259,7 @@ return {
                 if selection.filename ~= "" then
                   vim.cmd("edit " .. vim.fn.fnameescape(selection.filename))
                 end
-                vim.api.nvim_win_set_cursor(0, {selection.lnum, selection.col - 1})
+                vim.api.nvim_win_set_cursor(0, { selection.lnum, selection.col - 1 })
               end
             end)
             return true
@@ -348,7 +357,8 @@ return {
         vim.ui.input({ prompt = "Global mark letter (A-Z): " }, function(input)
           if input and input:match("^[A-Z]$") then
             vim.cmd('normal! m' .. input)
-            vim.notify("🌟 Set global mark '" .. input .. "' at " .. vim.fn.expand('%:t') .. ":" .. vim.fn.line('.'), vim.log.levels.INFO)
+            vim.notify("🌟 Set global mark '" .. input .. "' at " .. vim.fn.expand('%:t') .. ":" .. vim.fn.line('.'),
+              vim.log.levels.INFO)
           elseif input then
             vim.notify("❌ Invalid mark. Use A-Z for global marks", vim.log.levels.ERROR)
           end
@@ -826,8 +836,8 @@ return {
         Snacks.toggle.diagnostics():map("<leader>ud")
         Snacks.toggle.line_number():map("<leader>ul")
         Snacks.toggle
-          .option("conceallevel", { off = 0, on = vim.o.conceallevel > 0 and vim.o.conceallevel or 2 })
-          :map("<leader>uc")
+            .option("conceallevel", { off = 0, on = vim.o.conceallevel > 0 and vim.o.conceallevel or 2 })
+            :map("<leader>uc")
         Snacks.toggle.treesitter():map("<leader>uT")
         Snacks.toggle.option("background", { off = "light", on = "dark", name = "Dark Background" }):map("<leader>ub")
         Snacks.toggle.inlay_hints():map("<leader>uh")
@@ -862,7 +872,7 @@ return {
     end
 
     -- Set up custom colors for marks to match your theme
-    vim.api.nvim_set_hl(0, "SnacksMarks", { fg = "#4A90E2", bold = true }) -- Blue for marks
+    vim.api.nvim_set_hl(0, "SnacksMarks", { fg = "#4A90E2", bold = true })           -- Blue for marks
     vim.api.nvim_set_hl(0, "SnacksMarksAnnotation", { fg = "#50C878", bold = true }) -- Green for annotated marks
 
     -- Custom mark commands that work with snacks
@@ -875,7 +885,8 @@ return {
       local snacks = require("snacks")
       local function get_project_root()
         local cwd = vim.fn.getcwd()
-        local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
+        local git_root = vim.fn.systemlist("git -C " ..
+        vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
         return (vim.v.shell_error == 0 and git_root) or cwd
       end
 

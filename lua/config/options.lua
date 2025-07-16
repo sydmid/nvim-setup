@@ -1,5 +1,9 @@
 local opt = vim.opt
 
+-- Set leader key
+vim.g.mapleader = " "
+vim.g.maplocalleader = "\\"
+
 -- System clipboard integration
 opt.clipboard = "unnamedplus"
 
