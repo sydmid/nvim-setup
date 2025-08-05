@@ -169,11 +169,11 @@ local theme_opts = {
 return {
 	-- One Monokai colorscheme - the only theme we need
 	{
-		"cpea2506/one_monokai.nvim",
+		"Shatur/neovim-ayu",
 		priority = 1000,
 		config = function()
 			-- Configure One Monokai theme
-			require("one_monokai").setup({
+			require("ayu").setup({
 				transparent = false,
 				colors = {},
 				highlights = function(colors)
@@ -187,15 +187,15 @@ return {
 
 			-- Set the colorscheme
 			vim.opt.background = "dark"
-			vim.cmd.colorscheme("one_monokai")
+			vim.cmd.colorscheme("ayu")
 
 			-- Apply the current background mode
 			_G.set_background_mode(_G.current_bg_index)
 
 			-- Create autocmd to reapply background highlights when colorscheme changes
 			vim.api.nvim_create_autocmd("ColorScheme", {
-				pattern = "one_monokai",
-				group = vim.api.nvim_create_augroup("OneMonokaiBackground", { clear = true }),
+				pattern = "ayu",
+				group = vim.api.nvim_create_augroup("AyuBackground", { clear = true }),
 				callback = function()
 					-- Reapply current background mode
 					_G.set_background_mode(_G.current_bg_index)

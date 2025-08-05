@@ -363,48 +363,9 @@ return {
     opts = {
       -- Show breadcrumbs in the winbar (top of each window)
       attach_navic = false, -- We'll handle navic attachment ourselves
-      create_autocmd = false, -- We'll create our own autocmd
-      show_dirname = false, -- Don't show directory name to save space
-      show_basename = true, -- Show file basename
-
-      -- Theme configuration to match your no-clown-fiesta theme
-      theme = {
-        normal = { fg = "#E1E1E1", bg = "#121212" },
-        ellipsis = { fg = "#727272" },
-        separator = { fg = "#505050" },
-        modifier = { fg = "#F4BF75", italic = true },
-        dirname = { fg = "#AFAFAF" },
-        basename = { fg = "#BAD7FF", bold = true },
-        context = {},
-
-        -- Context kinds styling
-        context_file = { fg = "#E1E1E1" },
-        context_module = { fg = "#88afa2" },
-        context_namespace = { fg = "#88afa2" },
-        context_package = { fg = "#88afa2" },
-        context_class = { fg = "#BAD7FF", bold = true },
-        context_method = { fg = "#F4BF75" },
-        context_property = { fg = "#AA749F" },
-        context_field = { fg = "#AA749F" },
-        context_constructor = { fg = "#F4BF75", bold = true },
-        context_enum = { fg = "#BAD7FF" },
-        context_interface = { fg = "#BAD7FF" },
-        context_function = { fg = "#F4BF75" },
-        context_variable = { fg = "#E1E1E1" },
-        context_constant = { fg = "#FFA557" },
-        context_string = { fg = "#C0D684" },
-        context_number = { fg = "#FFA557" },
-        context_boolean = { fg = "#FFA557" },
-        context_array = { fg = "#E1E1E1" },
-        context_object = { fg = "#E1E1E1" },
-        context_key = { fg = "#AA749F" },
-        context_null = { fg = "#727272" },
-        context_enum_member = { fg = "#FFA557" },
-        context_struct = { fg = "#BAD7FF" },
-        context_event = { fg = "#F4BF75" },
-        context_operator = { fg = "#E1E1E1" },
-        context_type_parameter = { fg = "#88afa2" },
-      },
+      create_autocmd = true, -- We'll create our own autocmd
+      show_dirname = true, -- Don't show directory name to save space
+      show_basename = false, -- Show file basename
 
       -- Only show breadcrumbs for certain filetypes
       exclude_filetypes = {
@@ -425,73 +386,6 @@ return {
         "lazy",
         "oil",
       },
-
-      -- Symbols and separators
-      symbols = {
-        modified = "●",
-        ellipsis = "…",
-        separator = "",
-      },
-
-      -- Show context in a more compact format
-      kinds = {
-        File = "",
-        Module = "",
-        Namespace = "",
-        Package = "",
-        Class = "",
-        Method = "",
-        Property = "",
-        Field = "",
-        Constructor = "",
-        Enum = "",
-        Interface = "",
-        Function = "",
-        Variable = "",
-        Constant = "",
-        String = "",
-        Number = "",
-        Boolean = "",
-        Array = "",
-        Object = "",
-        Key = "",
-        Null = "",
-        EnumMember = "",
-        Struct = "",
-        Event = "",
-        Operator = "",
-        TypeParameter = "",
-      },
     },
-    config = function(_, opts)
-      require("barbecue").setup(opts)
-
-      -- Set up navic for LSP integration
-      local navic = require("nvim-navic")
-
-      -- Attach navic to LSP when available
-      vim.api.nvim_create_autocmd("LspAttach", {
-        group = vim.api.nvim_create_augroup("BarbecueNavic", { clear = true }),
-        callback = function(args)
-          local client = vim.lsp.get_client_by_id(args.data.client_id)
-          if client and client.server_capabilities.documentSymbolProvider then
-            navic.attach(client, args.buf)
-          end
-        end,
-      })
-
-      -- Toggle breadcrumbs (moved to <leader>h group)
-    --   vim.keymap.set("n", "<leader>hb", function()
-    --     local config = require("barbecue.config")
-    --     require("barbecue.ui").toggle()
-    --     vim.notify(
-    --       config.user.show and "Breadcrumbs enabled" or "Breadcrumbs disabled",
-    --       vim.log.levels.INFO
-    --     )
-    --   end, {
-    --     desc = "Toggle breadcrumbs bar"
-    --   })
-
-    end,
   },
 }

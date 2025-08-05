@@ -463,7 +463,7 @@ return {
           vim.keymap.set("n", "o", function()
             local node = api.tree.get_node_under_cursor()
             if node and node.type == "file" then
-              -- Open the file but don't change focus
+              -- Open the file
               api.node.open.edit()
               -- Keep focus on nvim-tree by explicitly focusing it
               vim.defer_fn(function()
@@ -1444,6 +1444,92 @@ return {
   {
     "ThePrimeagen/harpoon",
     dependencies = { "nvim-lua/plenary.nvim" },
+  },
+
+  -- Cybu - VSCode-like buffer switching
+  {
+    "ghillb/cybu.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons", "nvim-lua/plenary.nvim" },
+    config = function()
+      require("cybu").setup({
+        position = {
+          relative_to = "win",     -- win, editor, cursor
+          anchor = "topcenter",    -- topleft, topcenter, topright, centerleft, center, centerright, bottomleft, bottomcenter, bottomright
+          vertical_offset = 10,    -- vertical offset from anchor in lines
+          horizontal_offset = 0,   -- vertical offset from anchor in columns
+          max_win_height = 5,      -- height of cybu window in lines
+          max_win_width = 0.5,     -- integer for absolute in columns, float for relative to win/editor width
+        },
+        style = {
+          path = "relative",       -- absolute, relative, tail (filename only)
+          path_abbreviation = "none", -- none, shortened
+          border = "rounded",      -- single, double, rounded, none
+          separator = " ",         -- string used as separator
+          prefix = "…",           -- string used as prefix for truncated paths
+          padding = 1,             -- left & right padding in columns
+          hide_buffer_id = true,   -- hide buffer IDs in window
+          devicons = {
+            enabled = true,        -- enable or disable web dev icons
+            colored = true,        -- color devicons
+            truncate = true,       -- truncate wide icons
+          },
+          highlights = {           -- see highlights via :highlight
+            current_buffer = "CybuFocus",
+            adjacent_buffers = "CybuAdjacent",
+            background = "CybuBackground",
+            border = "CybuBorder",
+          },
+        },
+        behavior = {               -- set behavior for different modes
+          mode = {
+            default = {
+              switch = "immediate",  -- immediate, on_close
+              view = "rolling",      -- paging, rolling
+            },
+            last_used = {
+              switch = "on_close",   -- immediate, on_close
+              view = "paging",       -- paging, rolling
+            },
+            auto = {
+              view = "rolling",      -- paging, rolling
+            },
+          },
+          show_on_autocmd = false, -- event to trigger cybu (eg. "BufEnter")
+        },
+        display_time = 750,        -- time the cybu window is displayed
+        exclude = {                -- filetypes, buftypes to exclude
+          "neo-tree",
+          "fugitive",
+          "qf",
+        },
+        fallback = function() end, -- arbitrary fallback function used in excluded filetypes
+      })
+
+      -- Custom highlight groups for better integration with your theme
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        group = vim.api.nvim_create_augroup("CybuHighlights", { clear = true }),
+        callback = function()
+          -- Set highlights that work well with modern themes
+          vim.api.nvim_set_hl(0, "CybuFocus", { fg = "#89b4fa", bg = "#313244", bold = true })
+          vim.api.nvim_set_hl(0, "CybuAdjacent", { fg = "#cdd6f4", bg = "#1e1e2e" })
+          vim.api.nvim_set_hl(0, "CybuBackground", { bg = "#1e1e2e" })
+          vim.api.nvim_set_hl(0, "CybuBorder", { fg = "#89b4fa" })
+        end,
+      })
+
+      -- Set initial highlights
+      vim.api.nvim_set_hl(0, "CybuFocus", { fg = "#89b4fa", bg = "#313244", bold = true })
+      vim.api.nvim_set_hl(0, "CybuAdjacent", { fg = "#cdd6f4", bg = "#1e1e2e" })
+      vim.api.nvim_set_hl(0, "CybuBackground", { bg = "#1e1e2e" })
+      vim.api.nvim_set_hl(0, "CybuBorder", { fg = "#89b4fa" })
+
+      -- VSCode-like keybindings for buffer switching
+      vim.keymap.set("n", "<C-Tab>", "<Plug>(CybuNext)", { desc = "Next buffer (VSCode-like)" })
+      vim.keymap.set("n", "<C-S-Tab>", "<Plug>(CybuPrev)", { desc = "Previous buffer (VSCode-like)" })
+
+      -- Last used buffer toggle (like VSCode's Ctrl+Tab behavior when held)
+      vim.keymap.set("n", "<leader>`", "<Plug>(CybuLastusedNext)", { desc = "Last used buffer" })
+    end,
   },
 
   -- Surround text
