@@ -10,6 +10,9 @@ vim.g.maplocalleader = "\\"
 -- System clipboard integration
 opt.clipboard = "unnamedplus"
 
+-- Set default scrolloff to 5 globally
+vim.o.scrolloff = 5
+
 -- File handling settings
 opt.fixendofline = false          -- Don't automatically add newline at end of file
 opt.endofline = false             -- Don't enforce final newline

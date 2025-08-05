@@ -1,51 +1,4 @@
 local map = vim.keymap.set
-
--- Set default scrolloff to 5 globally
-vim.o.scrolloff = 5
-
--- Leader key is set in init.lua
-
--- NAVIGATION GUIDE: BRACKETS REPLACED WITH LEADER KEYS
--- To make bracket navigation ([ and ]) instant without delays, we've replaced all
--- bracket-based keymaps with leader key alternatives:
---
--- Git navigation:
---   <leader>gC - Next git change (was ]c)
---   <leader>gc - Previous git change (was [c)
---   ]c - Next git change (current document → workspace fallback)
---   [c - Previous git change (current document → workspace fallback)
---
--- Diagnostic navigation:
---   <leader>xj - Next diagnostic (was ]e or <D-S-]>) - ALSO: CMD+] (<D-]>)
---   <leader>xk - Previous diagnostic (was [e or <D-S-[>) - ALSO: CMD+[ (<D-[>)
---
--- Hunks navigation (gitsigns):
---   <leader>hj - Next hunk (was ]h)
---   <leader>hk - Previous hunk (was [h)
---
--- Todo comments:
---   <leader>tj - Next todo comment (was ]t)
---   <leader>tk - Previous todo comment (was [t)
---
--- Marks navigation (using snacks.nvim):
---   <leader>mj - Next mark
---   <leader>mk - Previous mark
---
--- Marks (using snacks.nvim):
---   <leader>mm - Smart mark toggle (auto-assigns a-z marks)
---   <D-S-]>    - Jump to next mark (Shift+CMD+])
---   <D-S-[>    - Jump to previous mark (Shift+CMD+[)
---   <leader>ml - List all marks (using snacks picker)
---   <leader>ma - Set global mark (A-Z)
---   <leader>mc - Clear marks in current buffer
---   <leader>mC - Clear global marks
---
--- Code block navigation using treesitter (VS Code gotoNextPreviousMember style):
---   g] - Next code block (functions, methods, classes, properties, etc.)
---   g[ - Previous code block (functions, methods, classes, properties, etc.)
---   (Works in both normal and visual modes, just like in VS Code)
---   (Highly optimized for instant response with zero delay)
-
 -- better find in document
 vim.keymap.set("x", "/", function()
 	-- Yank the selected text
@@ -58,7 +11,6 @@ vim.keymap.set("x", "/", function()
 end, { noremap = true, silent = true })
 
 -- Buffer management commands (which-key compatible)
-map("n", "<leader>bb", "<cmd>e #<CR>", { desc = "Switch to other buffer" })
 map("n", "<leader>bo", "<cmd>%bd|e#|bd#<CR>", { desc = "Delete other buffers" })
 -- Reset current buffer (reload from disk, discard changes)
 map("n", "<leader>br", function()
@@ -84,50 +36,8 @@ map("n", "<leader>br", function()
   vim.notify("Buffer reset from disk", vim.log.levels.INFO)
 end, { desc = "Reset buffer (reload from disk)" })
 
--- Buffer navigation - Native Vim/Neovim approach (replacing Cybu plugin)
--- These follow standard vim practices and are completely reliable
 
--- Enhanced buffer navigation with better feedback
-local function smart_buffer_nav(direction)
-  local current_buf = vim.api.nvim_get_current_buf()
-  local buffers = vim.tbl_filter(function(buf)
-    return vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_buf_get_option(buf, 'buflisted')
-  end, vim.api.nvim_list_bufs())
 
-  if #buffers <= 1 then
-    vim.notify("No other buffers available", vim.log.levels.INFO)
-    return
-  end
-
-  if direction == "next" then
-    vim.cmd("bnext")
-  else
-    vim.cmd("bprevious")
-  end
-
-  -- Show brief buffer info
-  local new_buf = vim.api.nvim_get_current_buf()
-  local buf_name = vim.api.nvim_buf_get_name(new_buf)
-  local display_name = buf_name == "" and "[No Name]" or vim.fn.fnamemodify(buf_name, ":t")
-
-  -- Get buffer index for display
-  local buf_index = 0
-  for i, buf in ipairs(buffers) do
-    if buf == new_buf then
-      buf_index = i
-      break
-    end
-  end
-
-  vim.notify(string.format("Buffer %d/%d: %s", buf_index, #buffers, display_name), vim.log.levels.INFO, {
-    timeout = 1000,
-  })
-end
-
-map("n", "]b", function() smart_buffer_nav("next") end, { desc = "Next buffer" })
-map("n", "[b", function() smart_buffer_nav("previous") end, { desc = "Previous buffer" })
-map("n", "<leader>bl", function() smart_buffer_nav("next") end, { desc = "Next buffer" })
-map("n", "<leader>bh", function() smart_buffer_nav("previous") end, { desc = "Previous buffer" })
 -- Ctrl+6 is the standard vim way to switch to alternate (last) buffer
 map("n", "<C-^>", "<cmd>e #<CR>", { desc = "Switch to alternate buffer" })
 -- Alternative mapping for switching to last buffer
@@ -139,18 +49,11 @@ vim.defer_fn(function()
   if wk_ok then
     wk.register({
       ["<leader>b"] = { name = "Buffer" },
-      ["<leader>bb"] = { "<cmd>e #<CR>", "Switch to other buffer" },
       ["<leader>bd"] = { "<cmd>bdelete<CR>", "Delete buffer and window" },
       ["<leader>bo"] = { "<cmd>%bd|e#|bd#<CR>", "Delete other buffers" },
-      ["<leader>bh"] = { function() smart_buffer_nav("previous") end, "Previous buffer" },
-      ["<leader>bl"] = { function() smart_buffer_nav("next") end, "Next buffer" },
       ["<leader>ba"] = { "<cmd>e #<CR>", "Switch to alternate buffer" },
     })
     -- Register bracket navigation
-    wk.register({
-      ["]b"] = { "Next buffer" },
-      ["[b"] = { "Previous buffer" },
-    })
   end
 end, 100)
 
@@ -163,16 +66,6 @@ vim.keymap.set("x", "<D-f>", function()
 	-- Start search
 	vim.fn.feedkeys("/" .. text .. "\n", "n")
 end, { noremap = true, silent = true })
--- vim.keymap.set("x", "/", function()
--- 	-- Yank the selected text
--- 	vim.cmd("normal! y")
--- 	-- Escape any special characters in the yanked text for the search
--- 	local text = vim.fn.getreg('"')
--- 	text = vim.fn.escape(text, [[\/]])
--- 	-- Start search
--- 	vim.fn.feedkeys("/" .. text .. "\n", "n")
--- end, { noremap = true, silent = true })
--- File navigation
 map("n", "\\e", ":e ~/.config/nvim/init.lua<CR>", { desc = "Edit init.lua" })
 map("n", "\\r", ":source ~/.config/nvim/init.lua<CR>", { desc = "Reload config" })
 map("n", "<D-`>", function()
@@ -189,15 +82,6 @@ map("t", "<D-`>", function()
   terminals.toggle_or_create_terminal("default", "fish")
 end, { desc = "Toggle terminal from terminal mode" })
 
--- Better navigation
--- map("v", "<S-J>", "5gj", { desc = "Move down 5 lines", silent = true })
--- map("v", "<S-K>", "5gk", { desc = "Move up 5 lines", silent = true })
--- map("n", "<S-J>", "5gj", { desc = "Move down 5 lines", silent = true })
--- map("n", "<S-K>", "5gk", { desc = "Move up 5 lines", silent = true })
-
--- Custom scroll down with temporary scrolloff adjustment
--- map("n", "<D-j>", ":set scrolloff=0<CR>5j5<C-e>:set scrolloff=5<CR>", { noremap = true, silent = true })
--- map("n", "<D-k>", ":set scrolloff=0<CR>5k5<C-y>:set scrolloff=5<CR>", { noremap = true, silent = true })
 
 map({"n","v"}, "H", "b", { desc = "Previous word", silent = true })
 map({"n","v"}, "L", "e", { desc = "Next word", silent = true })
@@ -220,12 +104,6 @@ map("n", "d", '"_d', { desc = "d: Delete without yanking" })
 map("n", "D", '"_D', { desc = "D: Delete to EOL without yanking" })
 map("v", "d", '"_d', { desc = "d: Delete without yanking" })
 
--- Tab navigation using correct VT sequences (0x09 = tab character)
--- DISABLED: These mappings cause Esc key delay issues
--- Map Ctrl-Tab (Ctrl modifier = 5, Tab = 0x09)
--- vim.keymap.set('n', '<Esc>[27;5;9~', ':bnext<CR>', { noremap = true, silent = true })
--- Map Ctrl-Shift-Tab (Ctrl+Shift modifier = 6, Tab = 0x09)
--- vim.keymap.set('n', '<Esc>[27;6;9~', ':bprevious<CR>', { noremap = true, silent = true })
 
 -- Alternative formats that might work in different terminals
 vim.keymap.set('n', '<C-Tab>', ':bnext<CR>', { noremap = true, silent = true })
@@ -302,24 +180,6 @@ map("n", "<leader>fd", function()
 	end
 end, { desc = "Format document" })
 
--- Structure view (similar to IDE structure tool)
--- map("n", "<D-o>", ":SymbolsOutline<CR>", { desc = "Toggle structure view", silent = true })
-
--- LSP keymaps have been moved to lua/plugins/lsp/lspconfig.lua
--- This centralizes all LSP functionality and ensures keymaps are only active
--- when an LSP server is actually attached to the current buffer
---
--- Key LSP keymaps available:
---   <D-i>     - Show hover documentation (beautiful popup)
---   <D-S-i>   - Show method signature help (manual trigger, beautiful popup)
---   gd        - Go to definition
---   <leader>pd - Peek definition
---   <leader>ca - Code actions
---   <leader>lr - Rename symbol
---
--- Note: Automatic signature help popups are disabled to prevent intrusive behavior.
--- Use <D-S-i> (Cmd+Shift+I) to manually trigger signature help when needed.
-
 -- Harpoon mappings
 map("n", "<leader>hh", ":lua require('harpoon.mark').add_file()<CR>", { desc = "Add to harpoon" })
 
@@ -395,9 +255,6 @@ map("i", ">>", "<ESC>la => <ESC>i", { desc = "Add arrow function", silent = true
 map("v", "<", "<gv", { desc = "Indent left and keep selection", silent = true })
 map("v", ">", ">gv", { desc = "Indent right and keep selection", silent = true })
 
--- Explicit ZZ mapping to bypass timeout issues with z-prefix mappings
--- map("n", "ZZ", ":wq<CR>", { desc = "Save and quit", nowait = true })
--- map("n", "ZQ", ":q!<CR>", { desc = "Quit without saving", nowait = true })
 
 -- Global marks with g prefix to avoid conflicts
 map("n", "gma", "mA", { desc = "Set global mark A" })
@@ -1019,12 +876,6 @@ end, { desc = "Toggle Arabic keymap" })
 -- Terminal management system using the terminals.lua module
 -- Load the terminal management module
 local terminals = require('config.terminals')
-
--- Basic terminal keymaps
--- map("n", "<leader>tt", function() terminals.toggle_or_create_terminal("default", "fish") end, { desc = "Toggle default terminal" })
--- map("n", "<leader>tf", function() terminals.run_in_terminal("default", "fish", { direction = "float" }) end, { desc = "Toggle floating terminal" })
--- map("n", "<leader>tv", function() terminals.run_in_terminal("default", "fish", { direction = "vertical" }) end, { desc = "Toggle vertical terminal" })
--- map("n", "<leader>th", function() terminals.run_in_terminal("default", "fish", { direction = "horizontal" }) end, { desc = "Toggle horizontal terminal" })
 
 -- Service terminals (moved to 't' group - numbers 1-9)
 map("n", "<leader>t1", function() terminals.run_in_terminal("web", "just web") end, { desc = "Run web service" })
