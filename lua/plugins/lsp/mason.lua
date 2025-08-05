@@ -88,7 +88,7 @@ return {
       mason_lspconfig.setup({
         -- list of servers for mason to install
         ensure_installed = {
-          -- "tsserver",
+          "typescript-language-server", -- TypeScript/JavaScript language server (correct Mason package name)
           "html",
           "cssls",
           "tailwindcss",
@@ -102,6 +102,9 @@ return {
           "eslint",
           "bashls",
           "csharp_ls",
+          -- Rust development servers
+          "rust_analyzer", -- Primary Rust LSP server
+          "taplo", -- TOML language server (for Cargo.toml)
         },
         automatic_installation = true,
       })
@@ -131,10 +134,18 @@ return {
             "debugpy", -- python debugger
             "pylint", -- python linter (legacy support)
             "eslint_d",
+            "prettier", -- TypeScript/JavaScript formatter
+            "typescript-language-server", -- Alternative TypeScript LSP (backup)
+            "js-debug-adapter", -- JavaScript/TypeScript debugger
             "shfmt", -- shell script formatter
             "shellcheck", -- shell script linter
             "csharpier", -- C# formatter
             "xmlformatter", -- XML formatter for C# projects
+            -- Rust development tools
+            "rustfmt", -- Rust formatter (standard)
+            "rust-analyzer", -- Rust LSP server
+            "codelldb", -- LLDB-based debugger for Rust
+            "taplo", -- TOML formatter and language server
           },
           -- Enhanced error handling
           auto_update = false, -- Disable auto-update to prevent network errors

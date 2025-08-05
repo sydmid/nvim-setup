@@ -1074,6 +1074,98 @@ return {
 					end,
 
 					-- Special server configs
+					["ts_ls"] = function()
+						-- Modern TypeScript/JavaScript language server configuration
+						lspconfig.ts_ls.setup({
+							capabilities = capabilities,
+							filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
+							root_dir = lspconfig.util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git"),
+							settings = {
+								typescript = {
+									inlayHints = {
+										includeInlayParameterNameHints = "all",
+										includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+										includeInlayFunctionParameterTypeHints = true,
+										includeInlayVariableTypeHints = true,
+										includeInlayPropertyDeclarationTypeHints = true,
+										includeInlayFunctionLikeReturnTypeHints = true,
+										includeInlayEnumMemberValueHints = true,
+									},
+								},
+								javascript = {
+									inlayHints = {
+										includeInlayParameterNameHints = "all",
+										includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+										includeInlayFunctionParameterTypeHints = true,
+										includeInlayVariableTypeHints = true,
+										includeInlayPropertyDeclarationTypeHints = true,
+										includeInlayFunctionLikeReturnTypeHints = true,
+										includeInlayEnumMemberValueHints = true,
+									},
+								},
+							},
+							on_attach = function(client, bufnr)
+								-- Enable inlay hints if supported
+								if client.server_capabilities.inlayHintProvider then
+									vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+								end
+
+								-- TypeScript-specific keymaps
+								local keymap = vim.keymap.set
+								keymap("n", "<leader>to", function()
+									vim.lsp.buf.execute_command({ command = "_typescript.organizeImports", arguments = { vim.api.nvim_buf_get_name(0) } })
+								end, { buffer = bufnr, desc = "Organize imports" })
+
+								keymap("n", "<leader>ti", function()
+									vim.lsp.buf.code_action({ filter = function(action) return action.title == "Add missing imports" end, apply = true })
+								end, { buffer = bufnr, desc = "Add missing imports" })
+
+								keymap("n", "<leader>tf", function()
+									vim.lsp.buf.code_action({ filter = function(action) return action.title:match("Fix all") end, apply = true })
+								end, { buffer = bufnr, desc = "Fix all" })
+
+								keymap("n", "<leader>tu", function()
+									vim.lsp.buf.code_action({ filter = function(action) return action.title:match("Remove unused") end, apply = true })
+								end, { buffer = bufnr, desc = "Remove unused" })
+
+								-- TypeScript-specific hover debugging
+								keymap("n", "<leader>tsh", function()
+									local clients = vim.lsp.get_clients({ bufnr = bufnr })
+									local ts_client = nil
+									for _, client in ipairs(clients) do
+										if client.name == "ts_ls" then
+											ts_client = client
+											break
+										end
+									end
+
+									if ts_client then
+										vim.notify(string.format("TypeScript LSP found: %s (hover: %s)",
+											ts_client.name,
+											ts_client.server_capabilities.hoverProvider and "✓" or "✗"
+										), vim.log.levels.INFO)
+
+										-- Test hover functionality
+										local params = vim.lsp.util.make_position_params()
+										vim.lsp.buf_request(bufnr, "textDocument/hover", params, function(err, result, ctx, config)
+											if err then
+												vim.notify("TypeScript hover error: " .. tostring(err), vim.log.levels.ERROR)
+											elseif result and result.contents then
+												vim.notify("TypeScript hover working! ✓", vim.log.levels.INFO)
+											else
+												vim.notify("TypeScript hover returned no content", vim.log.levels.WARN)
+											end
+										end)
+									else
+										vim.notify("No TypeScript LSP client found. Available clients: " ..
+											table.concat(vim.tbl_map(function(c) return c.name end, clients), ", "),
+											vim.log.levels.ERROR)
+									end
+								end, { buffer = bufnr, desc = "Debug TypeScript hover" })
+							end,
+						})
+					end,
+
 					["lua_ls"] = function()
 						lspconfig.lua_ls.setup({
 							capabilities = capabilities,
@@ -1192,13 +1284,226 @@ return {
 							},
 						})
 					end,
+
+					["rust_analyzer"] = function()
+						-- Professional Rust LSP configuration with rust-analyzer
+						lspconfig.rust_analyzer.setup({
+							capabilities = capabilities,
+							filetypes = { "rust" },
+							root_dir = lspconfig.util.root_pattern("Cargo.toml", "rust-project.json"),
+							settings = {
+								["rust-analyzer"] = {
+									-- Import configuration
+									imports = {
+										granularity = {
+											group = "module",
+										},
+										prefix = "self",
+									},
+									-- Cargo configuration
+									cargo = {
+										buildScripts = {
+											enable = true,
+										},
+										-- Load all targets for better completions
+										allTargets = true,
+										-- Use clippy for additional lints
+										features = "all",
+									},
+									-- Proc macro support
+									procMacro = {
+										enable = true,
+									},
+									-- Diagnostics configuration
+									diagnostics = {
+										enable = true,
+										enableExperimental = true,
+										-- Show warnings in dependencies
+										warningsAsHint = {},
+										warningsAsInfo = {},
+									},
+									-- Completion configuration
+									completion = {
+										callable = {
+											snippets = "fill_arguments",
+										},
+										postfix = {
+											enable = true,
+										},
+										privateEditable = {
+											enable = true,
+										},
+									},
+									-- Inlay hints configuration
+									inlayHints = {
+										enable = true,
+										bindingModeHints = {
+											enable = false,
+										},
+										chainingHints = {
+											enable = true,
+										},
+										closingBraceHints = {
+											enable = true,
+											minLines = 25,
+										},
+										closureReturnTypeHints = {
+											enable = "never",
+										},
+										lifetimeElisionHints = {
+											enable = "never",
+											useParameterNames = false,
+										},
+										maxLength = 25,
+										parameterHints = {
+											enable = true,
+										},
+										reborrowHints = {
+											enable = "never",
+										},
+										renderColons = true,
+										typeHints = {
+											enable = true,
+											hideClosureInitialization = false,
+											hideNamedConstructor = false,
+										},
+									},
+									-- Lens configuration
+									lens = {
+										enable = true,
+										debug = {
+											enable = true,
+										},
+										implementations = {
+											enable = true,
+										},
+										references = {
+											adt = {
+												enable = true,
+											},
+											enumVariant = {
+												enable = true,
+											},
+											method = {
+												enable = true,
+											},
+											trait = {
+												enable = true,
+											},
+										},
+										run = {
+											enable = true,
+										},
+									},
+									-- Semantic highlighting
+									semanticHighlighting = {
+										strings = {
+											enable = true,
+										},
+									},
+									-- Workspace configuration
+									workspace = {
+										symbol = {
+											search = {
+												scope = "workspace_and_dependencies",
+												kind = "all_symbols",
+											},
+										},
+									},
+									-- Hover configuration
+									hover = {
+										actions = {
+											enable = true,
+											debug = {
+												enable = true,
+											},
+											gotoTypeDef = {
+												enable = true,
+											},
+											implementations = {
+												enable = true,
+											},
+											references = {
+												enable = true,
+											},
+											run = {
+												enable = true,
+											},
+										},
+										documentation = {
+											enable = true,
+										},
+										links = {
+											enable = true,
+										},
+									},
+									-- Join lines configuration
+									joinLines = {
+										joinElseIf = true,
+										removeTrailingComma = true,
+										unwrapTrivialBlock = true,
+									},
+									-- Check configuration
+									check = {
+										command = "clippy",
+										extraArgs = { "--no-deps" },
+									},
+									-- Rustfmt configuration
+									rustfmt = {
+										extraArgs = {},
+										overrideCommand = nil,
+									},
+								},
+							},
+							-- Custom on_attach for Rust-specific functionality
+							on_attach = function(client, bufnr)
+								-- Enable inlay hints if supported
+								if client.server_capabilities.inlayHintProvider then
+									vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+								end
+
+								-- Set up Rust-specific keymaps
+								local opts = { buffer = bufnr, silent = true }
+								local keymap = vim.keymap.set
+
+								-- Toggle inlay hints
+								keymap("n", "<leader>ri", function()
+									vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }), { bufnr = bufnr })
+								end, { buffer = bufnr, desc = "Toggle inlay hints" })
+
+							end,
+						})
+					end,
+
+					["taplo"] = function()
+						-- TOML language server for Cargo.toml and other TOML files
+						lspconfig.taplo.setup({
+							capabilities = capabilities,
+							filetypes = { "toml" },
+							root_dir = lspconfig.util.root_pattern("*.toml", ".git"),
+							settings = {
+								taplo = {
+									configFile = {
+										enabled = true,
+									},
+									format = {
+										enabled = true,
+									},
+									lint = {
+										enabled = true,
+									},
+								},
+							},
+						})
+					end,
 				})
 			else
 				-- Fallback for newer versions of mason-lspconfig
 				-- Set up servers manually
 				local servers = {
-					"html", "cssls", "tailwindcss", "svelte", "lua_ls", "graphql",
-					"emmet_ls", "prismals", "pyright", "ruff", "eslint", "bashls", "csharp_ls"
+					"ts_ls", "html", "cssls", "tailwindcss", "svelte", "lua_ls", "graphql",
+					"emmet_ls", "prismals", "pyright", "ruff", "eslint", "bashls", "csharp_ls",
+					"rust_analyzer", "taplo"
 				}
 
 				for _, server_name in ipairs(servers) do
@@ -1308,6 +1613,97 @@ return {
 								},
 							},
 						})
+					elseif server_name == "rust_analyzer" then
+						-- Professional Rust LSP configuration with rust-analyzer (fallback)
+						lspconfig.rust_analyzer.setup({
+							capabilities = capabilities,
+							filetypes = { "rust" },
+							root_dir = lspconfig.util.root_pattern("Cargo.toml", "rust-project.json"),
+							settings = {
+								["rust-analyzer"] = {
+									cargo = {
+										buildScripts = { enable = true },
+										allTargets = true,
+										features = "all",
+									},
+									procMacro = { enable = true },
+									diagnostics = { enable = true, enableExperimental = true },
+									completion = {
+										callable = { snippets = "fill_arguments" },
+										postfix = { enable = true },
+									},
+									inlayHints = {
+										enable = true,
+										chainingHints = { enable = true },
+										parameterHints = { enable = true },
+										typeHints = { enable = true },
+									},
+									lens = { enable = true },
+									check = { command = "clippy" },
+								},
+							},
+							on_attach = function(client, bufnr)
+								if client.server_capabilities.inlayHintProvider then
+									vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+								end
+							end,
+						})
+					elseif server_name == "taplo" then
+						-- TOML language server configuration (fallback)
+						lspconfig.taplo.setup({
+							capabilities = capabilities,
+							filetypes = { "toml" },
+							root_dir = lspconfig.util.root_pattern("*.toml", ".git"),
+						})
+					elseif server_name == "ts_ls" then
+						-- TypeScript/JavaScript language server configuration (fallback)
+						lspconfig.ts_ls.setup({
+							capabilities = capabilities,
+							filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
+							root_dir = lspconfig.util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git"),
+							settings = {
+								typescript = {
+									inlayHints = {
+										includeInlayParameterNameHints = "all",
+										includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+										includeInlayFunctionParameterTypeHints = true,
+										includeInlayVariableTypeHints = true,
+										includeInlayPropertyDeclarationTypeHints = true,
+										includeInlayFunctionLikeReturnTypeHints = true,
+										includeInlayEnumMemberValueHints = true,
+									},
+								},
+								javascript = {
+									inlayHints = {
+										includeInlayParameterNameHints = "all",
+										includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+										includeInlayFunctionParameterTypeHints = true,
+										includeInlayVariableTypeHints = true,
+										includeInlayPropertyDeclarationTypeHints = true,
+										includeInlayFunctionLikeReturnTypeHints = true,
+										includeInlayEnumMemberValueHints = true,
+									},
+								},
+							},
+							on_attach = function(client, bufnr)
+								if client.server_capabilities.inlayHintProvider then
+									vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+								end
+								local keymap = vim.keymap.set
+								keymap("n", "<leader>to", function()
+									vim.lsp.buf.execute_command({ command = "_typescript.organizeImports", arguments = { vim.api.nvim_buf_get_name(0) } })
+								end, { buffer = bufnr, desc = "Organize imports" })
+								keymap("n", "<leader>ti", function()
+									vim.lsp.buf.code_action({ filter = function(action) return action.title == "Add missing imports" end, apply = true })
+								end, { buffer = bufnr, desc = "Add missing imports" })
+								keymap("n", "<leader>tf", function()
+									vim.lsp.buf.code_action({ filter = function(action) return action.title:match("Fix all") end, apply = true })
+								end, { buffer = bufnr, desc = "Fix all" })
+								keymap("n", "<leader>tu", function()
+									vim.lsp.buf.code_action({ filter = function(action) return action.title:match("Remove unused") end, apply = true })
+								end, { buffer = bufnr, desc = "Remove unused" })
+							end,
+						})
 					else
 						lspconfig[server_name].setup({ capabilities = capabilities })
 					end
@@ -1327,6 +1723,39 @@ return {
 				pattern = { "*.py", "*.pyi", "*.pyw", ".pythonrc", "SConstruct", "SConscript", "*.wsgi" },
 				callback = function(ev)
 					vim.bo[ev.buf].filetype = "python"
+				end,
+			})
+
+			-- Add filetype detection for Rust files
+			vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+				pattern = { "*.rs", "*.rlib" },
+				callback = function(ev)
+					vim.bo[ev.buf].filetype = "rust"
+				end,
+			})
+
+			-- Add filetype detection for TOML files (Cargo.toml, etc.)
+			vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+				pattern = { "*.toml", "Cargo.toml", "Cargo.lock", "pyproject.toml" },
+				callback = function(ev)
+					vim.bo[ev.buf].filetype = "toml"
+				end,
+			})
+
+			-- Add filetype detection for TypeScript/JavaScript files
+			vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+				pattern = { "*.ts", "*.tsx", "*.js", "*.jsx", "*.mjs", "*.cjs" },
+				callback = function(ev)
+					local ext = vim.fn.expand("%:e")
+					if ext == "ts" then
+						vim.bo[ev.buf].filetype = "typescript"
+					elseif ext == "tsx" then
+						vim.bo[ev.buf].filetype = "typescriptreact"
+					elseif ext == "js" or ext == "mjs" or ext == "cjs" then
+						vim.bo[ev.buf].filetype = "javascript"
+					elseif ext == "jsx" then
+						vim.bo[ev.buf].filetype = "javascriptreact"
+					end
 				end,
 			})
 
