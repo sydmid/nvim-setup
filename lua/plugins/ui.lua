@@ -1,17 +1,16 @@
 -- Global variables to track current background mode
 _G.background_modes = {
-	{ bg = "#121212", cursorline = "#272727", name = "Dark" },
+    { bg = "#282c34", cursorline = "#303640", name = "Light" },
 	{ bg = "#1f1f19", cursorline = "#333227", name = "Warm" },
-	{ bg = "#282c34", cursorline = "#383e4a", name = "MonoKai" },
-	{ bg = "#0f1419", cursorline = "#1a1f29", name = "Cool" }
+	{ bg = "#0f1419", cursorline = "#1a1f29", name = "Bluish" },
+	{ bg = "#121212", cursorline = "#272727", name = "Dark" }
 }
 _G.current_bg_index = 1
 
 -- Function to set background mode
 function _G.set_background_mode(mode_index)
 	if mode_index < 1 or mode_index > #_G.background_modes then
-		vim.notify("❌ Invalid background mode index!", vim.log.levels.ERROR)
-		return
+        mode_index = 0
 	end
 
 	_G.current_bg_index = mode_index
