@@ -1137,7 +1137,7 @@ return {
 				-- Other groups
 				{ "<leader>b", group = "Buffer" },
 				{ "<leader>c", group = "Context/Code-Actions" },
-				{ "<leader>ch", desc = "Toggle context header (robust)" },
+				{ "<leader>ch", desc = "Toggle context header" },
 				{ "<leader>cj", desc = "Jump to context" },
 				{ "<leader>cd", desc = "Debug context state" },
 				{ "<leader>ce", desc = "Force enable context" },
