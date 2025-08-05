@@ -18,7 +18,7 @@ return {
 			-- Setup overseer with custom configuration
 			overseer.setup({
 				templates = {},
-				strategy = "terminal",
+				strategy = "terminal", -- Use basic terminal strategy
 				dap = false,
 				component_aliases = {
 					default = {
@@ -131,15 +131,22 @@ return {
 						params = {},
 					})
 				else
-					-- Register dev commands as terminal tasks
+					-- Register dev commands with simple terminal execution
 					overseer.register_template({
 						name = entry.name,
 						builder = function()
+							local expanded_cmd = expand_vars(entry.cmd)
+
+							-- Simple terminal task that opens output automatically
 							return {
-								cmd = { "bash", "-c" },
-								args = { expand_vars(entry.cmd) },
+								cmd = { "fish", "-c" },
+								args = { expanded_cmd },
 								name = entry.name,
-								components = { "default" },
+								components = {
+									"default",
+									"on_complete_notify",
+									{ "open_output", on_start = "always" },
+								},
 							}
 						end,
 						condition = {
