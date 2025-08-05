@@ -1,5 +1,8 @@
 local opt = vim.opt
 
+-- Make sure to setup `mapleader` and `maplocalleader` before
+-- loading lazy.nvim so that mappings are correct.
+
 -- Set leader key
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
@@ -47,7 +50,7 @@ opt.foldenable = true             -- Enable folding
 opt.foldlevelstart = 99           -- Start with all folds open
 
 -- Timing settings
-opt.timeoutlen = 300              -- Reasonable timeout for key sequences (300ms for telescope stability)
+opt.timeoutlen = 200              -- Faster timeout for key sequences
 opt.ttimeoutlen = 0               -- Eliminate escape delay completely
 
 -- Additional settings
@@ -58,7 +61,7 @@ opt.signcolumn = "yes:2"          -- Always show sign column with fixed width of
 opt.updatetime = 100              -- Faster updates
 opt.scrolloff = 8                 -- Keep lines visible around cursor
 opt.sidescrolloff = 8             -- Keep columns visible around cursor
-opt.wrap = false                  -- Don't wrap lines
+opt.wrap = true                  -- Don't wrap lines
 opt.mouse = "a"                   -- Enable mouse in all modes
 
 -- backspace
@@ -73,34 +76,3 @@ opt.splitbelow = true -- split horizontal window to the bottom
 
 -- turn off swapfile
 opt.swapfile = false
-
--- Set cursor to block shape in all modes
--- opt.guicursor = "" -- Empty string makes cursor block in all modes
--- opt.guicursor = "n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50"
-
--- Notification filtering - only show errors and warnings
--- Store the original vim.notify function
-local original_notify = vim.notify
-local notifications_filtered = true
-
--- Override vim.notify to filter out info messages
-vim.notify = function(msg, level, opts)
-  -- Only show ERROR and WARN level notifications when filtering is enabled
-  if notifications_filtered and level and (level >= vim.log.levels.WARN) then
-    return original_notify(msg, level, opts)
-  elseif not notifications_filtered then
-    return original_notify(msg, level, opts)
-  end
-  -- Silently ignore INFO and DEBUG messages when filtering is enabled
-  return
-end
-
--- Function to toggle notification filtering
-function _G.toggle_notification_filter()
-  notifications_filtered = not notifications_filtered
-  if notifications_filtered then
-    vim.notify("Notification filtering enabled (errors/warnings only)", vim.log.levels.WARN)
-  else
-    vim.notify("Notification filtering disabled (all messages)", vim.log.levels.WARN)
-  end
-end

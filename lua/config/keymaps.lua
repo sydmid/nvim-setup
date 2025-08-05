@@ -395,99 +395,15 @@ map("i", ">>", "<ESC>la => <ESC>i", { desc = "Add arrow function", silent = true
 map("v", "<", "<gv", { desc = "Indent left and keep selection", silent = true })
 map("v", ">", ">gv", { desc = "Indent right and keep selection", silent = true })
 
--- Folding mappings
-map("n", "zf", "zf", { desc = "Create fold" })
-map("n", "zd", "zd", { desc = "Delete fold" })
-map("n", "zo", "zo", { desc = "Open fold" })
-map("n", "zO", "zO", { desc = "Open all folds" })
-map("n", "zc", "zc", { desc = "Close fold" })
-map("n", "zC", "zC", { desc = "Close all folds" })
-map("n", "za", "za", { desc = "Toggle fold" })
-map("n", "zR", "zR", { desc = "Open all folds" })
-map("n", "zM", "zM", { desc = "Close all folds" })
-map("n", "<leader>z", "za", { desc = "Toggle fold under cursor" })
-map("n", "<leader>Z", function()
-	if vim.wo.foldenable then
-		vim.wo.foldenable = false
-	else
-		vim.wo.foldenable = true
-	end
-end, { desc = "Toggle folding" })
+-- Explicit ZZ mapping to bypass timeout issues with z-prefix mappings
+-- map("n", "ZZ", ":wq<CR>", { desc = "Save and quit", nowait = true })
+-- map("n", "ZQ", ":q!<CR>", { desc = "Quit without saving", nowait = true })
 
 -- Global marks with g prefix to avoid conflicts
 map("n", "gma", "mA", { desc = "Set global mark A" })
 map("n", "gmb", "mB", { desc = "Set global mark B" })
 map("n", "gma", "`A", { desc = "Go to global mark A" })
 map("n", "gmb", "`B", { desc = "Go to global mark B" })
-
--- Marks navigation (using snacks.nvim - follows the j/k navigation pattern)
--- Navigate to next and previous marks in current buffer
--- NOTE: These are now handled by snacks.nvim in the marks section
--- map("n", "<leader>mj", function() -- Next mark (handled by snacks)
--- map("n", "<leader>mk", function() -- Previous mark (handled by snacks)
-
--- Separate normal and visual mode mappings for D-S-f
-map("n", "<D-S-f>", function()
-	if _G.telescope_live_grep_literal then
-		pcall(_G.telescope_live_grep_literal)
-	else
-		vim.notify("Telescope literal live grep not available", vim.log.levels.WARN)
-	end
-end, { desc = "telescope find string in all files (literal search)", silent = true })
-map("v", "<D-S-f>", function()
-	-- Yank the selected text to the unnamed register
-	vim.cmd("normal! y")
-	-- Get the yanked text
-	local selected_text = vim.fn.getreg('"')
-	-- No need to escape special characters since we're using literal search
-	-- Call telescope with the selected text as the default search term
-	if _G.telescope_live_grep_literal then
-		pcall(_G.telescope_live_grep_literal, { default_text = selected_text, initial_mode = "normal" })
-	else
-		vim.notify("Telescope literal live grep not available", vim.log.levels.WARN)
-	end
-end, { desc = "telescope find selected text in all files (literal search)", silent = true })
-
--- Alternative regex search for when you need regex patterns (⌘+⌥+Shift+F)
-map("n", "<D-A-S-f>", function()
-	if _G.telescope_live_grep_with_dynamic_title then
-		pcall(_G.telescope_live_grep_with_dynamic_title)
-	else
-		vim.notify("Telescope regex live grep not available", vim.log.levels.WARN)
-	end
-end, { desc = "telescope find string in all files (regex search)", silent = true })
-
-map("v", "<D-A-S-f>", function()
-	-- Yank the selected text to the unnamed register
-	vim.cmd("normal! y")
-	-- Get the yanked text
-	local selected_text = vim.fn.getreg('"')
-	-- Keep the text as-is for regex search (user can type regex patterns)
-	if _G.telescope_live_grep_with_dynamic_title then
-		pcall(_G.telescope_live_grep_with_dynamic_title, { default_text = selected_text, initial_mode = "normal" })
-	else
-		vim.notify("Telescope regex live grep not available", vim.log.levels.WARN)
-	end
-end, { desc = "telescope find selected text in all files (regex search)", silent = true })
-
--- Enhanced search function that searches for word under cursor
-local function search_word_under_cursor()
-	local word = vim.fn.expand("<cword>")
-	if word == "" then
-		-- If no word under cursor, fall back to regular search
-		vim.api.nvim_feedkeys("/", "n", false)
-	else
-		-- Search for the word using vim's search functionality
-		-- Use \< and \> for whole word matching (vim best practice)
-		local search_pattern = "\\<" .. vim.fn.escape(word, "\\") .. "\\>"
-		vim.fn.setreg("/", search_pattern)
-		vim.cmd("normal! n")
-		-- Enable search highlighting
-		vim.opt.hlsearch = true
-	end
-end
-
-map("n", "<D-f>", search_word_under_cursor, { desc = "search word under cursor in current file", silent = true })
 
 -- Miscellaneous
 map({ "n", "i", "v" }, "<D-s>", "<Cmd>w<CR>", { noremap = true, silent = true })
