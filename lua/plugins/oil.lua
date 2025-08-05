@@ -17,6 +17,7 @@ return {
           ["<C-l>"] = false,
           ["<C-k>"] = false,
           ["<C-j>"] = false,
+          ["-"] = false,
           ["<M-h>"] = "actions.select_split",
           ["<Esc>"] = { "actions.close", mode = "n" },
           ["<CR>"] = "actions.select",
