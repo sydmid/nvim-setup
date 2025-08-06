@@ -308,7 +308,7 @@ return {
               view = "rolling",     -- paging, rolling
             },
             last_used = {
-              switch = "on_close", -- immediate, on_close
+              switch = "immediate", -- immediate, on_close
               view = "paging",     -- paging, rolling
             },
             auto = {
@@ -317,7 +317,7 @@ return {
           },
           show_on_autocmd = false, -- event to trigger cybu (eg. "BufEnter")
         },
-        display_time = 500,        -- time the cybu window is displayed
+        display_time = 1000,        -- time the cybu window is displayed
         exclude = {                -- filetypes, buftypes to exclude
           "neo-tree",
           "fugitive",
@@ -347,6 +347,39 @@ return {
       -- VSCode-like keybindings for buffer switching
       vim.keymap.set("n", "<C-Tab>", "<Plug>(CybuLastusedNext)", { desc = "Next buffer (VSCode-like)" })
       vim.keymap.set("n", "<C-S-Tab>", "<Plug>(CybuLastusedPrev)", { desc = "Previous buffer (VSCode-like)" })
+    end,
+  },
+
+  -- Buffer manager - Enhanced buffer management with UI
+  {
+    "j-morano/buffer_manager.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      local opts = { noremap = true, silent = true }
+      local ui = require("buffer_manager.ui")
+
+      -- Setup buffer_manager
+      require("buffer_manager").setup({
+        select_menu_item_commands = {
+          v = {
+            key = "<C-v>",
+            command = "vsplit"
+          },
+          h = {
+            key = "<C-h>",
+            command = "split"
+          }
+        },
+        focus_alternate_buffer = false,
+        short_file_names = true,
+        short_term_names = true,
+        loop_nav = true,
+      })
+
+      -- Set keymaps for buffer_manager
+      vim.keymap.set("n", "<D-2>", ui.toggle_quick_menu, opts)
+      vim.keymap.set("n", "<M-h>", ui.nav_prev, opts)
+      vim.keymap.set("n", "<M-l>", ui.nav_next, opts)
     end,
   },
 

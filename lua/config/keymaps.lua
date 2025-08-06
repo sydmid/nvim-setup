@@ -572,7 +572,7 @@ map("n", "<D-6>", function()
 end, { desc = "Show buffer diagnostics in telescope", silent = true })
 
 -- Buffers with Telescope
-map("n", "<D-2>", function()
+map("n", "<leader>fb", function()
   require("telescope.builtin").buffers({
     theme = "ivy",         -- Consistent theme with diagnostics
     initial_mode = "normal", -- Start in normal mode instead of insert mode
