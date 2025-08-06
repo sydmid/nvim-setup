@@ -235,6 +235,25 @@ return {
           end, opts("Open file, keep tree open, focus main buffer"))
         end,
       })
+
+      -- Set custom colors for folder arrows and hierarchy lines
+      vim.api.nvim_set_hl(0, "NvimTreeFolderArrowClosed", { fg = "#9b9d9c" })
+      vim.api.nvim_set_hl(0, "NvimTreeFolderArrowOpen", { fg = "#e5b674" })
+      vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#e5b674" })
+      vim.api.nvim_set_hl(0, "NvimTreeFolderName", { fg = "#9b9d9c" })
+      vim.api.nvim_set_hl(0, "NvimTreeOpenedFolderName", { fg = "#e5b674" })
+
+      -- Ensure the highlights persist across colorscheme changes
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        group = vim.api.nvim_create_augroup("NvimTreeCustomColors", { clear = true }),
+        callback = function()
+          vim.api.nvim_set_hl(0, "NvimTreeFolderArrowClosed", { fg = "#9b9d9c" })
+          vim.api.nvim_set_hl(0, "NvimTreeFolderArrowOpen", { fg = "#e5b674" })
+          vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#e5b674" })
+          vim.api.nvim_set_hl(0, "NvimTreeFolderName", { fg = "#9b9d9c" })
+          vim.api.nvim_set_hl(0, "NvimTreeOpenedFolderName", { fg = "#e5b674" })
+        end,
+      })
     end,
   },
 
