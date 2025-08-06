@@ -1053,7 +1053,6 @@ end
 
 -- Map the smart buffer delete function to <leader>bd
 map("n", "<D-w>", smart_buffer_delete, { desc = "Close buffer (with confirmation if modified)", noremap = true, silent = true })
-map("n", "<leader>bd", smart_buffer_delete, { desc = "Smart delete buffer", silent = true })
 map({ "n", "i", "v" }, "<D-S-s>", save_all_modified, { desc = "Save all modified buffers", noremap = true, silent = true })
 
 -- Background mode selector keymap
