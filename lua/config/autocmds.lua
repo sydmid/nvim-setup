@@ -222,3 +222,13 @@ autocmd("BufWinEnter", {
 --   end,
 --   desc = "Auto-detect files with Arabic content",
 -- })
+
+-- Ensure cursor blinking persists across all events
+augroup("CursorBlinking", { clear = true })
+autocmd({ "VimEnter", "UIEnter", "BufEnter" }, {
+  group = "CursorBlinking",
+  callback = function()
+    vim.opt.guicursor = "n-v-c-sm:block,i-ci-ve:ver25,r-cr-o:hor20,a:blinkwait700-blinkoff400-blinkon250"
+  end,
+  desc = "Force cursor blinking configuration",
+})
