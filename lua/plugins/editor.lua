@@ -177,17 +177,7 @@ return {
             }
           end
 
-          -- Apply default mappings except for Tab
-          -- BEGIN_DEFAULT_ON_ATTACH
-          vim.keymap.set("n", "<C-]>", api.tree.change_root_to_node, opts("CD"))
-          vim.keymap.set("n", "<C-e>", api.node.open.replace_tree_buffer, opts("Open: In Place"))
-          vim.keymap.set("n", "<C-k>", api.node.show_info_popup, opts("Info"))
-          vim.keymap.set("n", "<C-r>", api.fs.rename_sub, opts("Rename: Omit Filename"))
-          vim.keymap.set("n", "<C-t>", api.node.open.tab, opts("Open: New Tab"))
-          vim.keymap.set("n", "<C-v>", api.node.open.vertical, opts("Open: Vertical Split"))
-          vim.keymap.set("n", "<C-x>", api.node.open.horizontal, opts("Open: Horizontal Split"))
           vim.keymap.set("n", "<BS>", api.node.navigate.parent_close, opts("Close Directory"))
-
           -- Custom Enter behavior: Open file and close nvim-tree
           vim.keymap.set("n", "<CR>", function()
             local node = api.tree.get_node_under_cursor()
@@ -201,8 +191,6 @@ return {
               api.node.open.edit()
             end
           end, opts("Open file and close tree"))
-
-          -- vim.keymap.set("n", "<Tab>",          api.node.open.preview,              opts("Open Preview")) -- Disabled to use global Tab mapping
           vim.keymap.set("n", ">", api.node.navigate.sibling.next, opts("Next Sibling"))
           vim.keymap.set("n", "<", api.node.navigate.sibling.prev, opts("Previous Sibling"))
           vim.keymap.set("n", ".", api.node.run.cmd, opts("Run Command"))
@@ -227,7 +215,6 @@ return {
           vim.keymap.set("n", "K", api.node.navigate.sibling.first, opts("First Sibling"))
           vim.keymap.set("n", "L", api.node.open.toggle_group_empty, opts("Toggle Group Empty"))
           vim.keymap.set("n", "M", api.tree.toggle_no_bookmark_filter, opts("Toggle Filter: No Bookmark"))
-
           -- Custom 'o' behavior: Open file, keep tree open and focused on tree
           vim.keymap.set("n", "o", function()
             local node = api.tree.get_node_under_cursor()
@@ -251,7 +238,6 @@ return {
               api.node.open.edit()
             end
           end, opts("Open file, keep tree open and focused"))
-
           -- Custom 'O' behavior: Open file, keep tree open but focus main buffer
           vim.keymap.set("n", "O", function()
             local node = api.tree.get_node_under_cursor()
@@ -278,8 +264,6 @@ return {
           vim.keymap.set("n", "Y", api.fs.copy.relative_path, opts("Copy Relative Path"))
           vim.keymap.set("n", "<2-LeftMouse>", api.node.open.edit, opts("Open"))
           vim.keymap.set("n", "<2-RightMouse>", api.tree.change_root_to_node, opts("CD"))
-          -- END_DEFAULT_ON_ATTACH
-
           -- Custom mapping: Use `/` for live filter instead of global search
           vim.keymap.set("n", "/", api.live_filter.start, opts("Live Filter: Start"))
           -- Custom mapping: Use `//` for clearing live filter

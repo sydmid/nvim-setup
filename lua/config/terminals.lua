@@ -1,16 +1,10 @@
--- Terminal management for multiple services
--- Provides functionality to run multiple services in separate terminal buffers
--- and switch between them easily
-
 local M = {}
-
 -- Store terminal buffers and their metadata
 local terminals = {}
-
 -- Configuration
 local config = {
   terminal_size = 20,
-  direction = "float", -- can be "horizontal", "vertical", "float", or "tab"
+  direction = "horizontal", -- can be "horizontal", "vertical", "float", or "tab"
   float_opts = {
     border = "curved",
     winblend = 0,
@@ -70,7 +64,7 @@ function M.run_in_terminal(name, cmd, opts)
   local term = Terminal:new({
     id = term_id,
     cmd = cmd,
-    direction = opts.direction or config.direction,
+    direction = "horizontal",
     size = opts.size or config.terminal_size,
     float_opts = opts.float_opts or config.float_opts,
     display_name = display_name,
@@ -99,17 +93,17 @@ function M.run_in_terminal(name, cmd, opts)
       -- Store the last known cursor position for locked mode
       vim.b[term.bufnr].locked_cursor_pos = nil
 
-      vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", {noremap = true, silent = true})
+      -- vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", {noremap = true, silent = true})
 
       -- Add Esc to exit terminal mode and auto-lock cursor for examination
-      vim.api.nvim_buf_set_keymap(term.bufnr, "t", "<Esc>",
-        "<C-\\><C-n>:lua require('config.terminals').auto_lock_for_examination(" .. term.bufnr .. ")<CR>",
-        {noremap = true, silent = true, desc = "Exit terminal mode and lock for examination"})
+      -- vim.api.nvim_buf_set_keymap(term.bufnr, "t", "<Esc>",
+      --   "<C-\\><C-n>:lua require('config.terminals').auto_lock_for_examination(" .. term.bufnr .. ")<CR>",
+      --   {noremap = true, silent = true, desc = "Exit terminal mode and lock for examination"})
 
       -- Add key to toggle cursor following (lock/unlock scrolling)
-      vim.api.nvim_buf_set_keymap(term.bufnr, "n", "<leader>tl",
-        ":lua require('config.terminals').toggle_follow_output(" .. term.bufnr .. ")<CR>",
-        {noremap = true, silent = true, desc = "Toggle follow output"})
+      -- vim.api.nvim_buf_set_keymap(term.bufnr, "n", "<leader>tl",
+      --   ":lua require('config.terminals').toggle_follow_output(" .. term.bufnr .. ")<CR>",
+      --   {noremap = true, silent = true, desc = "Toggle follow output"})
 
       -- Add key to jump to end and re-enable following
       vim.api.nvim_buf_set_keymap(term.bufnr, "n", "G",
@@ -183,11 +177,6 @@ end
 
 -- Focus on a specific terminal by name
 function M.focus_terminal(name)
-  if not terminals[name] then
-    vim.notify("Terminal '" .. name .. "' not found. Run it first.", vim.log.levels.WARN)
-    return false
-  end
-
   local term_data = terminals[name]
   if term_data.terminal then
     -- If terminal is not open, open it
@@ -225,11 +214,6 @@ end
 
 -- Toggle a terminal (open if closed, close if open)
 function M.toggle_terminal(name)
-  if not terminals[name] then
-    vim.notify("Terminal '" .. name .. "' not found. Run it first.", vim.log.levels.WARN)
-    return false
-  end
-
   local term_data = terminals[name]
   if term_data.terminal then
     local was_open = term_data.terminal:is_open()

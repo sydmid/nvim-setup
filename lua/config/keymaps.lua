@@ -11,7 +11,7 @@ vim.keymap.set("x", "/", function()
 end, { noremap = true, silent = true })
 
 -- Buffer management commands (which-key compatible)
-map("n", "<leader>bo", "<cmd>%bd|e#|bd#<CR>", { desc = "Delete other buffers" })
+map("n", "<leader>bD", "<cmd>%bd|e#|bd#<CR>", { desc = "Delete other buffers" })
 -- Reset current buffer (reload from disk, discard changes)
 map("n", "<leader>br", function()
   local bufname = vim.api.nvim_buf_get_name(0)
@@ -35,27 +35,7 @@ map("n", "<leader>br", function()
   vim.cmd("edit!")
   vim.notify("Buffer reset from disk", vim.log.levels.INFO)
 end, { desc = "Reset buffer (reload from disk)" })
-
-
-
--- Ctrl+6 is the standard vim way to switch to alternate (last) buffer
-map("n", "<C-^>", "<cmd>e #<CR>", { desc = "Switch to alternate buffer" })
--- Alternative mapping for switching to last buffer
-map("n", "<leader>ba", "<cmd>e #<CR>", { desc = "Switch to alternate buffer" })
-
--- Register buffer commands with which-key explicitly
-vim.defer_fn(function()
-  local wk_ok, wk = pcall(require, "which-key")
-  if wk_ok then
-    wk.register({
-      ["<leader>b"] = { name = "Buffer" },
-      ["<leader>bd"] = { "<cmd>bdelete<CR>", "Delete buffer and window" },
-      ["<leader>bo"] = { "<cmd>%bd|e#|bd#<CR>", "Delete other buffers" },
-      ["<leader>ba"] = { "<cmd>e #<CR>", "Switch to alternate buffer" },
-    })
-    -- Register bracket navigation
-  end
-end, 100)
+map("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Delete other buffers" })
 
 vim.keymap.set("x", "<D-f>", function()
 	-- Yank the selected text
@@ -66,7 +46,6 @@ vim.keymap.set("x", "<D-f>", function()
 	-- Start search
 	vim.fn.feedkeys("/" .. text .. "\n", "n")
 end, { noremap = true, silent = true })
-map("n", "\\e", ":e ~/.config/nvim/init.lua<CR>", { desc = "Edit init.lua" })
 map("n", "\\r", ":source ~/.config/nvim/init.lua<CR>", { desc = "Reload config" })
 map("n", "<D-`>", function()
   local terminals = require('config.terminals')
@@ -341,7 +320,7 @@ local function is_window_visible(win)
 end
 
 -- -- Tab key toggles between main buffer and auxiliary buffers
-map("n", "<Tab>", function()
+map({"n","t"}, "<Tab>", function()
 	local current = vim.api.nvim_get_current_buf()
 	local current_win = vim.api.nvim_get_current_win()
 
@@ -381,7 +360,6 @@ map("n", "<Tab>", function()
 			vim.api.nvim_set_current_win(visible_aux_windows[1])
 			return
 		end
-
 		-- No auxiliary windows visible, provide feedback
 		vim.notify("No auxiliary windows open", vim.log.levels.INFO, { timeout = 1000 })
 	else
@@ -507,15 +485,10 @@ vim.keymap.set("n", "<D-b>", function()
 	end
 end, { desc = "Close non-main buffers", silent = true })
 
-map({ "n", "v" }, "<D-S-t>", ":silent! %bd!|e#|bd#<CR>", {
-	desc = "Force close all buffers except current",
-	silent = true,
-})
-
 map({ "n", "v" }, "<D-m>", ":MaximizerToggle<CR>", { desc = "Toggle Maximize/minimize", silent = true })
 map("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
+map("i", "kj", "<ESC>", { desc = "Exit insert mode with kj" })
 map("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
-map("n", "'", "`", { desc = "Go to mark" })
 map("n", "Y", "^vg_y", { desc = "Yank line contents" })
 -- map("n", "<esc>", ":noh<return><esc>", { desc = "Clear search highlight" })
 vim.keymap.set("n", "<Esc>", function()
@@ -775,19 +748,13 @@ map("i", "<D-S-j>", "<Esc>:m .+1<CR>==gi", { desc = "Move line down", silent = t
 map("i", "<D-S-k>", "<Esc>:m .-2<CR>==gi", { desc = "Move line up", silent = true }) -- Move line up
 
 -- window management
-map("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" }) -- split window vertically
-map("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" }) -- split window horizontally
+map("n", "|", "<C-w>v", { desc = "Split window vertically" }) -- split window vertically
+map("n", "_", "<C-w>s", { desc = "Split window horizontally" }) -- split window horizontally
 map("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" }) -- make split windows equal width & height
-map("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" }) -- close current split window
-
--- CMD key window splits (macOS style)
-map("n", "<D-t>", "<C-w>v", { desc = "Create new vertical split to right" }) -- create new vertical split to right
-
-map("n", "<leader>wo", "<cmd>tabnew<CR>", { desc = "Open new tab" }) -- open new tab
-map("n", "<leader>wx", "<cmd>tabclose<CR>", { desc = "Close current tab" }) -- close current tab
-map("n", "<leader>wn", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
-map("n", "<leader>wp", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
-map("n", "<leader>wf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
+-- tab management
+map("n", "<D-n>", "<cmd>tabnew<CR>", { desc = "Open new tab" }) -- open new tab
+map("n", "<D-]>", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
+map("n", "<D-[>", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
 
 -- Smart find and replace function
 local function get_visual_selection()
