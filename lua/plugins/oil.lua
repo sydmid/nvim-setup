@@ -27,6 +27,16 @@ return {
           ["g\\"] = { "actions.toggle_trash", mode = "n" },
 
         },
+        float = {
+          padding = 2,
+          max_width = 80,
+          max_height = 30,
+          border = "rounded",
+          win_options = {
+            winblend = 0,
+          },
+          preview_split = "auto",
+        },
         win_options = {
           winbar = "%{v:lua.CustomOilBar()}",
         },
@@ -40,10 +50,10 @@ return {
       }
 
       -- Open parent directory in current window
-      vim.keymap.set("n", "<BS>", "<CMD>Oil<CR>", { desc = "Open parent directory" })
+    --   vim.keymap.set("n", "<BS>", "<CMD>Oil<CR>", { desc = "Open parent directory" })
 
       -- Open parent directory in floating window
-      vim.keymap.set("n", "<space>-", require("oil").toggle_float)
+      vim.keymap.set("n", "<BS>", require("oil").toggle_float)
     end,
   },
 }
