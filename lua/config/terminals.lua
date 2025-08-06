@@ -474,23 +474,23 @@ function M.unlock_cursor()
 end
 
 -- Debug function to check terminal cursor state
-function M.debug_cursor_state()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local win = vim.api.nvim_get_current_win()
+-- function M.debug_cursor_state()
+--   local bufnr = vim.api.nvim_get_current_buf()
+--   local win = vim.api.nvim_get_current_win()
 
-  print("=== Terminal Cursor Debug ===")
-  print("Buffer:", bufnr)
-  print("Window:", win)
-  print("Buffer type:", vim.bo[bufnr].buftype)
-  print("Following output:", vim.b[bufnr].terminal_follow_output)
-  print("Locked position:", vim.inspect(vim.b[bufnr].locked_cursor_pos))
+--   print("=== Terminal Cursor Debug ===")
+--   print("Buffer:", bufnr)
+--   print("Window:", win)
+--   print("Buffer type:", vim.bo[bufnr].buftype)
+--   print("Following output:", vim.b[bufnr].terminal_follow_output)
+--   print("Locked position:", vim.inspect(vim.b[bufnr].locked_cursor_pos))
 
-  local cursor_pos = vim.api.nvim_win_get_cursor(win)
-  print("Current cursor:", cursor_pos[1], cursor_pos[2])
-  print("Buffer lines:", vim.api.nvim_buf_line_count(bufnr))
-  print("Window valid:", vim.api.nvim_win_is_valid(win))
-  print("========================")
-end
+--   local cursor_pos = vim.api.nvim_win_get_cursor(win)
+--   print("Current cursor:", cursor_pos[1], cursor_pos[2])
+--   print("Buffer lines:", vim.api.nvim_buf_line_count(bufnr))
+--   print("Window valid:", vim.api.nvim_win_is_valid(win))
+--   print("========================")
+-- end
 
 -- Setup function for configuration
 function M.setup(opts)

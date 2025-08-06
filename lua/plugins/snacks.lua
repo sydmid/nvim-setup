@@ -464,11 +464,11 @@ return {
       desc = "Highlights",
     },
     {
-      "<leader>si",
+      "<leader>ii",
       function()
         Snacks.picker.icons()
       end,
-      desc = "Icons",
+      desc = "Insert Icons",
     },
     {
       "<leader>sj",

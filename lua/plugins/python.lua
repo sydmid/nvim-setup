@@ -362,7 +362,6 @@ return {
 		ft = "python",
 		build = ":UpdateRemotePlugins",
 		config = function()
-			vim.keymap.set("n", "<leader>si", ":Isort<CR>", { desc = "Sort Python imports" })
 		end,
 	},
 

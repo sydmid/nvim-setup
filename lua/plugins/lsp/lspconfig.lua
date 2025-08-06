@@ -1045,24 +1045,6 @@ return {
 							end, 50)
 						end
 					end, { buffer = ev.buf, desc = "Previous diagnostic (with Error Lens sync)" })
-
-					keymap("n", "<D-]>", function()
-						vim.diagnostic.goto_next()
-						if _G.ErrorLens and _G.ErrorLens.enabled then
-							vim.defer_fn(function()
-								_G.ErrorLens.refresh_current_buffer()
-							end, 50)
-						end
-					end, { buffer = ev.buf, desc = "Next diagnostic (with Error Lens sync)" })
-
-					keymap("n", "<D-[>", function()
-						vim.diagnostic.goto_prev()
-						if _G.ErrorLens and _G.ErrorLens.enabled then
-							vim.defer_fn(function()
-								_G.ErrorLens.refresh_current_buffer()
-							end, 50)
-						end
-					end, { buffer = ev.buf, desc = "Previous diagnostic (with Error Lens sync)" })
 				end,
 			})
 

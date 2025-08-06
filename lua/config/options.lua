@@ -1,17 +1,12 @@
 local opt = vim.opt
 
+-- Configure word boundaries to treat hyphens as separators
+opt.iskeyword:remove("-")
+
 -- Make sure to setup `mapleader` and `maplocalleader` before
 -- loading lazy.nvim so that mappings are correct.
-
--- Set leader key
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
-
--- System clipboard integration
-opt.clipboard = "unnamedplus"
-
--- Set default scrolloff to 5 globally
-vim.o.scrolloff = 5
 
 -- File handling settings
 opt.fixendofline = false          -- Don't automatically add newline at end of file
@@ -39,7 +34,6 @@ opt.smartcase = true              -- Smart case sensitivity
 -- Indentation settings
 opt.tabstop = 4                   -- Tab width
 opt.softtabstop = 4               -- Soft tab width
-opt.expandtab = true
 opt.shiftwidth = 4                -- Indent width
 opt.shiftround = true             -- Round indent to multiple of shiftwidth
 opt.expandtab = true              -- Use spaces instead of tabs
@@ -60,7 +54,7 @@ opt.ttimeoutlen = 0               -- Eliminate escape delay completely
 opt.matchpairs:append("<:>")      -- Add <> to matching pairs
 opt.termguicolors = true          -- True color support
 opt.background = "dark"
-opt.signcolumn = "yes:2"          -- Always show sign column with fixed width of 2
+opt.signcolumn = "yes:1"          -- Always show sign column with fixed width of 2
 opt.updatetime = 100              -- Faster updates
 opt.scrolloff = 8                 -- Keep lines visible around cursor
 opt.sidescrolloff = 8             -- Keep columns visible around cursor
@@ -71,7 +65,7 @@ opt.mouse = "a"                   -- Enable mouse in all modes
 opt.backspace = "indent,eol,start" -- allow backspace on indent, end of line or insert mode start position
 
 -- clipboard
-opt.clipboard:append("unnamedplus") -- use system clipboard as default register
+-- opt.clipboard:append("unnamedplus") -- use system clipboard as default register
 
 -- split windows
 opt.splitright = true -- split vertical window to the right
