@@ -100,16 +100,7 @@ return {
       desc = "Projects",
     },
     {
-      "<leader><space>",
-      function()
-        Snacks.picker.smart()
-      end,
-      desc = "Smart Find Files",
-    },
-
-    -- Buffer group (<leader>b) - Buffer management
-    {
-      "<leader>bo",
+      "<leader>fb",
       function()
         Snacks.picker.buffers({
           win = {
@@ -830,46 +821,25 @@ return {
         vim.print = _G.dd -- Override print to use snacks for `:=` command
 
         -- Create toggle mappings using Test/Utils group (<leader>u)
-        Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
-        Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
-        Snacks.toggle.option("relativenumber", { name = "Relative Number" }):map("<leader>uL")
-        Snacks.toggle.diagnostics():map("<leader>ud")
-        Snacks.toggle.line_number():map("<leader>ul")
-        Snacks.toggle
-            .option("conceallevel", { off = 0, on = vim.o.conceallevel > 0 and vim.o.conceallevel or 2 })
-            :map("<leader>uc")
-        Snacks.toggle.treesitter():map("<leader>uT")
-        Snacks.toggle.option("background", { off = "light", on = "dark", name = "Dark Background" }):map("<leader>ub")
-        Snacks.toggle.inlay_hints():map("<leader>uh")
-        Snacks.toggle.indent():map("<leader>ug")
-        Snacks.toggle.dim():map("<leader>uD")
+        -- Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
+        -- Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
+        -- Snacks.toggle.option("relativenumber", { name = "Relative Number" }):map("<leader>uL")
+        -- Snacks.toggle.diagnostics():map("<leader>ud")
+        -- Snacks.toggle.line_number():map("<leader>ul")
+        -- Snacks.toggle
+        --     .option("conceallevel", { off = 0, on = vim.o.conceallevel > 0 and vim.o.conceallevel or 2 })
+        --     :map("<leader>uc")
+        -- Snacks.toggle.treesitter():map("<leader>uT")
+        -- Snacks.toggle.option("background", { off = "light", on = "dark", name = "Dark Background" }):map("<leader>ub")
+        -- Snacks.toggle.inlay_hints():map("<leader>uh")
+        -- Snacks.toggle.indent():map("<leader>ug")
+        -- Snacks.toggle.dim():map("<leader>uD")
       end,
     })
   end,
 
   config = function(_, opts)
     require("snacks").setup(opts)
-
-    -- Integration with existing Which-Key groups - Add specific snacks descriptions
-    local wk_ok, wk = pcall(require, "which-key")
-    if wk_ok then
-      wk.add({
-        -- Add snacks-specific descriptions to existing groups
-        { "<leader>f", group = "󰈞 File/Find" },
-        { "<leader>b", group = "󰓩 Buffer" },
-        { "<leader>s", group = "󰯌 Session/Split/Search" },
-        { "<leader>g", group = "󰊢 Git/Goto" },
-        { "<leader>l", group = "󰿘 LSP" },
-        { "<leader>w", group = "󰓩 Workspace/Tabs" },
-        { "<leader>u", group = "󰙨 Test/Utils/Toggles" },
-        { "<leader>m", group = "󰃀 Marks" },
-        { "<leader>c", group = "󰒓 Context/Code-Actions" },
-        { "<leader>v", group = "󰒉 Visual/View" },
-        { "<leader>t", group = "󰆍 Terminal/Tabs/Themes" },
-        { "<leader>e", group = "🔍 Error Lens/Explorer" },
-        { "<leader>i", group = "󰋼 Info/Implementations" },
-      })
-    end
 
     -- Set up custom colors for marks to match your theme
     vim.api.nvim_set_hl(0, "SnacksMarks", { fg = "#4A90E2", bold = true })           -- Blue for marks
@@ -899,70 +869,5 @@ return {
     vim.api.nvim_create_user_command("MarksGlobal", function()
       require("snacks").picker.marks()
     end, { desc = "List all global marks" })
-
-    vim.api.nvim_create_user_command("MarksHelp", function()
-      local marks_help = {
-        "Snacks Marks Usage:",
-        "",
-        "Global Marks (A-Z): Set with `mA`, jump with `'A`",
-        "Local Marks (a-z): Set with `ma`, jump with `'a`",
-        "Special Marks:",
-        "  `. - Last change position",
-        "  `' - Last jump position",
-        "  `\" - Last exit position",
-        "  `[ and `] - Start/end of last change",
-        "",
-        "Keybindings:",
-        "  <leader>sm - Open marks picker (all marks)",
-        "  <leader>mm - Quick mark toggle (auto-assigns a-z marks)",
-        "  <leader>ml - List marks (current project only)",
-        "  <leader>mb - List buffers (snacks buffers)",
-        "  <leader>mL - List marks (all global marks)",
-        "  <leader>mj - Next mark in buffer",
-        "  <leader>mk - Previous mark in buffer",
-        "  <leader>ma - Set global mark (A-Z)",
-        "  <leader>mc - Clear marks in current buffer",
-        "  <leader>mC - Clear all global marks",
-        "",
-        "Commands:",
-        "  :MarksList - List all marks",
-        "  :MarksProject - List project marks only",
-        "  :MarksGlobal - List all global marks",
-        "  :MarksHelp - Show this help",
-        "",
-        "Use snacks picker for full marks navigation!"
-      }
-
-      local buf = vim.api.nvim_create_buf(false, true)
-      vim.api.nvim_buf_set_lines(buf, 0, -1, false, marks_help)
-      vim.api.nvim_buf_set_option(buf, 'filetype', 'markdown')
-      vim.api.nvim_buf_set_option(buf, 'modifiable', false)
-
-      local win = vim.api.nvim_open_win(buf, true, {
-        relative = 'editor',
-        width = 70,
-        height = #marks_help + 2,
-        row = (vim.o.lines - #marks_help) / 2,
-        col = (vim.o.columns - 70) / 2,
-        style = 'minimal',
-        border = 'rounded',
-        title = ' 📍 Marks Help ',
-        title_pos = 'center'
-      })
-
-      vim.api.nvim_buf_set_keymap(buf, 'n', 'q', '<cmd>close<cr>', { silent = true })
-      vim.api.nvim_buf_set_keymap(buf, 'n', '<Esc>', '<cmd>close<cr>', { silent = true })
-    end, { desc = "Show marks help" })
-
-    -- Enhanced notifications for snacks operations (following your existing pattern)
-    vim.api.nvim_create_autocmd("User", {
-      pattern = "SnacksNotificationShown",
-      callback = function(data)
-        -- Optional: Log snacks notifications for debugging
-        if vim.g.snacks_debug then
-          vim.notify("📦 Snacks notification: " .. vim.inspect(data.data), vim.log.levels.DEBUG)
-        end
-      end,
-    })
   end,
 }

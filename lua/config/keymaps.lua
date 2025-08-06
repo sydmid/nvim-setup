@@ -571,31 +571,6 @@ map("n", "<D-6>", function()
   })
 end, { desc = "Show buffer diagnostics in telescope", silent = true })
 
--- Buffers with Telescope
-map("n", "<leader>fb", function()
-  require("telescope.builtin").buffers({
-    theme = "ivy",         -- Consistent theme with diagnostics
-    initial_mode = "normal", -- Start in normal mode instead of insert mode
-    layout_config = {
-      height = 0.5,
-      preview_cutoff = 120,
-    },
-    -- Enhanced buffer display
-    show_all_buffers = true,
-    sort_mru = true, -- Sort by most recently used
-    sort_lastused = true,
-    previewer = true,
-    attach_mappings = function(prompt_bufnr, map_func)
-      local actions = require("telescope.actions")
-      -- Override ESC to close telescope instead of going to normal mode
-      map_func("i", "<Esc>", actions.close)
-      map_func("n", "<Esc>", actions.close)
-      map_func("n", "q", actions.close)
-      return true
-    end,
-  })
-end, { desc = "Show buffers in telescope", silent = true })
-
 -- Harpoon quick menu
 map("n", "<D-3>", function()
   require("harpoon.ui").toggle_quick_menu()
