@@ -52,32 +52,46 @@ return {
         -- Normalize the path
         target_dir = vim.fn.resolve(target_dir)
 
-        -- Close all buffers and windows without saving (more aggressive approach)
-        -- First, close all windows except the current one
-        vim.cmd("silent! only")
-        -- Stop any LSP clients to prevent them from keeping buffers alive
-        vim.lsp.stop_client(vim.lsp.get_active_clients())
-        -- Force close all buffers without saving
-        vim.cmd("silent! bufdo bwipeout!")
-        -- Fallback: wipeout any remaining buffers
-        vim.cmd("silent! %bwipeout!")
-
-        -- Change the working directory
-        vim.cmd("cd " .. vim.fn.fnameescape(target_dir))
-
-        -- Update nvim-tree to reflect the new workspace
-        vim.schedule(function()
-          local nvim_tree_ok, nvim_tree_api = pcall(require, "nvim-tree.api")
-          if nvim_tree_ok then
-            -- Change nvim-tree's root to the new workspace
-            nvim_tree_api.tree.change_root(target_dir)
-          end
-        end)
-
-        vim.notify("Workspace changed to: " .. target_dir, vim.log.levels.INFO)
-
-        -- Close oil after changing workspace
+        -- Close oil first to prevent interference
         oil.close()
+
+        -- Use vim.schedule to ensure operations happen after oil is properly closed
+        vim.schedule(function()
+          -- Change the working directory first
+          vim.cmd("cd " .. vim.fn.fnameescape(target_dir))
+
+          -- Then handle buffer cleanup more gracefully
+          -- Close all windows except the current one
+          vim.cmd("silent! only")
+
+          -- Get list of non-essential buffers to close
+          local current_buf = vim.api.nvim_get_current_buf()
+          for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+            if bufnr ~= current_buf and vim.api.nvim_buf_is_loaded(bufnr) then
+              local bufname = vim.api.nvim_buf_get_name(bufnr)
+              -- Skip special buffers and focus on regular file buffers
+              if bufname ~= "" and not bufname:match("^oil://") then
+                vim.cmd("silent! bwipeout! " .. bufnr)
+              end
+            end
+          end
+
+          -- Stop LSP clients after buffer cleanup
+          vim.schedule(function()
+            vim.lsp.stop_client(vim.lsp.get_active_clients())
+          end)
+
+          -- Update nvim-tree to reflect the new workspace
+          vim.schedule(function()
+            local nvim_tree_ok, nvim_tree_api = pcall(require, "nvim-tree.api")
+            if nvim_tree_ok then
+              -- Change nvim-tree's root to the new workspace
+              nvim_tree_api.tree.change_root(target_dir)
+            end
+          end)
+
+          vim.notify("Workspace changed to: " .. target_dir, vim.log.levels.INFO)
+        end)
       end
 
       require("oil").setup {

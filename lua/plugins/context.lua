@@ -6,21 +6,20 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
-    },    opts = {
+    },
+    opts = {
       enable = true,
-      max_lines = 0, -- 0 means no limit, dynamically resize based on content
-      min_window_height = 0, -- Always show context (set to higher value like 10 to only show in larger windows)
+      max_lines = 0,           -- 0 means no limit, dynamically resize based on content
+      min_window_height = 0,   -- Always show context (set to higher value like 10 to only show in larger windows)
       line_numbers = true,
       multiline_threshold = 1, -- Show context even for single-line functions
-      trim_scope = 'outer', -- Which context lines to trim: 'outer' (default) or 'inner'
-      mode = 'cursor', -- How to calculate context: 'cursor' (default), 'topline'
-      separator = nil, -- Separator between context and content. Use '─' or '▁' or nil to disable
-      zindex = 20, -- Z-index for the floating window
-      on_attach = nil, -- Optional callback to run when attached
+      trim_scope = 'outer',    -- Which context lines to trim: 'outer' (default) or 'inner'
+      mode = 'cursor',         -- How to calculate context: 'cursor' (default), 'topline'
+      separator = nil,         -- Separator between context and content. Use '─' or '▁' or nil to disable
+      zindex = 20,             -- Z-index for the floating window
+      on_attach = nil,         -- Optional callback to run when attached
 
-      -- Enhanced patterns for better context detection and reliability
       patterns = {
-        -- Enhanced HTML patterns for Angular templates
         html = {
           'element',
           'start_tag',
@@ -78,24 +77,6 @@ return {
     },
     config = function(_, opts)
       require("treesitter-context").setup(opts)
-
-      -- Force HTML context detection
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "html", "htmlangular", "vue", "svelte" },
-        group = vim.api.nvim_create_augroup("TreesitterContextHTML", { clear = true }),
-        callback = function()
-          -- Ensure context is enabled for HTML files
-          require("treesitter-context").enable()
-
-          -- Force refresh context display
-          vim.defer_fn(function()
-            if vim.bo.filetype == "html" or vim.bo.filetype == "htmlangular" then
-              -- Trigger a context refresh
-              vim.cmd("doautocmd CursorMoved")
-            end
-          end, 100)
-        end,
-      })
 
       -- Set custom highlight groups to match your theme
       vim.api.nvim_create_autocmd("ColorScheme", {
@@ -195,16 +176,10 @@ return {
             end)
           end
         end,
-      })      -- Keymaps for context navigation (moved to <leader>h group)
-      vim.keymap.set("n", "[c", function()
-        require("treesitter-context").go_to_context(vim.v.count1)
-      end, {
-        silent = true,
-        desc = "Jump to context (breadcrumb)"
       })
 
       -- Context control keymaps in <leader>h group
-      vim.keymap.set("n", "<leader>cj", function()
+      vim.keymap.set("n", "<leader>ck", function()
         require("treesitter-context").go_to_context(vim.v.count1)
       end, {
         silent = true,
@@ -265,86 +240,7 @@ return {
           )
         end, 50) -- Small delay to allow the toggle to complete
       end, {
-        desc = "Toggle treesitter context (robust)"
-      })
-
-      vim.keymap.set("n", "<leader>cd", function()
-        local tsc = require("treesitter-context")
-        local has_parser = pcall(vim.treesitter.get_parser)
-        local ft = vim.bo.filetype
-
-        vim.notify(string.format(
-          "Context Debug:\n" ..
-          "- Enabled: %s\n" ..
-          "- Filetype: %s\n" ..
-          "- Has parser: %s\n" ..
-          "- Buffer lines: %d",
-          tsc.enabled(),
-          ft,
-          has_parser,
-          vim.api.nvim_buf_line_count(0)
-        ), vim.log.levels.INFO)
-      end, {
-        desc = "Debug treesitter context"
-      })
-
-      -- Force enable context (for troubleshooting)
-      vim.keymap.set("n", "<leader>ce", function()
-        local tsc = require("treesitter-context")
-        tsc.enable()
-        vim.schedule(function()
-          vim.cmd("doautocmd CursorMoved")
-          vim.cmd("redraw!")
-          vim.notify("Context force enabled", vim.log.levels.INFO)
-        end)
-      end, {
-        desc = "Force enable treesitter context"
-      })
-
-      -- Force disable context (for troubleshooting)
-      vim.keymap.set("n", "<leader>cx", function()
-        local tsc = require("treesitter-context")
-        tsc.disable()
-        vim.schedule(function()
-          vim.cmd("redraw!")
-          vim.notify("Context force disabled", vim.log.levels.INFO)
-        end)
-      end, {
-        desc = "Force disable treesitter context"
-      })
-
-      -- Context status and health check
-      vim.keymap.set("n", "<leader>cs", function()
-        local tsc = require("treesitter-context")
-        local bufnr = vim.api.nvim_get_current_buf()
-        local ft = vim.bo.filetype
-        local has_parser = pcall(vim.treesitter.get_parser, bufnr, ft)
-        local line_count = vim.api.nvim_buf_line_count(bufnr)
-        local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
-
-        local status_msg = string.format(
-          "🔍 Context Status Report:\n\n" ..
-          "📊 State: %s\n" ..
-          "📄 Filetype: %s\n" ..
-          "🌳 Treesitter parser: %s\n" ..
-          "📏 Buffer lines: %d\n" ..
-          "📍 Cursor line: %d\n" ..
-          "🎯 Refresh counter: %s\n\n" ..
-          "💡 If context isn't showing:\n" ..
-          "   • Try <leader>ce to force enable\n" ..
-          "   • Check if treesitter parser exists for filetype\n" ..
-          "   • Make sure you're in a file with functions/classes",
-          tsc.enabled() and "🟢 ENABLED" or "🔴 DISABLED",
-          ft == "" and "none" or ft,
-          has_parser and "✅ Available" or "❌ Missing",
-          line_count,
-          cursor_line,
-          vim.g.context_refresh_counter or "0"
-        )
-
-        vim.notify(status_msg, vim.log.levels.INFO)
-      end, {
-        desc = "Context status and health check"
+        desc = "Toggle treesitter context"
       })
     end,
   },
@@ -362,12 +258,11 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     opts = {
       -- Show breadcrumbs in the winbar (top of each window)
-      attach_navic = false, -- We'll handle navic attachment ourselves
+      attach_navic = false,  -- We'll handle navic attachment ourselves
       create_autocmd = true, -- We'll create our own autocmd
-      show_dirname = true, -- Don't show directory name to save space
-      show_basename = false, -- Show file basename
+      show_dirname = true,   
+      show_basename = true, -- Show file basename
 
-      -- Only show breadcrumbs for certain filetypes
       exclude_filetypes = {
         "help",
         "startify",

@@ -146,8 +146,8 @@ return {
             oil.close()
           end
         end,
-        -- Close any floating windows that might interfere
-        "lua for _, win in ipairs(vim.api.nvim_list_wins()) do if vim.api.nvim_win_get_config(win).relative ~= '' then vim.api.nvim_win_close(win, false) end end",
+        -- Close any floating windows that might interfere (but preserve treesitter-context)
+        "lua for _, win in ipairs(vim.api.nvim_list_wins()) do local config = vim.api.nvim_win_get_config(win); if config.relative ~= '' and not (config.zindex and config.zindex >= 20) then vim.api.nvim_win_close(win, false) end end",
       },
 
       post_restore_cmds = {

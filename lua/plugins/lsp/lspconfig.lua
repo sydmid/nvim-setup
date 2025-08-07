@@ -819,40 +819,96 @@ return {
 								-- Set up keymaps for the hover window to allow focusing
 								vim.defer_fn(function()
 									if vim.api.nvim_win_is_valid(winnr) then
+										-- Store the original buffer to set up Tab mapping
+										local original_buf = vim.api.nvim_get_current_buf()
+
 										-- Allow focusing the hover window with Tab
 										vim.keymap.set('n', '<Tab>', function()
-											vim.api.nvim_set_current_win(winnr)
-										end, { buffer = vim.api.nvim_get_current_buf(), desc = "Focus hover window", nowait = true })
+											if vim.api.nvim_win_is_valid(winnr) then
+												vim.api.nvim_set_current_win(winnr)
+											end
+										end, { buffer = original_buf, desc = "Focus hover window", nowait = true })
 
 										-- Set up keymaps within the hover window for navigation
 										if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
+											-- High priority ESC mapping for the hover buffer
 											vim.keymap.set('n', '<Esc>', function()
 												if vim.api.nvim_win_is_valid(winnr) then
 													vim.api.nvim_win_close(winnr, true)
 												end
-											end, { buffer = bufnr, nowait = true })
+											end, { buffer = bufnr, nowait = true, silent = true })
 
 											vim.keymap.set('n', 'q', function()
 												if vim.api.nvim_win_is_valid(winnr) then
 													vim.api.nvim_win_close(winnr, true)
 												end
-											end, { buffer = bufnr, nowait = true })
+											end, { buffer = bufnr, nowait = true, silent = true })
 
 											-- Allow scrolling within the hover window
 											vim.keymap.set('n', 'j', function()
-												vim.api.nvim_win_call(winnr, function()
-													vim.cmd('normal! j')
-												end)
-											end, { buffer = bufnr, nowait = true })
+												if vim.api.nvim_win_is_valid(winnr) then
+													vim.api.nvim_win_call(winnr, function()
+														vim.cmd('normal! j')
+													end)
+												end
+											end, { buffer = bufnr, nowait = true, silent = true })
 
 											vim.keymap.set('n', 'k', function()
-												vim.api.nvim_win_call(winnr, function()
-													vim.cmd('normal! k')
-												end)
-											end, { buffer = bufnr, nowait = true })
+												if vim.api.nvim_win_is_valid(winnr) then
+													vim.api.nvim_win_call(winnr, function()
+														vim.cmd('normal! k')
+													end)
+												end
+											end, { buffer = bufnr, nowait = true, silent = true })
+
+											-- Additional ESC mapping for the original buffer when hover is open
+											vim.keymap.set('n', '<Esc>', function()
+												if vim.api.nvim_win_is_valid(winnr) then
+													vim.api.nvim_win_close(winnr, true)
+													return
+												end
+												-- If hover window is not valid, let the default ESC behavior run
+												vim.cmd("nohlsearch")
+											end, { buffer = original_buf, nowait = true, silent = true })
+
+											-- Clean up the extra ESC mapping when hover window closes
+											vim.api.nvim_create_autocmd("WinClosed", {
+												pattern = tostring(winnr),
+												once = true,
+												callback = function()
+													-- Remove the temporary ESC mapping from original buffer
+													pcall(vim.keymap.del, 'n', '<Esc>', { buffer = original_buf })
+												end,
+											})
 										end
 									end
 								end, 10)
+
+								-- Additional safety: Create an autocmd to ensure ESC works
+								local group = vim.api.nvim_create_augroup("LspHoverEscClose_" .. winnr, { clear = true })
+								vim.api.nvim_create_autocmd("WinEnter", {
+									group = group,
+									callback = function()
+										local current_win = vim.api.nvim_get_current_win()
+										if current_win == winnr and vim.api.nvim_win_is_valid(winnr) then
+											-- Ensure ESC mapping is present when entering hover window
+											vim.keymap.set('n', '<Esc>', function()
+												if vim.api.nvim_win_is_valid(winnr) then
+													vim.api.nvim_win_close(winnr, true)
+												end
+											end, { buffer = bufnr, nowait = true, silent = true })
+										end
+									end,
+								})
+
+								-- Clean up the autocmd when window closes
+								vim.api.nvim_create_autocmd("WinClosed", {
+									pattern = tostring(winnr),
+									once = true,
+									callback = function()
+										pcall(vim.api.nvim_del_augroup_by_id, group)
+									end,
+								})
 							end
 						end
 

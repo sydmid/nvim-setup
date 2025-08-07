@@ -510,15 +510,40 @@ vim.keymap.set("n", "<Esc>", function()
       end
     end
   else
-    -- Clear search highlight
-    vim.cmd("nohlsearch")
-
-    -- Close floating windows (hover, signature help, etc.)
+    -- Check if there are any LSP hover windows that should be closed first
+    local hover_windows_closed = false
     for _, win in ipairs(vim.api.nvim_list_wins()) do
       local ok, config = pcall(vim.api.nvim_win_get_config, win)
       if ok and config.relative ~= "" then
-        pcall(vim.api.nvim_win_close, win, true)
+        -- Check if this is an LSP hover window by checking window title or buffer name
+        local buf = vim.api.nvim_win_get_buf(win)
+        local buf_name = vim.api.nvim_buf_get_name(buf)
+        local buf_lines = vim.api.nvim_buf_get_lines(buf, 0, 1, false)
+
+        -- Skip treesitter-context windows (they have zindex >= 20)
+        if not (config.zindex and config.zindex >= 20) then
+          -- Check if it's likely an LSP hover window
+          local is_hover_window = config.title and (
+            config.title:match("Documentation") or
+            config.title:match("Signature") or
+            config.title:match("Hover")
+          )
+
+          if is_hover_window or (buf_lines[1] and buf_lines[1]:match("^#")) then
+            pcall(vim.api.nvim_win_close, win, true)
+            hover_windows_closed = true
+          else
+            -- Close other floating windows (signature help, etc.)
+            pcall(vim.api.nvim_win_close, win, true)
+          end
+        end
       end
+    end
+
+    -- If we closed any hover windows, don't clear search highlight
+    if not hover_windows_closed then
+      -- Clear search highlight
+      vim.cmd("nohlsearch")
     end
   end
 end, { desc = "Clear highlights or focus main buffer from auxiliary", silent = true })
