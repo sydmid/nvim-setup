@@ -166,34 +166,32 @@ local theme_opts = {
 }
 
 return {
-	-- One Monokai colorscheme - the only theme we need
 	{
-		"Shatur/neovim-ayu",
+		"bluz71/vim-moonfly-colors",
 		priority = 1000,
+        name = "moonfly",
 		config = function()
-			-- Configure One Monokai theme
-			require("ayu").setup({
-				transparent = false,
-				colors = {},
-				highlights = function(colors)
-					return {}
-				end,
-				italics = true,
-			})
+			-- Configure moonfly theme options
+			vim.g.moonflyCursorColor = true
+			vim.g.moonflyItalics = true
+			vim.g.moonflyTransparent = false
+			vim.g.moonflyUndercurls = true
+			vim.g.moonflyUnderlineMatchParen = true
+			vim.g.moonflyVirtualTextColor = true
 
 			-- Load saved background preference
 			_G.load_background_preference()
 
 			-- Set the colorscheme
 			vim.opt.background = "dark"
-			vim.cmd.colorscheme("ayu")
+			vim.cmd.colorscheme("moonfly")
 
 			-- Apply the current background mode
 			_G.set_background_mode(_G.current_bg_index)
 
 			-- Create autocmd to reapply background highlights when colorscheme changes
 			vim.api.nvim_create_autocmd("ColorScheme", {
-				pattern = "ayu",
+				pattern = "moonfly",
 				group = vim.api.nvim_create_augroup("AyuBackground", { clear = true }),
 				callback = function()
 					-- Reapply current background mode
