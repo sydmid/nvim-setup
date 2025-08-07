@@ -1412,4 +1412,109 @@ return {
 		end,
 	},
 
+	-- Enhanced cursorword highlighting (cursorline disabled to avoid conflicts)
+	{
+		"ya2s/nvim-cursorline",
+		event = { "BufReadPre", "BufNewFile" },
+		config = function()
+			require('nvim-cursorline').setup({
+				cursorline = {
+					-- Disable cursorline management to avoid conflicts with existing setup
+					enable = false,
+					timeout = 1000,
+					number = false,
+				},
+				cursorword = {
+					-- Keep cursorword functionality for highlighting words under cursor
+					enable = true,
+					min_length = 3,
+					hl = { underline = true },
+				}
+			})
+
+			-- Ensure cursorword highlight is applied after colorscheme loads
+			vim.api.nvim_create_autocmd("ColorScheme", {
+				group = vim.api.nvim_create_augroup("CursorWordHighlight", { clear = true }),
+				callback = function()
+					-- Set a distinct cursorword highlight that's always visible
+					vim.api.nvim_set_hl(0, "CursorWord", {
+						underline = true,
+						sp = "#88afa2", -- Cyan color for underline
+						-- Alternative: use background highlight if underline isn't visible
+						-- bg = "#2A2A2A",
+					})
+				end,
+			})
+
+			-- Apply the highlight immediately
+			vim.api.nvim_set_hl(0, "CursorWord", {
+				underline = true,
+				sp = "#88afa2", -- Cyan color for underline
+			})
+		end,
+	},
+
+	-- Smooth scrolling animations for any movement
+	{
+		"declancm/cinnamon.nvim",
+		version = "*",
+		event = { "BufReadPre", "BufNewFile" },
+		config = function()
+			require("cinnamon").setup({
+				-- Enable both basic and extra keymaps for comprehensive smooth scrolling
+				keymaps = {
+					basic = true,  -- Half-window, page, paragraph, search, cursor location movements
+					extra = true,  -- Start/end of file/line, screen scrolling, up/down, left/right movements
+				},
+				options = {
+					-- Animate cursor and window scrolling for any movement
+					mode = "cursor",
+					-- Don't require count for animation (smoother experience)
+					count_only = false,
+					-- Slightly faster delay for responsive feel
+					delay = 4,
+					max_delta = {
+						-- Disable limits for line movements (always animate)
+						line = false,
+						-- Disable limits for column movements (always animate)
+						column = false,
+						-- Maximum duration for any movement (1 second)
+						time = 1000,
+					},
+					step_size = {
+						-- Smooth vertical movement (1 line per step)
+						vertical = 1,
+						-- Slightly larger horizontal steps for efficiency
+						horizontal = 2,
+					},
+				},
+			})
+
+			-- Disable smooth scrolling for specific file types where it might be distracting
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = {
+					"help",
+					"dashboard",
+					"alpha",
+					"lazy",
+					"mason",
+					"telescope",
+					"TelescopePrompt",
+					"TelescopeResults",
+					"TelescopePreview",
+					"notify",
+					"noice",
+					"NvimTree",
+					"neo-tree",
+					"oil",
+					"trouble",
+					"qf", -- quickfix
+				},
+				callback = function()
+					vim.b.cinnamon_disable = true
+				end,
+			})
+		end,
+	},
+
 }
