@@ -102,6 +102,8 @@ return {
           "eslint",
           "bashls",
           "csharp_ls",
+          -- Go development servers
+          "gopls", -- Official Go language server
           -- Rust development servers
           "rust_analyzer", -- Primary Rust LSP server
           "taplo", -- TOML language server (for Cargo.toml)
@@ -141,6 +143,11 @@ return {
             "shellcheck", -- shell script linter
             "csharpier", -- C# formatter
             "xmlformatter", -- XML formatter for C# projects
+            -- Go development tools
+            "gopls", -- Go language server
+            "gofumpt", -- Go formatter (stricter than gofmt)
+            "golangci-lint", -- Go linter
+            "delve", -- Go debugger
             -- Rust development tools
             "rustfmt", -- Rust formatter (standard)
             "rust-analyzer", -- Rust LSP server

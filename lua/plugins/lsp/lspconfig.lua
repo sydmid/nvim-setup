@@ -1478,6 +1478,53 @@ return {
 							},
 						})
 					end,
+
+					["gopls"] = function()
+						-- Official Go language server configuration
+						lspconfig.gopls.setup({
+							capabilities = capabilities,
+							filetypes = { "go", "gomod", "gowork", "gotmpl" },
+							root_dir = lspconfig.util.root_pattern("go.mod", "go.work", ".git"),
+							settings = {
+								gopls = {
+									completeUnimported = true,
+									usePlaceholders = true,
+									analyses = {
+										unusedparams = true,
+										unreachable = true,
+										fillstruct = true,
+									},
+									staticcheck = true,
+									gofumpt = true,
+									codelenses = {
+										gc_details = false,
+										generate = true,
+										regenerate_cgo = true,
+										run_govulncheck = true,
+										test = true,
+										tidy = true,
+										upgrade_dependency = true,
+										vendor = true,
+									},
+									hints = {
+										assignVariableTypes = true,
+										compositeLiteralFields = true,
+										compositeLiteralTypes = true,
+										constantValues = true,
+										functionTypeParameters = true,
+										parameterNames = true,
+										rangeVariableTypes = true,
+									},
+								},
+							},
+							on_attach = function(client, bufnr)
+								-- Enable inlay hints if supported
+								if client.server_capabilities.inlayHintProvider then
+									vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+								end
+							end,
+						})
+					end,
 				})
 			else
 				-- Fallback for newer versions of mason-lspconfig
@@ -1485,7 +1532,7 @@ return {
 				local servers = {
 					"ts_ls", "html", "cssls", "tailwindcss", "svelte", "lua_ls", "graphql",
 					"emmet_ls", "prismals", "pyright", "ruff", "eslint", "bashls", "csharp_ls",
-					"rust_analyzer", "taplo"
+					"gopls", "rust_analyzer", "taplo"
 				}
 
 				for _, server_name in ipairs(servers) do
@@ -1637,6 +1684,26 @@ return {
 							filetypes = { "toml" },
 							root_dir = lspconfig.util.root_pattern("*.toml", ".git"),
 						})
+					elseif server_name == "gopls" then
+						-- Go language server configuration (fallback)
+						lspconfig.gopls.setup({
+							capabilities = capabilities,
+							filetypes = { "go", "gomod", "gowork", "gotmpl" },
+							root_dir = lspconfig.util.root_pattern("go.mod", "go.work", ".git"),
+							settings = {
+								gopls = {
+									completeUnimported = true,
+									usePlaceholders = true,
+									analyses = {
+										unusedparams = true,
+										unreachable = true,
+										fillstruct = true,
+									},
+									staticcheck = true,
+									gofumpt = true,
+								},
+							},
+						})
 					elseif server_name == "ts_ls" then
 						-- TypeScript/JavaScript language server configuration (fallback)
 						lspconfig.ts_ls.setup({
@@ -1721,6 +1788,23 @@ return {
 				pattern = { "*.toml", "Cargo.toml", "Cargo.lock", "pyproject.toml" },
 				callback = function(ev)
 					vim.bo[ev.buf].filetype = "toml"
+				end,
+			})
+
+			-- Add filetype detection for Go files
+			vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+				pattern = { "*.go", "go.mod", "go.sum", "go.work", "go.work.sum", "*.gotmpl" },
+				callback = function(ev)
+					local filename = vim.fn.expand("%:t")
+					if filename == "go.mod" or filename == "go.work" then
+						vim.bo[ev.buf].filetype = "gomod"
+					elseif filename == "go.sum" or filename == "go.work.sum" then
+						vim.bo[ev.buf].filetype = "gosum"
+					elseif vim.fn.expand("%:e") == "gotmpl" then
+						vim.bo[ev.buf].filetype = "gotmpl"
+					else
+						vim.bo[ev.buf].filetype = "go"
+					end
 				end,
 			})
 
