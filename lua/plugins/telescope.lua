@@ -85,6 +85,12 @@ return {
       telescope.load_extension("frecency")
       telescope.load_extension("ui-select")
 
+      -- Load todo-comments telescope extension if available
+      local has_todo_comments = pcall(require, "todo-comments")
+      if has_todo_comments then
+        pcall(telescope.load_extension, "todo-comments")
+      end
+
       -- Load csharpls-extended telescope extension if available
       local has_csharpls_extended = pcall(require, "csharpls_extended")
       if has_csharpls_extended then
@@ -288,25 +294,34 @@ return {
       end
 
       keymap.set("n", "<leader>ft", function()
-        -- Use telescope for todo search with proper Esc handling
-        local telescope_opts = {
-          attach_mappings = function(prompt_bufnr, map_func)
-            local actions = require("telescope.actions")
-            map_func("i", "<Esc>", actions.close)
-            map_func("n", "<Esc>", actions.close)
-            map_func("n", "q", actions.close)
-            return true
-          end,
-        }
-        -- Try todo-comments telescope extension first, fallback to live_grep
-        local ok, todo_comments = pcall(require, "todo-comments")
-        if ok and todo_comments.search then
-          todo_comments.search(telescope_opts)
-        else
-          builtin.live_grep(vim.tbl_extend("force", telescope_opts, {
-            default_text = "TODO\\|FIXME\\|NOTE\\|HACK\\|WARN",
-            additional_args = { "--regex" }
-          }))
+        -- Try to use todo-comments telescope extension
+        local ok = pcall(function()
+          telescope.extensions["todo-comments"].todo({
+            attach_mappings = function(prompt_bufnr, map_func)
+              local actions = require("telescope.actions")
+              map_func("i", "<Esc>", actions.close)
+              map_func("n", "<Esc>", actions.close)
+              map_func("n", "q", actions.close)
+              return true
+            end,
+          })
+        end)
+
+        if not ok then
+          --Fallback: use live_grep with the exact keywords from your todo-comments config
+          builtin.live_grep({
+            prompt_title = "🔍 Find TODOs",
+            -- Using the exact pattern from your todo-comments config
+            default_text = "\\b(FIX|FIXME|BUG|FIXIT|ISSUE|TODO|HACK|WARN|WARNING|XXX|PERF|OPTIM|PERFORMANCE|OPTIMIZE|NOTE|INFO|TEST|TESTING|PASSED|FAILED):",
+            additional_args = { "--regex" },
+            attach_mappings = function(prompt_bufnr, map_func)
+              local actions = require("telescope.actions")
+              map_func("i", "<Esc>", actions.close)
+              map_func("n", "<Esc>", actions.close)
+              map_func("n", "q", actions.close)
+              return true
+            end,
+          })
         end
       end, { desc = "Find todos" })
 
