@@ -81,20 +81,12 @@ end, { desc = "Reset buffer (reload from disk)" })
 map("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Delete other buffers" })
 
 -- Terminal Impls
-map("n", "<D-`>", function()
-  local terminals = require('config.terminals')
-  terminals.toggle_or_create_terminal("default", "fish")
+map({ "n", "i", "v", "t" }, "<D-`>", function()
+  require("snacks").terminal.toggle()
 end, { desc = "Toggle terminal" })
 
-map("t", "<D-`>", function()
-  -- Exit terminal mode and toggle the terminal
-  vim.cmd("stopinsert")
-  local terminals = require('config.terminals')
-  terminals.toggle_or_create_terminal("default", "fish")
-end, { desc = "Toggle terminal from terminal mode" })
-
 -- Improved redo
-map("n", "U", "<C-r>", { desc = "Redo", silent = true })
+map({ "n", "v"}, "U", "<C-r>", { desc = "Redo", silent = true })
 
 -- Jump list navigation (fix Ctrl+i being overridden by Tab mapping)
 map("n", "<C-i>", "<C-i>", { desc = "Jump forward in jump list", silent = true })
@@ -247,6 +239,7 @@ local ignored_filetypes = {
   "help",
   "oil",
   "alpha",
+  "snacks_terminal", -- Snacks terminal
 }
 -- Buftypes to ignore
 local ignored_buftypes = {
@@ -547,19 +540,19 @@ map({ "n", "v" }, "<D-e>", ":NvimTreeFindFile<CR>", { desc = "Reveal current fil
 -- Diagnostics with Telescope
 map("n", "<D-6>", function()
   require("telescope.builtin").diagnostics({
-    bufnr = 0,                   -- Current buffer only
-    theme = "ivy",               -- Use ivy theme for a beautiful compact container
-    initial_mode = "normal",     -- Start in normal mode instead of insert mode
+    bufnr = 0,               -- Current buffer only
+    theme = "ivy",           -- Use ivy theme for a beautiful compact container
+    initial_mode = "normal", -- Start in normal mode instead of insert mode
     layout_config = {
-      height = 0.5,              -- Take 50% of screen height for better visibility
+      height = 0.5,          -- Take 50% of screen height for better visibility
       preview_cutoff = 120,
     },
     -- Enhanced diagnostic display
     severity_sort = true, -- Group by severity (errors first)
-    no_sign = false,    -- Show diagnostic signs
-    line_width = "full", -- Full line width for better readability
-    previewer = true,   -- Enable preview for context
-    show_line = true,   -- Show line numbers
+    no_sign = false,      -- Show diagnostic signs
+    line_width = "full",  -- Full line width for better readability
+    previewer = true,     -- Enable preview for context
+    show_line = true,     -- Show line numbers
     attach_mappings = function(prompt_bufnr, map_func)
       local actions = require("telescope.actions")
       -- Override ESC to close telescope instead of going to normal mode
@@ -605,12 +598,12 @@ local function workspace_git_navigation(direction)
   -- Get current project root for scoping
   local cwd = vim.fn.getcwd()
   local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")
-  [1]
+      [1]
   local project_root = (vim.v.shell_error == 0 and git_root) or cwd
 
   telescope_builtin.git_status({
     prompt_title = direction == "next" and "󰊢 Next Git Changes - " .. vim.fn.fnamemodify(project_root, ":t") or
-    "󰊢 Previous Git Changes - " .. vim.fn.fnamemodify(project_root, ":t"),
+        "󰊢 Previous Git Changes - " .. vim.fn.fnamemodify(project_root, ":t"),
     initial_mode = "normal",
     theme = "ivy",
     layout_config = { height = 0.6 },
@@ -806,15 +799,6 @@ vim.keymap.set("i", "<C-^>", function()
     vim.notify("Arabic keymap enabled", vim.log.levels.INFO)
   end
 end, { desc = "Toggle Arabic keymap" })
-
--- Terminal management system using the terminals.lua module
--- Load the terminal management module
-local terminals = require('config.terminals')
-
--- Terminal cursor control for live logs (avoiding conflict with <leader>tl for logs focus)
-map("n", "<leader>tx", function() terminals.toggle_follow_output() end, { desc = "Toggle cursor follow (lock/unlock)" })
-map("n", "<leader>tL", function() terminals.lock_cursor() end, { desc = "Lock cursor (disable auto-scroll)" })
-map("n", "<leader>tU", function() terminals.unlock_cursor() end, { desc = "Unlock cursor (enable auto-scroll)" })
 
 -- Smart window closing with confirmation for modified buffers
 local function smart_window_close()

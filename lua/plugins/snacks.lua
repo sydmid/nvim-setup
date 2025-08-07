@@ -665,15 +665,6 @@ return {
       end,
       desc = "Toggle Zoom",
     },
-
-    -- Terminal/Tabs/Themes group (<leader>t) - Terminal
-    {
-      "<c-/>",
-      function()
-        Snacks.terminal()
-      end,
-      desc = "Toggle Terminal",
-    },
     {
       "<c-_>",
       function()
