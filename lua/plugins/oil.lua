@@ -10,6 +10,66 @@ return {
         return "  " .. vim.fn.fnamemodify(path, ":.")
       end
 
+      -- Function to change workspace to selected file's parent folder or selected folder
+      local function change_workspace_to_selection()
+        local oil = require("oil")
+        local entry = oil.get_cursor_entry()
+        if not entry then
+          vim.notify("No entry selected", vim.log.levels.WARN)
+          return
+        end
+
+        local current_dir = oil.get_current_dir()
+        if not current_dir then
+          vim.notify("Could not get current directory", vim.log.levels.ERROR)
+          return
+        end
+
+        -- Ensure current_dir ends with a path separator
+        if not current_dir:match("/$") then
+          current_dir = current_dir .. "/"
+        end
+
+        local selected_path = current_dir .. entry.name
+        local target_dir
+
+        -- If it's a file, get its parent directory
+        -- If it's a directory, use it directly
+        if entry.type == "file" then
+          target_dir = vim.fn.fnamemodify(selected_path, ":h")
+        elseif entry.type == "directory" then
+          target_dir = selected_path
+        else
+          -- For other types (links, etc.), try to determine if it's a directory
+          local stat = vim.loop.fs_stat(selected_path)
+          if stat and stat.type == "directory" then
+            target_dir = selected_path
+          else
+            target_dir = vim.fn.fnamemodify(selected_path, ":h")
+          end
+        end
+
+        -- Normalize the path
+        target_dir = vim.fn.resolve(target_dir)
+
+        -- Change the working directory
+        vim.cmd("cd " .. vim.fn.fnameescape(target_dir))
+
+        -- Update nvim-tree to reflect the new workspace
+        vim.schedule(function()
+          local nvim_tree_ok, nvim_tree_api = pcall(require, "nvim-tree.api")
+          if nvim_tree_ok then
+            -- Change nvim-tree's root to the new workspace
+            nvim_tree_api.tree.change_root(target_dir)
+          end
+        end)
+
+        vim.notify("Workspace changed to: " .. target_dir, vim.log.levels.INFO)
+
+        -- Close oil after changing workspace
+        oil.close()
+      end
+
       require("oil").setup {
         columns = { "icon" },
         keymaps = {
@@ -35,6 +95,7 @@ return {
           ["ee"] = "actions.open_external",
           ["hh"] = { "actions.toggle_hidden", mode = "n" },
           ["<BS>"] = { "actions.parent", mode = "n" },
+          ["<C-w>"] = { change_workspace_to_selection, mode = "n", desc = "Change workspace to selection" },
 
         },
         float = {

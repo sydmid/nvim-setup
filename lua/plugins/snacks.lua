@@ -65,7 +65,7 @@ return {
       desc = "Find Files",
     },
     {
-      "<leader>ff",
+      "<D-p>",
       function()
         Snacks.picker.files()
       end,
@@ -79,7 +79,7 @@ return {
       desc = "Find Git Files",
     },
     {
-      "<leader>fr",
+      "<D-P>",
       function()
         Snacks.picker.recent()
       end,
@@ -128,16 +128,32 @@ return {
     {
       "<leader>mm",
       function()
-        -- Smart mark toggle - uses next available local mark
+        -- Smart mark toggle - uses next available local mark or toggles existing mark
         local function toggle_smart_mark()
           local marks = vim.fn.getmarklist('%')
           local used_marks = {}
+          local current_line = vim.fn.line('.')
+          local existing_mark_on_line = nil
 
-          -- Get currently used local marks in this buffer
+          -- Get currently used local marks in this buffer and check for mark on current line
           for _, mark in ipairs(marks) do
             if mark.mark:match("^'[a-z]$") then
-              used_marks[mark.mark:sub(2)] = true
+              local mark_char = mark.mark:sub(2)
+              used_marks[mark_char] = true
+
+              -- Check if there's already a mark on the current line
+              if mark.pos and mark.pos[2] == current_line then
+                existing_mark_on_line = mark_char
+              end
             end
+          end
+
+          -- If there's already a mark on the current line, remove it (toggle off)
+          if existing_mark_on_line then
+            vim.cmd('delmarks ' .. existing_mark_on_line)
+            vim.notify("🗑️ Removed mark '" .. existing_mark_on_line .. "' from line " .. current_line,
+              vim.log.levels.INFO)
+            return
           end
 
           -- Find first available mark a-z
@@ -145,131 +161,36 @@ return {
             local char = string.char(i)
             if not used_marks[char] then
               vim.cmd('normal! m' .. char)
-              vim.notify("📌 Set mark '" .. char .. "' at line " .. vim.fn.line('.'), vim.log.levels.INFO)
+              vim.notify("📌 Set mark '" .. char .. "' at line " .. current_line, vim.log.levels.INFO)
               return
             end
           end
 
           -- If all marks are used, reuse 'a'
           vim.cmd('normal! ma')
-          vim.notify("📌 Set mark 'a' at line " .. vim.fn.line('.') .. " (reused)", vim.log.levels.INFO)
+          vim.notify("📌 Set mark 'a' at line " .. current_line .. " (reused)", vim.log.levels.INFO)
         end
         toggle_smart_mark()
       end,
       desc = "Smart Mark Toggle",
     },
     {
-      "<leader>ml",
+      "<leader>fm",
       function()
-        -- Get current project root
-        local function get_project_root()
-          local cwd = vim.fn.getcwd()
-          local git_root = vim.fn.systemlist("git -C " ..
-          vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
-          return (vim.v.shell_error == 0 and git_root) or cwd
-        end
-
-        local project_root = get_project_root()
-
-        -- Get all marks and filter to current project
-        local all_global_marks = vim.fn.getmarklist()
-        local buffer_marks = vim.fn.getmarklist('%')
-
-        -- Filter marks to current project
-        local project_marks = {}
-
-        -- Add global marks that point to files in current project
-        for _, mark in ipairs(all_global_marks) do
-          if mark.file and mark.file ~= "" then
-            local full_path = vim.fn.fnamemodify(mark.file, ':p')
-            if vim.startswith(full_path, project_root) then
-              table.insert(project_marks, mark)
-            end
-          end
-        end
-
-        -- Add current buffer marks (they're always in current project)
-        for _, mark in ipairs(buffer_marks) do
-          table.insert(project_marks, mark)
-        end
-
-        if #project_marks == 0 then
-          vim.notify("📍 No marks found in current project: " .. vim.fn.fnamemodify(project_root, ":t"),
-            vim.log.levels.INFO)
-          return
-        end
-
-        -- Create a custom telescope picker for project marks
-        local pickers = require("telescope.pickers")
-        local finders = require("telescope.finders")
-        local conf = require("telescope.config").values
-        local actions = require("telescope.actions")
-        local action_state = require("telescope.actions.state")
-
-        local mark_entries = {}
-        for _, mark in ipairs(project_marks) do
-          local file_path = mark.file or vim.api.nvim_buf_get_name(0)
-          local line = mark.pos and mark.pos[2] or mark.lnum or 1
-          local col = mark.pos and mark.pos[3] or mark.col or 1
-          local mark_name = mark.mark and mark.mark:gsub("^'", "") or "?"
-
-          local display_path = file_path ~= "" and vim.fn.fnamemodify(file_path, ':~:.') or "[Current Buffer]"
-          local display = string.format("%s  %s:%d", mark_name, display_path, line)
-
-          table.insert(mark_entries, {
-            mark = mark_name,
-            filename = file_path,
-            lnum = line,
-            col = col,
-            display = display,
-          })
-        end
-
-        pickers.new({}, {
-          prompt_title = "📍 Project Marks - " .. vim.fn.fnamemodify(project_root, ":t"),
-          finder = finders.new_table({
-            results = mark_entries,
-            entry_maker = function(entry)
-              return {
-                value = entry,
-                display = entry.display,
-                ordinal = entry.display,
-                filename = entry.filename,
-                lnum = entry.lnum,
-                col = entry.col,
-              }
-            end,
-          }),
-          sorter = conf.generic_sorter({}),
-          previewer = conf.file_previewer({}),
-          attach_mappings = function(prompt_bufnr)
-            actions.select_default:replace(function()
-              local selection = action_state.get_selected_entry()
-              actions.close(prompt_bufnr)
-              if selection and selection.filename then
-                if selection.filename ~= "" then
-                  vim.cmd("edit " .. vim.fn.fnameescape(selection.filename))
-                end
-                vim.api.nvim_win_set_cursor(0, { selection.lnum, selection.col - 1 })
-              end
-            end)
-            return true
-          end,
-        }):find()
+        Snacks.picker.marks({
+          global = false,
+          ["local"] = true,
+        })
       end,
-      desc = "List Project Marks",
+      desc = "List All Local Marks",
     },
     {
-      "<leader>mb",
+      "<leader>fM",
       function()
-        Snacks.picker.buffers()
-      end,
-      desc = "List Buffers",
-    },
-    {
-      "<leader>mL",
-      function()
-        Snacks.picker.marks()
+        Snacks.picker.marks({
+          global = true,
+          ["local"] = false,
+        })
       end,
       desc = "List All Global Marks",
     },
@@ -356,18 +277,6 @@ return {
         end)
       end,
       desc = "Set Global Mark",
-    },
-    {
-      "<D-S-]>",
-      "<leader>mj",
-      desc = "Next Mark (macOS)",
-      remap = true,
-    },
-    {
-      "<D-S-[>",
-      "<leader>mk",
-      desc = "Previous Mark (macOS)",
-      remap = true,
     },
     {
       "<leader>st",
@@ -847,7 +756,7 @@ return {
       local function get_project_root()
         local cwd = vim.fn.getcwd()
         local git_root = vim.fn.systemlist("git -C " ..
-        vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
+          vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
         return (vim.v.shell_error == 0 and git_root) or cwd
       end
 

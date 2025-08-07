@@ -437,9 +437,9 @@ return {
       end
 
       -- Make custom functions globally accessible
-      _G.telescope_lsp_references_with_dynamic_title = lsp_references_with_dynamic_title
-      _G.telescope_live_grep_with_dynamic_title = live_grep_with_dynamic_title
-      _G.telescope_oldfiles_with_dynamic_title = oldfiles_with_dynamic_title
+      -- _G.telescope_lsp_references_with_dynamic_title = lsp_references_with_dynamic_title
+      -- _G.telescope_live_grep_with_dynamic_title = live_grep_with_dynamic_title
+      -- _G.telescope_oldfiles_with_dynamic_title = oldfiles_with_dynamic_title
 
       -- Live grep with literal search (no regex escaping needed)
       local function live_grep_literal(opts)
@@ -588,67 +588,6 @@ return {
           builtin_func(telescope_opts)
         end
       end
-      keymap.set("n", "<D-p>", function()
-        -- Get current working directory
-        local cwd = vim.fn.getcwd()
-
-        -- Try to find git root first, fallback to cwd
-        local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel")[1]
-        local project_root = (vim.v.shell_error == 0 and git_root) or cwd
-
-        -- Clear telescope cache to prevent cross-project results
-        pcall(function()
-          require("telescope.builtin").resume = function() end -- Disable resume functionality temporarily
-        end)
-
-        -- Use telescope find_files with project root scope
-        telescope_with_esc(builtin.find_files, {
-          cwd = project_root,
-          search_dirs = { project_root }, -- Explicitly limit search to project root
-          prompt_title = "Find Files in " .. vim.fn.fnamemodify(project_root, ":t"),
-          hidden = false,                 -- Don't search hidden files by default to avoid cross-project contamination
-          no_ignore = false,              -- Respect .gitignore to avoid cross-project results
-        })()
-      end, { desc = "Fuzzy find files in current project" })
-
-      keymap.set("n", "<D-S-p>", function()
-        -- Get current working directory
-        local cwd = vim.fn.getcwd()
-
-        -- Try to find git root first, fallback to cwd
-        local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel")[1]
-        local project_root = (vim.v.shell_error == 0 and git_root) or cwd
-
-        _G.telescope_oldfiles_with_dynamic_title({
-          cwd = project_root,
-          initial_mode = "normal",
-          -- Filter to only show files within the current project
-          attach_mappings = function(prompt_bufnr, map_func)
-            local actions = require("telescope.actions")
-            local action_state = require("telescope.actions.state")
-
-            -- Override the default selection to ensure we stay within project
-            actions.select_default:replace(function()
-              local selection = action_state.get_selected_entry()
-              if selection then
-                local file_path = selection.path or selection.value
-                -- Only open if file is within project root
-                if vim.startswith(file_path, project_root) then
-                  actions.close(prompt_bufnr)
-                  vim.cmd("edit " .. vim.fn.fnameescape(file_path))
-                else
-                  vim.notify("File is outside current project", vim.log.levels.WARN)
-                end
-              end
-            end)
-
-            map_func("i", "<Esc>", actions.close)
-            map_func("n", "<Esc>", actions.close)
-            map_func("n", "q", actions.close)
-            return true
-          end,
-        })
-      end, { desc = "Fuzzy find recent files in project" })
 
       keymap.set("n", "<leader>fs", live_grep_literal, { desc = "Find string in cwd (literal search)" })
       keymap.set(
