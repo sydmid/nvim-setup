@@ -60,20 +60,16 @@ return {
           -- Change the working directory first
           vim.cmd("cd " .. vim.fn.fnameescape(target_dir))
 
-          -- Then handle buffer cleanup more gracefully
           -- Close all windows except the current one
           vim.cmd("silent! only")
 
-          -- Get list of non-essential buffers to close
-          local current_buf = vim.api.nvim_get_current_buf()
-          for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-            if bufnr ~= current_buf and vim.api.nvim_buf_is_loaded(bufnr) then
-              local bufname = vim.api.nvim_buf_get_name(bufnr)
-              -- Skip special buffers and focus on regular file buffers
-              if bufname ~= "" and not bufname:match("^oil://") then
-                vim.cmd("silent! bwipeout! " .. bufnr)
-              end
-            end
+          -- Force close ALL buffers to start fresh in new workspace
+          -- Use %bdelete to close all buffers and start with a clean slate
+          vim.cmd("silent! %bdelete!")
+
+          -- Ensure we have at least one buffer open
+          if #vim.api.nvim_list_bufs() == 0 then
+            vim.cmd("enew")
           end
 
           -- Stop LSP clients after buffer cleanup
