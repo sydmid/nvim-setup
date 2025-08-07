@@ -133,7 +133,7 @@ return {
 			vim.keymap.set("n", "<leader>gs", "<cmd>Git<cr>", { desc = "Git status " })
 
 			-- Git commit with enhanced workflow
-			vim.keymap.set("n", "<leader>gc", function()
+			vim.keymap.set("n", "<leader>gC", function()
 				-- Open git status first, then commit
 				vim.cmd("Git")
 				vim.defer_fn(function()

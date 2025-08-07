@@ -21,7 +21,7 @@ map("n", "c", '"_c', { desc = "c: Change without yanking" })
 map("n", "x", '"_x', { desc = "x: Delete char without yanking" })
 map({ "n", "v" }, "d", '"_d', { desc = "d: Delete without yanking" })
 map("n", "D", '"_D', { desc = "D: Delete to EOL without yanking" })
-map("n", "Y", "^vg_y", { desc = "Yank line contents" })
+map("n", "Y", "y$", { desc = "Y: Yank to EOL" })
 --------------------------------------------- Comments Impls
 map("n", "<D-/>", function()
   require("Comment.api").toggle.linewise.current()
@@ -86,7 +86,7 @@ map({ "n", "i", "v", "t" }, "<D-`>", function()
 end, { desc = "Toggle terminal" })
 
 -- Improved redo
-map({ "n", "v"}, "U", "<C-r>", { desc = "Redo", silent = true })
+map({ "n", "v" }, "U", "<C-r>", { desc = "Redo", silent = true })
 
 -- Jump list navigation (fix Ctrl+i being overridden by Tab mapping)
 map("n", "<C-i>", "<C-i>", { desc = "Jump forward in jump list", silent = true })
@@ -586,9 +586,8 @@ local function buffer_git_navigation(direction)
   end
 end
 
--- Workspace Git Navigation with Telescope (]C, [C)
--- Function for workspace-wide git change navigation
-local function workspace_git_navigation(direction)
+vim.keymap.set("n", "<leader>gc", function()
+  -- Function for workspace-wide git change navigation
   local telescope_builtin = require("telescope.builtin")
   if not telescope_builtin then
     vim.notify("Telescope not available for workspace git navigation", vim.log.levels.WARN)
@@ -640,22 +639,7 @@ local function workspace_git_navigation(direction)
       return true
     end,
   })
-end
-
--- Buffer-only git navigation (]c,) - Remember !!! c[ is for jump to context
-vim.keymap.set("n", "]c", function()
-  buffer_git_navigation("next")
-end, { desc = "Next git change (buffer only)", silent = true })
-
--- Workspace git navigation (]C, [C)
-vim.keymap.set("n", "]C", function()
-  workspace_git_navigation("next")
-end, { desc = "Next git change (workspace)", silent = true })
-
-vim.keymap.set("n", "[C", function()
-  workspace_git_navigation("prev")
-end, { desc = "Previous git change (workspace)", silent = true })
-
+end, { desc = "git changed files", silent = true })
 -- Normal + Visual mode
 map({ "n", "v" }, "<D-S-j>", function()
   -- If in visual mode, move the entire selected block
@@ -712,9 +696,15 @@ map("n", "|", "<C-w>v", { desc = "Split window vertically" })         -- split w
 map("n", "_", "<C-w>s", { desc = "Split window horizontally" })       -- split window horizontally
 map("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" }) -- make split windows equal width & height
 -- tab management
-map("n", "<D-n>", "<cmd>tabnew<CR>", { desc = "Open new tab" })       -- open new tab
-map("n", "<D-S-}>", "<cmd>tabn<CR>", { desc = "Go to next tab" })     --  go to next tab
-map("n", "<D-[>", "<cmd>tabp<CR>", { desc = "Go to previous tab" })   --  go to previous tab
+map("n", "<D-t>", "<cmd>tabnew<CR>", { desc = "Open new tab" })       -- open new tab
+-- Tab navigation (vi-style, most common among pros)
+map("n", "gt", ":tabnext<CR>", { desc = "Next tab" })
+map("n", "gT", ":tabprevious<CR>", { desc = "Previous tab" })
+-- Window resizing (professional addition)
+map("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase window height" })
+map("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease window height" })
+map("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease window width" })
+map("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase window width" })
 
 -- Smart find and replace function
 local function get_visual_selection()
@@ -788,17 +778,6 @@ vim.keymap.set("n", "<D-r>", function()
     end
   end)
 end, { desc = "Find and replace dialog", silent = true })
-
--- Toggle Arabic keyboard mapping in insert mode
-vim.keymap.set("i", "<C-^>", function()
-  if vim.bo.keymap == "arabic" then
-    vim.bo.keymap = ""
-    vim.notify("Arabic keymap disabled", vim.log.levels.INFO)
-  else
-    vim.bo.keymap = "arabic"
-    vim.notify("Arabic keymap enabled", vim.log.levels.INFO)
-  end
-end, { desc = "Toggle Arabic keymap" })
 
 -- Smart window closing with confirmation for modified buffers
 local function smart_window_close()

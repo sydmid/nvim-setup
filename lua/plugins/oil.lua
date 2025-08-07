@@ -13,18 +13,28 @@ return {
       require("oil").setup {
         columns = { "icon" },
         keymaps = {
-          ["<C-h>"] = false,
-          ["<C-l>"] = false,
-          ["<C-k>"] = false,
-          ["<C-j>"] = false,
-          ["-"] = false,
-          ["<M-h>"] = "actions.select_split",
-          ["<Esc>"] = { "actions.close", mode = "n" },
+          ["g?"] = { "actions.show_help", mode = "n" },
           ["<CR>"] = "actions.select",
+          ["<C-s>"] = { "actions.select", opts = { vertical = true } },
+          ["<C-h>"] = { "actions.select", opts = { horizontal = true } },
+          ["<C-t>"] = { "actions.select", opts = { tab = true } },
+          ["<C-p>"] = "actions.preview",
+          ["<C-c>"] = { "actions.close", mode = "n" },
+          ["<C-l>"] = "actions.refresh",
+          ["_"] = { "actions.open_cwd", mode = "n" },
+          ["`"] = { "actions.cd", mode = "n" },
+          ["~"] = { "actions.cd", opts = { scope = "tab" }, mode = "n" },
+          ["gs"] = { "actions.change_sort", mode = "n" },
+          ["gx"] = "actions.open_external",
+          ["g."] = { "actions.toggle_hidden", mode = "n" },
+          ["g\\"] = { "actions.toggle_trash", mode = "n" },
+          ["-"] = false,
+          ["<Esc>"] = { "actions.close", mode = "n" },
+          ["q"] = { "actions.close", mode = "n" },
           ["ss"] = { "actions.change_sort", mode = "n" },
           ["ee"] = "actions.open_external",
           ["hh"] = { "actions.toggle_hidden", mode = "n" },
-          ["g\\"] = { "actions.toggle_trash", mode = "n" },
+          ["<BS>"] = { "actions.parent", mode = "n" },
 
         },
         float = {
@@ -50,7 +60,7 @@ return {
       }
 
       -- Open parent directory in current window
-    --   vim.keymap.set("n", "<BS>", "<CMD>Oil<CR>", { desc = "Open parent directory" })
+      --   vim.keymap.set("n", "<BS>", "<CMD>Oil<CR>", { desc = "Open parent directory" })
 
       -- Open parent directory in floating window
       vim.keymap.set("n", "<BS>", require("oil").toggle_float)
