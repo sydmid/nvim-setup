@@ -406,55 +406,93 @@ return {
 		end,
 	},
 
-	-- Indentation guides with enhanced visibility
+	-- hlchunk.nvim - Beautiful animated indentation and chunk highlighting
 	{
-		"lukas-reineke/indent-blankline.nvim",
-		main = "ibl",
-		opts = {
-			indent = {
-				char = "│",
-				tab_char = "│",
-			},
-			scope = {
-				enabled = true,
-				char = "│",
-				show_start = true,
-				show_end = true,
-				highlight = { "IblScope" },
-			},
-			exclude = {
-				filetypes = {
-					"help",
-					"dashboard",
-					"alpha",
-					"lazy",
-					"mason",
-					"trouble",
-					"oil",
-					"NvimTree",
-					"neo-tree",
-					"terminal",
-					"toggleterm",
-					"notify",
-					"noice",
-					"TelescopePrompt",
-					"TelescopeResults",
-					"TelescopePreview",
+		"shellRaining/hlchunk.nvim",
+		event = { "BufReadPre", "BufNewFile" },
+		config = function()
+			require("hlchunk").setup({
+				-- Chunk highlighting with beautiful animations
+				chunk = {
+					enable = true,
+					priority = 15,
+					style = {
+						{ fg = "#806d9c" }, -- Purple color for normal chunks
+						{ fg = "#c21f30" }, -- Red color for error chunks
+					},
+					use_treesitter = true,
+					chars = {
+						horizontal_line = "─",
+						vertical_line = "│",
+						left_top = "╭",
+						left_bottom = "╰",
+						right_arrow = ">",
+					},
+					textobject = "ic", -- Inner chunk textobject
+					max_file_size = 1024 * 1024, -- 1MB max file size
+					error_sign = true,
+					-- Animation settings for smooth effects
+					duration = 200, -- Animation duration in ms
+					delay = 300,   -- Animation delay in ms
+					exclude_filetypes = {
+						aerial = true,
+						dashboard = true,
+						alpha = true,
+						lazy = true,
+						mason = true,
+						trouble = true,
+						oil = true,
+						NvimTree = true,
+						["neo-tree"] = true,
+						terminal = true,
+						toggleterm = true,
+						notify = true,
+						noice = true,
+						TelescopePrompt = true,
+						TelescopeResults = true,
+						TelescopePreview = true,
+						help = true,
+					},
 				},
-				buftypes = {
-					"terminal",
-					"nofile",
-					"quickfix",
-					"prompt",
-					"help",
+				-- Indent line highlighting
+				indent = {
+					enable = true,
+					priority = 10,
+					style = {
+						{ fg = "#2A2A2A" }, -- Subtle gray for indent lines
+					},
+					use_treesitter = false, -- Keep false for better performance
+					chars = { "│" }, -- Simple vertical line character
+					ahead_lines = 5, -- Preview range
+					delay = 100, -- Throttle delay for smooth scrolling
+					exclude_filetypes = {
+						aerial = true,
+						dashboard = true,
+						alpha = true,
+						lazy = true,
+						mason = true,
+						trouble = true,
+						oil = true,
+						NvimTree = true,
+						["neo-tree"] = true,
+						terminal = true,
+						toggleterm = true,
+						notify = true,
+						noice = true,
+						TelescopePrompt = true,
+						TelescopeResults = true,
+						TelescopePreview = true,
+						help = true,
+					},
 				},
-			},
-		},
-		config = function(_, opts)
-			require("ibl").setup(opts)
-			-- Enhanced indent guide colors
-			vim.api.nvim_set_hl(0, "IblIndent", { fg = "#2A2A2A" })
-			vim.api.nvim_set_hl(0, "IblScope", { fg = "#404040", bold = true })
+				-- Disable other features as requested
+				line_num = {
+					enable = false,
+				},
+				blank = {
+					enable = false,
+				},
+			})
 		end,
 	},
 
@@ -1138,14 +1176,10 @@ return {
 				{ "<leader>b", group = "Buffer" },
 				{ "<leader>c", group = "Context/Code-Actions" },
 				{ "<leader>ch", desc = "Toggle context header" },
-				{ "<leader>cj", desc = "Jump to context" },
-				{ "<leader>cd", desc = "Debug context state" },
-				{ "<leader>ce", desc = "Force enable context" },
-				{ "<leader>cx", desc = "Force disable context" },
-				{ "<leader>cs", desc = "Context status & health" },
+				{ "<leader>ck", desc = "Jump to context" },
 				{ "<leader>d", group = "Debug" },
 				{ "<leader>e", group = "Error Lens/Explorer" },
-				{ "<leader>el", desc = "Toggle Error Lens (ThePrimeagen style)" },
+				{ "<leader>el", desc = "Toggle Error Lens" },
 				{ "<leader>ee", desc = "Enable Error Lens" },
 				{ "<leader>ed", desc = "Disable Error Lens" },
 				{ "<leader>er", desc = "Refresh Error Lens" },
