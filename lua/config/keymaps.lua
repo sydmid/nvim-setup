@@ -883,8 +883,22 @@ map({ "n", "i", "v" }, "<D-S-s>", save_all_modified,
 -- Background mode selector keymap
 map("n", "<leader>tt", function()
   _G.telescope_background_picker()
-end, { desc = "🎨 Select background mode", silent = true })
+end, { desc = "Select background mode", silent = true })
 
 -- Code Runner - Run code snippets and files
 map("n", "<leader>cr", "<cmd>RunCode<CR>", { desc = "Run code in current buffer" })
 map("v", "<leader>cr", "<cmd>RunCode<CR>", { desc = "Run selected code" })
+
+vim.keymap.set("n", "]t", function()
+  require("todo-comments").jump_next()
+end, { desc = "Next todo comment" })
+
+-- You can also specify a list of valid jump keywords
+-- vim.keymap.set("n", "]t", function()
+--   require("todo-comments").jump_next({keywords = { "ERROR", "WARNING" }})
+-- end, { desc = "Next error/warning todo comment" })
+
+vim.keymap.set("n", "[t", function()
+  require("todo-comments").jump_prev()
+end, { desc = "Previous todo comment" })
+
