@@ -52,6 +52,16 @@ return {
         -- Normalize the path
         target_dir = vim.fn.resolve(target_dir)
 
+        -- Close all buffers and windows without saving (more aggressive approach)
+        -- First, close all windows except the current one
+        vim.cmd("silent! only")
+        -- Stop any LSP clients to prevent them from keeping buffers alive
+        vim.lsp.stop_client(vim.lsp.get_active_clients())
+        -- Force close all buffers without saving
+        vim.cmd("silent! bufdo bwipeout!")
+        -- Fallback: wipeout any remaining buffers
+        vim.cmd("silent! %bwipeout!")
+
         -- Change the working directory
         vim.cmd("cd " .. vim.fn.fnameescape(target_dir))
 
