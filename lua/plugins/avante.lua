@@ -421,12 +421,6 @@ return {
       vim.api.nvim_create_user_command("AvanteGitAnalyze", avante_git_analyze, {})
       vim.api.nvim_create_user_command("AvanteHistoryNav", avante_history_nav, {})
 
-      -- Custom highlight groups for enhanced UI
-      vim.api.nvim_set_hl(0, "AvanteTitle", { fg = "#6CC644", bold = true })
-      vim.api.nvim_set_hl(0, "AvanteSubtitle", { fg = "#FFCC00", italic = true })
-      vim.api.nvim_set_hl(0, "AvanteHistory", { fg = "#58A6FF", italic = true })
-      vim.api.nvim_set_hl(0, "AvanteSession", { fg = "#F78166", bold = true })
-
       -- Test Ollama connection on startup
       vim.defer_fn(function()
         test_ollama_connection()

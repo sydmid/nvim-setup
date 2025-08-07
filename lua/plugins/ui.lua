@@ -34,6 +34,8 @@ function _G.set_background_mode(mode_index)
 		TelescopeResultsBorder = { bg = mode.bg },
 		TelescopePreviewNormal = { bg = mode.bg },
 		TelescopePreviewBorder = { bg = mode.bg },
+		TelescopePromptNormal = { bg = mode.bg },
+		TelescopePromptBorder = { bg = mode.bg },
 		NoiceCmdlinePopup = { bg = mode.bg },
 		NoiceCmdlinePopupBorder = { bg = mode.bg },
 		NoicePopup = { bg = mode.bg },
@@ -199,6 +201,26 @@ return {
 				end,
 			})
 
+			-- Additional autocmd to fix Telescope backgrounds specifically
+			vim.api.nvim_create_autocmd({ "FileType", "BufWinEnter" }, {
+				pattern = { "TelescopePrompt", "TelescopeResults", "TelescopePreview" },
+				group = vim.api.nvim_create_augroup("TelescopeBackgroundFix", { clear = true }),
+				callback = function()
+					-- Reapply telescope highlights from current background mode
+					local mode = _G.background_modes[_G.current_bg_index]
+					if mode then
+						vim.api.nvim_set_hl(0, "TelescopeNormal", { bg = mode.bg })
+						vim.api.nvim_set_hl(0, "TelescopeBorder", { bg = mode.bg })
+						vim.api.nvim_set_hl(0, "TelescopeResultsNormal", { bg = mode.bg })
+						vim.api.nvim_set_hl(0, "TelescopeResultsBorder", { bg = mode.bg })
+						vim.api.nvim_set_hl(0, "TelescopePreviewNormal", { bg = mode.bg })
+						vim.api.nvim_set_hl(0, "TelescopePreviewBorder", { bg = mode.bg })
+						vim.api.nvim_set_hl(0, "TelescopePromptNormal", { bg = mode.bg })
+						vim.api.nvim_set_hl(0, "TelescopePromptBorder", { bg = mode.bg })
+					end
+				end,
+			})
+
 			-- Add keymaps for background mode
 			vim.keymap.set("n", "<leader>bb", function()
 				_G.toggle_background_mode()
@@ -219,65 +241,10 @@ return {
 			local lualine = require("lualine")
 			local lazy_status = require("lazy.status") -- to configure lazy pending updates count
 
-			-- Enhanced no-clown-fiesta palette with improved vibrancy and contrast
-			local colors = {
-				-- Core theme colors from no-clown-fiesta palette
-				bg = "#121212",           -- Main background
-				alt_bg = "#121212",       -- Alternative background
-				accent = "#202020",       -- Accent background
-				fg = "#E1E1E1",          -- Main foreground
-				light_gray = "#AFAFAF",   -- Light gray text
-				medium_gray = "#727272",  -- Medium gray text
-				gray = "#373737",        -- Dark gray
-
-				-- Enhanced vibrant colors with better contrast
-				blue = "#BAD7FF",        -- Bright blue (no-clown-fiesta blue)
-				cyan = "#88afa2",        -- Cyan (no-clown-fiesta cyan)
-				green = "#90A959",       -- Green (no-clown-fiesta green)
-				yellow = "#F4BF75",      -- Yellow (no-clown-fiesta yellow)
-				orange = "#FFA557",      -- Orange (no-clown-fiesta orange)
-				red = "#b46958",         -- Red (no-clown-fiesta red)
-				purple = "#AA749F",      -- Purple (no-clown-fiesta purple)
-				gray_blue = "#7E97AB",   -- Gray-blue (no-clown-fiesta gray_blue)
-			}
-
-			local my_lualine_theme = {
-				normal = {
-					a = { bg = colors.blue, fg = colors.bg, gui = "bold" },
-					b = { bg = colors.alt_bg, fg = colors.fg },
-					c = { bg = colors.bg, fg = colors.light_gray },
-				},
-				insert = {
-					a = { bg = colors.green, fg = colors.bg, gui = "bold" },
-					b = { bg = colors.alt_bg, fg = colors.fg },
-					c = { bg = colors.bg, fg = colors.light_gray },
-				},
-				visual = {
-					a = { bg = colors.purple, fg = colors.fg, gui = "bold" },
-					b = { bg = colors.alt_bg, fg = colors.fg },
-					c = { bg = colors.bg, fg = colors.light_gray },
-				},
-				command = {
-					a = { bg = colors.yellow, fg = colors.bg, gui = "bold" },
-					b = { bg = colors.alt_bg, fg = colors.fg },
-					c = { bg = colors.bg, fg = colors.light_gray },
-				},
-				replace = {
-					a = { bg = colors.red, fg = colors.fg, gui = "bold" },
-					b = { bg = colors.alt_bg, fg = colors.fg },
-					c = { bg = colors.bg, fg = colors.light_gray },
-				},
-				inactive = {
-					a = { bg = colors.gray, fg = colors.medium_gray, gui = "bold" },
-					b = { bg = colors.gray, fg = colors.medium_gray },
-					c = { bg = colors.gray, fg = colors.medium_gray },
-				},
-			}
-
-			-- configure lualine with enhanced theme
+			-- configure lualine with auto theme that adapts to your background system
 			lualine.setup({
 				options = {
-					theme = my_lualine_theme,
+					theme = "auto", -- Let lualine auto-detect theme from colorscheme
 					component_separators = { left = "", right = "" },
 					section_separators = { left = "", right = "" },
 					globalstatus = true, -- Use global statusline for better alignment
@@ -295,7 +262,6 @@ return {
 						{
 							"filename",
 							path = 0, -- Show filename only (no path)
-							color = { fg = colors.fg },
 							symbols = {
 								modified = "",
 								readonly = "",
@@ -305,11 +271,6 @@ return {
 						{
 							"diff",
 							colored = true,
-							diff_color = {
-								added    = { fg = colors.green },
-								modified = { fg = colors.yellow },
-								removed  = { fg = colors.red },
-							},
 						}
 					},
 					lualine_c = {
@@ -318,18 +279,11 @@ return {
 						-- {
 						-- 	lazy_status.updates,
 						-- 	cond = lazy_status.has_updates,
-						-- 	color = { fg = colors.orange },
 						-- },
 						{
 							"diagnostics",
 							sources = { "nvim_lsp", "nvim_diagnostic" },
 							sections = { "error", "warn", "info", "hint" },
-							diagnostics_color = {
-								error = { fg = colors.red },
-								warn  = { fg = colors.yellow },
-								info  = { fg = colors.blue },
-								hint  = { fg = colors.cyan },
-							},
 							symbols = {
 								error = " ",
 								warn = " ",
@@ -339,11 +293,9 @@ return {
 						},
 						-- {
 						-- 	"encoding",
-						-- 	color = { fg = colors.medium_gray }
 						-- },
 						{
 							"fileformat",
-							color = { fg = colors.medium_gray },
 							symbols = {
 								unix = "LF",
 								dos = "CRLF",
@@ -354,20 +306,17 @@ return {
 							"filetype",
 							colored = true,
 							icon_only = false,
-							color = { fg = colors.gray_blue }
 						},
 					},
 					lualine_y = {
 						{
 							-- "progress",
-							-- color = { fg = colors.light_gray }
 						}
 					},
 					lualine_z = {
 						{
 							"branch",
 							icon = "󰊢",
-							color = { fg = colors.cyan, bg = colors.alt_bg }
 						}
 					}
 				},
@@ -377,7 +326,6 @@ return {
 					lualine_c = {
 						{
 							"filename",
-							color = { fg = colors.medium_gray }
 						}
 					},
 					lualine_x = {
@@ -396,11 +344,6 @@ return {
 		config = function()
 			-- Enhanced yank highlight with no-clown-fiesta colors
 			vim.g.highlightedyank_highlight_duration = 200
-			vim.api.nvim_set_hl(0, "HighlightedyankRegion", {
-				fg = "#121212",
-				bg = "#F4BF75",
-				bold = true
-			})
 		end,
 	},
 
@@ -414,10 +357,6 @@ return {
 				chunk = {
 					enable = true,
 					priority = 15,
-					style = {
-						{ fg = "#806d9c" }, -- Purple color for normal chunks
-						{ fg = "#c21f30" }, -- Red color for error chunks
-					},
 					use_treesitter = true,
 					chars = {
 						horizontal_line = "─",
@@ -456,9 +395,6 @@ return {
 				indent = {
 					enable = true,
 					priority = 10,
-					style = {
-						{ fg = "#2A2A2A" }, -- Subtle gray for indent lines
-					},
 					use_treesitter = false, -- Keep false for better performance
 					chars = { "│" }, -- Simple vertical line character
 					ahead_lines = 5, -- Preview range
@@ -543,15 +479,6 @@ return {
 		},
 		config = function(_, opts)
 			require("noice").setup(opts)
-			-- Enhanced noice highlight groups with no-clown-fiesta theme
-			vim.api.nvim_set_hl(0, "NoiceCmdlinePopup", { fg = "#E1E1E1", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "NoiceCmdlinePopupBorder", { fg = "#505050", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "NoiceCmdlinePrompt", { fg = "#BAD7FF", bold = true })
-			vim.api.nvim_set_hl(0, "NoiceCmdlineIcon", { fg = "#88afa2" })
-			vim.api.nvim_set_hl(0, "NoicePopup", { fg = "#E1E1E1", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "NoicePopupBorder", { fg = "#505050", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "NoiceConfirm", { fg = "#E1E1E1", bg = "#121212" })
-			vim.api.nvim_set_hl(0, "NoiceConfirmBorder", { fg = "#505050", bg = "#121212" })
 		end,
 	},
 
@@ -1223,7 +1150,6 @@ return {
 		event = "VeryLazy",
 		config = function()
 			require("notify").setup({
-				background_colour = "#000000",
 				timeout = 3000,
 				max_width = 80,
 				level = vim.log.levels.ERROR,
@@ -1238,25 +1164,6 @@ return {
 		config = function()
 			-- Configure highlighted yank with no-clown-fiesta theme colors
 			vim.g.highlightedyank_highlight_duration = 200
-
-			-- Set custom yank highlight using theme colors
-			vim.api.nvim_create_autocmd("ColorScheme", {
-				group = vim.api.nvim_create_augroup("YankHighlightTheme", { clear = true }),
-				callback = function()
-					vim.api.nvim_set_hl(0, "HighlightedyankRegion", {
-						fg = "#121212",
-						bg = "#F4BF75",
-						bold = true
-					})
-				end,
-			})
-
-			-- Apply highlights immediately
-			vim.api.nvim_set_hl(0, "HighlightedyankRegion", {
-				fg = "#121212",
-				bg = "#F4BF75",
-				bold = true
-			})
 		end,
 	},
 	-- Features: Cursor position, Search results, Diagnostics, Git hunks, Marks, Quickfix
@@ -1428,26 +1335,6 @@ return {
 					min_length = 3,
 					hl = { underline = true },
 				}
-			})
-
-			-- Ensure cursorword highlight is applied after colorscheme loads
-			vim.api.nvim_create_autocmd("ColorScheme", {
-				group = vim.api.nvim_create_augroup("CursorWordHighlight", { clear = true }),
-				callback = function()
-					-- Set a distinct cursorword highlight that's always visible
-					vim.api.nvim_set_hl(0, "CursorWord", {
-						underline = true,
-						sp = "#88afa2", -- Cyan color for underline
-						-- Alternative: use background highlight if underline isn't visible
-						-- bg = "#2A2A2A",
-					})
-				end,
-			})
-
-			-- Apply the highlight immediately
-			vim.api.nvim_set_hl(0, "CursorWord", {
-				underline = true,
-				sp = "#88afa2", -- Cyan color for underline
 			})
 		end,
 	},

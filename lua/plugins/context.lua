@@ -78,41 +78,6 @@ return {
     config = function(_, opts)
       require("treesitter-context").setup(opts)
 
-      -- Set custom highlight groups to match your theme
-      vim.api.nvim_create_autocmd("ColorScheme", {
-        group = vim.api.nvim_create_augroup("TreesitterContextTheme", { clear = true }),
-        callback = function()
-          -- Context background - slightly darker than normal background
-          vim.api.nvim_set_hl(0, "TreesitterContext", {
-            bg = "#0A0A0A",
-            fg = "#E1E1E1"
-          })
-
-          -- Context line numbers
-          vim.api.nvim_set_hl(0, "TreesitterContextLineNumber", {
-            bg = "#0A0A0A",
-            fg = "#727272"
-          })
-
-          -- Context separator (if enabled)
-          vim.api.nvim_set_hl(0, "TreesitterContextSeparator", {
-            fg = "#404040"
-          })
-
-          -- Context bottom border
-          vim.api.nvim_set_hl(0, "TreesitterContextBottom", {
-            bg = "#0A0A0A",
-            underline = true,
-            sp = "#404040"
-          })
-        end,
-      })
-
-      -- Apply highlights immediately
-      vim.schedule(function()
-        vim.cmd("doautocmd ColorScheme")
-      end)
-
       -- Enhanced context refresh mechanism for better reliability
       local refresh_timer = nil
       vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
@@ -260,7 +225,7 @@ return {
       -- Show breadcrumbs in the winbar (top of each window)
       attach_navic = false,  -- We'll handle navic attachment ourselves
       create_autocmd = true, -- We'll create our own autocmd
-      show_dirname = true,   
+      show_dirname = true,
       show_basename = true, -- Show file basename
 
       exclude_filetypes = {

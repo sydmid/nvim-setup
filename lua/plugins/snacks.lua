@@ -741,10 +741,6 @@ return {
   config = function(_, opts)
     require("snacks").setup(opts)
 
-    -- Set up custom colors for marks to match your theme
-    vim.api.nvim_set_hl(0, "SnacksMarks", { fg = "#4A90E2", bold = true })           -- Blue for marks
-    vim.api.nvim_set_hl(0, "SnacksMarksAnnotation", { fg = "#50C878", bold = true }) -- Green for annotated marks
-
     -- Custom mark commands that work with snacks
     vim.api.nvim_create_user_command("MarksList", function()
       require("snacks").picker.marks()

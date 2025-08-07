@@ -345,24 +345,6 @@ return {
         fallback = function() end, -- arbitrary fallback function used in excluded filetypes
       })
 
-      -- Custom highlight groups for better integration with your theme
-      vim.api.nvim_create_autocmd("ColorScheme", {
-        group = vim.api.nvim_create_augroup("CybuHighlights", { clear = true }),
-        callback = function()
-          -- Set highlights that work well with modern themes
-          vim.api.nvim_set_hl(0, "CybuFocus", { fg = "#89b4fa", bg = "#313244", bold = true })
-          vim.api.nvim_set_hl(0, "CybuAdjacent", { fg = "#cdd6f4", bg = "#1e1e2e" })
-          vim.api.nvim_set_hl(0, "CybuBackground", { bg = "#1e1e2e" })
-          vim.api.nvim_set_hl(0, "CybuBorder", { fg = "#89b4fa" })
-        end,
-      })
-
-      -- Set initial highlights
-      vim.api.nvim_set_hl(0, "CybuFocus", { fg = "#89b4fa", bg = "#313244", bold = true })
-      vim.api.nvim_set_hl(0, "CybuAdjacent", { fg = "#cdd6f4", bg = "#1e1e2e" })
-      vim.api.nvim_set_hl(0, "CybuBackground", { bg = "#1e1e2e" })
-      vim.api.nvim_set_hl(0, "CybuBorder", { fg = "#89b4fa" })
-
       -- VSCode-like keybindings for buffer switching
       vim.keymap.set("n", "<C-Tab>", "<Plug>(CybuLastusedNext)", { desc = "Next buffer (VSCode-like)" })
       vim.keymap.set("n", "<C-S-Tab>", "<Plug>(CybuLastusedPrev)", { desc = "Previous buffer (VSCode-like)" })
@@ -529,15 +511,6 @@ return {
           filetypes = { "help", "dashboard", "alpha", "lazy", "mason", "trouble", "oil", "NvimTree" },
           buftypes = { "terminal", "nofile", "quickfix", "prompt", "acwrite" }
         },
-      })
-    end,
-    init = function()
-      -- Set custom highlight for visual whitespace (recommended in docs)
-      -- This goes in init to ensure it's set before the plugin loads
-      vim.api.nvim_set_hl(0, "VisualNonText", {
-        fg = "#5D5F71",
-        bg = "#24282d",
-        italic = true
       })
     end,
   },

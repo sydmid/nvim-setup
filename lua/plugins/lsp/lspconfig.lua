@@ -93,41 +93,7 @@ return {
 				close_events = { "BufHidden" }, -- Only close when leaving buffer, not on cursor movement
 			})
 
-			-- Custom highlight groups for LSP floating windows to match theme
-			vim.api.nvim_create_autocmd("ColorScheme", {
-				group = vim.api.nvim_create_augroup("CustomLspHighlights", {}),
-				callback = function()
-					-- LSP signature help styling with no-clown-fiesta theme
-					vim.api.nvim_set_hl(0, "LspSignatureActiveParameter", {
-						bg = "#2A2A2A",
-						fg = "#F4BF75",
-						bold = true,
-						italic = true
-					})
-					-- Ensure all floating windows match Telescope background
-					vim.api.nvim_set_hl(0, "FloatBorder", {
-						fg = "#505050",
-						bg = "#121212"
-					})
-					vim.api.nvim_set_hl(0, "NormalFloat", {
-						bg = "#121212",
-						fg = "#E1E1E1"
-					})
-					vim.api.nvim_set_hl(0, "FloatTitle", {
-						bg = "#BAD7FF",
-						fg = "#121212",
-						bold = true
-					})
-					-- Enhanced highlight for LSP reference previews
-					vim.api.nvim_set_hl(0, "TelescopePreviewLine", {
-						bg = "#2A2A2A",
-						fg = "#E1E1E1"
-					})
-				end,
-			})
 
-			-- Trigger the highlight setup immediately
-			vim.cmd("doautocmd ColorScheme")
 
 			-- Custom signature help function with better window management and focus support
 			local function show_signature_help()
