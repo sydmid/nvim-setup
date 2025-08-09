@@ -804,69 +804,6 @@ vim.keymap.set("n", "<D-r>", function()
   end)
 end, { desc = "Find and replace dialog", silent = true })
 
--- Smart window closing with confirmation for modified buffers
-local function smart_window_close()
-  local current_buf = vim.api.nvim_get_current_buf()
-  local current_win = vim.api.nvim_get_current_win()
-
-  -- Check if buffer is valid and loaded
-  if not vim.api.nvim_buf_is_valid(current_buf) or not vim.api.nvim_buf_is_loaded(current_buf) then
-    return
-  end
-
-  -- Check if this is the last window
-  local window_count = #vim.api.nvim_list_wins()
-  if window_count == 1 then
-    vim.notify("Cannot close the last window", vim.log.levels.WARN)
-    return
-  end
-
-  local modified = vim.api.nvim_buf_get_option(current_buf, 'modified')
-  local bufname = vim.api.nvim_buf_get_name(current_buf)
-  local filename = vim.fn.fnamemodify(bufname, ':t')
-
-  if filename == '' then
-    filename = '[No Name]'
-  end
-
-  -- Check if buffer is displayed in other windows
-  local buffer_windows = {}
-  for _, win in ipairs(vim.api.nvim_list_wins()) do
-    if vim.api.nvim_win_get_buf(win) == current_buf then
-      table.insert(buffer_windows, win)
-    end
-  end
-
-  local is_buffer_in_other_windows = #buffer_windows > 1
-
-  if modified and not is_buffer_in_other_windows then
-    local choice = vim.fn.confirm(
-      'Buffer "' .. filename .. '" has unsaved changes and will be hidden. Save before closing window?',
-      '&Save and close window\n&Close window without saving\n&Cancel',
-      1
-    )
-
-    if choice == 1 then
-      -- Save and close window
-      local ok, err = pcall(function()
-        vim.cmd('write')
-      end)
-      if ok then
-        vim.cmd('close')
-      else
-        vim.notify('Error saving file: ' .. tostring(err), vim.log.levels.ERROR)
-      end
-    elseif choice == 2 then
-      -- Close window without saving
-      vim.cmd('close')
-    end
-    -- choice == 3 or 0 means cancel, do nothing
-  else
-    -- Buffer not modified or is displayed in other windows, safe to close window
-    vim.cmd('close')
-  end
-end
-
 -- Save all modified buffers only
 local function save_all_modified()
   local modified_count = 0
@@ -899,9 +836,6 @@ local function save_all_modified()
   end
 end
 
--- Map the smart window close function to <D-w>
-map("n", "<D-w>", smart_window_close,
-  { desc = "Close window (with confirmation if modified)", noremap = true, silent = true })
 map({ "n", "i", "v" }, "<D-S-s>", save_all_modified,
   { desc = "Save all modified buffers", noremap = true, silent = true })
 
@@ -913,17 +847,3 @@ end, { desc = "Select background mode", silent = true })
 -- Code Runner - Run code snippets and files
 map("n", "<leader>cr", "<cmd>RunCode<CR>", { desc = "Run code in current buffer" })
 map("v", "<leader>cr", "<cmd>RunCode<CR>", { desc = "Run selected code" })
-
-vim.keymap.set("n", "]t", function()
-  require("todo-comments").jump_next()
-end, { desc = "Next todo comment" })
-
--- You can also specify a list of valid jump keywords
--- vim.keymap.set("n", "]t", function()
---   require("todo-comments").jump_next({keywords = { "ERROR", "WARNING" }})
--- end, { desc = "Next error/warning todo comment" })
-
-vim.keymap.set("n", "[t", function()
-  require("todo-comments").jump_prev()
-end, { desc = "Previous todo comment" })
-

@@ -18,34 +18,43 @@ autocmd("TextYankPost", {
 --   command = ":%s/\\s\\+$//e",
 -- })
 
--- Prevent unwanted file modifications on save
-augroup("PreserveFileState", { clear = true })
-autocmd("BufWritePre", {
-  group = "PreserveFileState",
-  pattern = "*",
-  callback = function()
-    -- Save original file state to prevent unwanted modifications
-    vim.b.original_eol = vim.bo.endofline
-    vim.b.original_fixeol = vim.bo.fixendofline
-    -- Ensure no automatic line ending modifications
-    vim.bo.fixendofline = false
-    vim.bo.endofline = false
-  end,
-})
+-- TEMPORARILY DISABLED: Prevent unwanted file modifications on save
+-- This autocmd was causing issues with ZZ command on modified buffers
+-- augroup("PreserveFileState", { clear = true })
+-- autocmd("BufWritePre", {
+--   group = "PreserveFileState",
+--   pattern = "*",
+--   callback = function()
+--     -- Only preserve file state for explicit saves, not for ZZ command
+--     -- Check if this is being called from ZZ command by looking at the command stack
+--     local info = debug.getinfo(3, "f")
+--     if info and info.func then
+--       -- Skip this autocmd if we're in a ZZ command context
+--       return
+--     end
+--
+--     -- Save original file state to prevent unwanted modifications
+--     vim.b.original_eol = vim.bo.endofline
+--     vim.b.original_fixeol = vim.bo.fixendofline
+--     -- Ensure no automatic line ending modifications for regular saves
+--     vim.bo.fixendofline = false
+--     vim.bo.endofline = false
+--   end,
+-- })
 
-autocmd("BufWritePost", {
-  group = "PreserveFileState",
-  pattern = "*",
-  callback = function()
-    -- Restore original settings after save
-    if vim.b.original_eol ~= nil then
-      vim.bo.endofline = vim.b.original_eol
-    end
-    if vim.b.original_fixeol ~= nil then
-      vim.bo.fixendofline = vim.b.original_fixeol
-    end
-  end,
-})
+-- autocmd("BufWritePost", {
+--   group = "PreserveFileState",
+--   pattern = "*",
+--   callback = function()
+--     -- Restore original settings after save
+--     if vim.b.original_eol ~= nil then
+--       vim.bo.endofline = vim.b.original_eol
+--     end
+--     if vim.b.original_fixeol ~= nil then
+--       vim.bo.fixendofline = vim.b.original_fixeol
+--     end
+--   end,
+-- })
 
 -- Set up terminal mode mappings for window navigation
 autocmd("TermOpen", {
