@@ -77,7 +77,25 @@ return {
 				vim.cmd("edit " .. vim.fn.fnameescape(filename))
 			end
 
-			-- Define all your commands (both scratch and dev)
+			-- Function to open terminal and copy command
+			local function open_terminal_with_command(cmd)
+				-- Use Snacks terminal instead of vim terminal
+				require("snacks").terminal.toggle()
+
+				-- Wait a moment for terminal to initialize
+				vim.defer_fn(function()
+					-- Copy the command to clipboard
+					vim.fn.setreg("+", cmd)
+					vim.fn.setreg('"', cmd)
+
+					-- Notify user that command is copied
+					vim.notify("Command copied to clipboard: " .. cmd, vim.log.levels.INFO)
+
+					-- Send the command to the terminal (but don't execute it)
+					-- Remove the "i" prefix since Snacks terminal handles input differently
+					vim.api.nvim_feedkeys(cmd, "n", false)
+				end, 200) -- Slightly longer delay for Snacks terminal
+			end			-- Define all your commands (scratch, dev, and terminal)
 			local commands = {
 				-- Scratch commands (these will be handled specially)
 				{ name = "Rust: scratch", lang = "rs", type = "scratch" },
@@ -89,27 +107,38 @@ return {
 				{ name = "C#: scratch", lang = "cs", type = "scratch" },
 				{ name = "lua: scratch", lang = "lua", type = "scratch" },
 
-				-- Dev commands
+				-- Terminal commands (open terminal with command copied)
+				{ name = "Rust: cargo new --lib", cmd = "cargo new --lib ", type = "terminal" },
+				{ name = "Rust: cargo new --bin", cmd = "cargo new --bin ", type = "terminal" },
+				{ name = "Node: npm init", cmd = "npm init ", type = "terminal" },
+				{ name = "Node: npm create vite@latest", cmd = "npm create vite@latest ", type = "terminal" },
+				{ name = "Python: poetry new", cmd = "poetry new ", type = "terminal" },
+				{ name = "Python: pip install", cmd = "pip install ", type = "terminal" },
+				{ name = "Git: git clone", cmd = "git clone ", type = "terminal" },
+				{ name = "Docker: docker run", cmd = "docker run ", type = "terminal" },
+				{ name = "Go: go mod init", cmd = "go mod init ", type = "terminal" },
+
+				-- Execute commands
 				{
 					name = "Rust: rustc $f -o $dir/$f-no-extension && $dir/$f-no-extension",
 					cmd = 'rustc "${file}" -o "${fileDirname}/${fileBasenameNoExtension}" && "${fileDirname}/${fileBasenameNoExtension}"',
-					type = "dev",
+					type = "exec",
 				},
 				{
 					name = "C: gcc $f -o $dir/$f-no-extension && $dir/$f-no-extension",
 					cmd = 'gcc "${file}" -o "${fileDirname}/${fileBasenameNoExtension}" && "${fileDirname}/${fileBasenameNoExtension}"',
-					type = "dev",
+					type = "exec",
 				},
 				{
 					name = "Cpp: g++ $f -o $dir/$f-no-extension && $dir/$f-no-extension",
 					cmd = 'g++ "${file}" -o "${fileDirname}/${fileBasenameNoExtension}" && "${fileDirname}/${fileBasenameNoExtension}"',
-					type = "dev",
+					type = "exec",
 				},
-				{ name = "TS: node $f", cmd = 'node "${file}"', type = "dev" },
-				{ name = "PY: python3 $f", cmd = 'python3 "${file}"', type = "dev" },
-				{ name = "Go: go run $f", cmd = 'go run "${file}"', type = "dev" },
-				{ name = "C#: dotnet $f", cmd = 'dotnet "${file}"', type = "dev" },
-				{ name = "lua: lua $f", cmd = 'lua "${file}"', type = "dev" },
+				{ name = "TS: node $f", cmd = 'node "${file}"', type = "exec" },
+				{ name = "PY: python3 $f", cmd = 'python3 "${file}"', type = "exec" },
+				{ name = "Go: go run $f", cmd = 'go run "${file}"', type = "exec" },
+				{ name = "C#: dotnet $f", cmd = 'dotnet "${file}"', type = "exec" },
+				{ name = "lua: lua $f", cmd = 'lua "${file}"', type = "exec" },
 			}
 
 			-- Register all commands as overseer tasks
@@ -132,8 +161,26 @@ return {
 						priority = 60, -- Higher priority for scratch commands
 						params = {},
 					})
+				elseif entry.type == "terminal" then
+					-- Register terminal commands that open terminal with command copied
+					overseer.register_template({
+						name = entry.name,
+						builder = function()
+							-- Execute the terminal opening immediately
+							open_terminal_with_command(entry.cmd)
+							-- Return a dummy task that immediately succeeds
+							return {
+								cmd = { "echo" },
+								args = { "Terminal opened with command: " .. entry.cmd },
+								name = entry.name,
+								components = { "on_complete_notify" },
+							}
+						end,
+						priority = 55, -- Medium priority for terminal commands
+						params = {},
+					})
 				else
-					-- Register dev commands with simple terminal execution
+					-- exec commands with simple terminal execution
 					overseer.register_template({
 						name = entry.name,
 						builder = function()
