@@ -80,36 +80,36 @@ return {
 			-- Define all your commands (both scratch and dev)
 			local commands = {
 				-- Scratch commands (these will be handled specially)
-				{ name = "SCRATCH: Rust", lang = "rs", type = "scratch" },
-				{ name = "SCRATCH: C", lang = "c", type = "scratch" },
-				{ name = "SCRATCH: Cpp", lang = "cpp", type = "scratch" },
-				{ name = "SCRATCH: TypeScript", lang = "ts", type = "scratch" },
-				{ name = "SCRATCH: Python", lang = "py", type = "scratch" },
-				{ name = "SCRATCH: Go", lang = "go", type = "scratch" },
-				{ name = "SCRATCH: C#", lang = "cs", type = "scratch" },
-				{ name = "SCRATCH: lua", lang = "lua", type = "scratch" },
+				{ name = "Rust: scratch", lang = "rs", type = "scratch" },
+				{ name = "C: scratch", lang = "c", type = "scratch" },
+				{ name = "Cpp: scratch", lang = "cpp", type = "scratch" },
+				{ name = "TypeScript: scratch", lang = "ts", type = "scratch" },
+				{ name = "Python: scratch", lang = "py", type = "scratch" },
+				{ name = "Go: scratch", lang = "go", type = "scratch" },
+				{ name = "C#: scratch", lang = "cs", type = "scratch" },
+				{ name = "lua: scratch", lang = "lua", type = "scratch" },
 
 				-- Dev commands
 				{
-					name = "Rust: Compile & Run (Rustc)",
+					name = "Rust: rustc $f -o $dir/$f-no-extension && $dir/$f-no-extension",
 					cmd = 'rustc "${file}" -o "${fileDirname}/${fileBasenameNoExtension}" && "${fileDirname}/${fileBasenameNoExtension}"',
 					type = "dev",
 				},
 				{
-					name = "DEV: Compile & Run C",
+					name = "C: gcc $f -o $dir/$f-no-extension && $dir/$f-no-extension",
 					cmd = 'gcc "${file}" -o "${fileDirname}/${fileBasenameNoExtension}" && "${fileDirname}/${fileBasenameNoExtension}"',
 					type = "dev",
 				},
 				{
-					name = "DEV: Compile & Run Cpp",
+					name = "Cpp: g++ $f -o $dir/$f-no-extension && $dir/$f-no-extension",
 					cmd = 'g++ "${file}" -o "${fileDirname}/${fileBasenameNoExtension}" && "${fileDirname}/${fileBasenameNoExtension}"',
 					type = "dev",
 				},
-				{ name = "DEV: Run TypeScript (node)", cmd = 'node "${file}"', type = "dev" },
-				{ name = "DEV: Run Python", cmd = 'python3 "${file}"', type = "dev" },
-				{ name = "DEV: Run Go", cmd = 'go run "${file}"', type = "dev" },
-				{ name = "DEV: Run C# (dotnet)", cmd = 'dotnet "${file}"', type = "dev" },
-				{ name = "DEV: Run lua", cmd = 'lua "${file}"', type = "dev" },
+				{ name = "TS: node $f", cmd = 'node "${file}"', type = "dev" },
+				{ name = "PY: python3 $f", cmd = 'python3 "${file}"', type = "dev" },
+				{ name = "Go: go run $f", cmd = 'go run "${file}"', type = "dev" },
+				{ name = "C#: dotnet $f", cmd = 'dotnet "${file}"', type = "dev" },
+				{ name = "lua: lua $f", cmd = 'lua "${file}"', type = "dev" },
 			}
 
 			-- Register all commands as overseer tasks

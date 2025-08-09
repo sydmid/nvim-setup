@@ -91,6 +91,5 @@
   "vim-maximizer": { "branch": "master", "commit": "2e54952fe91e140a2e69f35f22131219fcd9c5f1" },
   "vim-pythonsense": { "branch": "master", "commit": "9200a57629c904ed2ab8c9b2e8c5649d311794ba" },
   "vim-tmux-navigator": { "branch": "master", "commit": "c45243dc1f32ac6bcf6068e5300f3b2b237e576a" },
-  "visual-whitespace.nvim": { "branch": "main", "commit": "77bd21fb442cf2b97d7224f8269c053e9def9cb9" },
   "which-key.nvim": { "branch": "main", "commit": "370ec46f710e058c9c1646273e6b225acf47cbed" }
 }
