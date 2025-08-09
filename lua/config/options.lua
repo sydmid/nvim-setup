@@ -113,8 +113,9 @@ opt.infercase = true
 opt.jumpoptions = "stack"
 opt.laststatus = 3
 opt.linebreak = true
+-- Enable global whitespace display
 opt.list = true
-opt.listchars = "tab:»·,nbsp:+,trail:·,extends:→,precedes:←"
+opt.listchars = "tab:→ ,nbsp:␣,trail:·,extends:→,precedes:←,space:·"
 opt.magic = true
 opt.mousescroll = "ver:3,hor:6"
 -- Do NOT adjust the following option (pumblend) if you're using transparent background

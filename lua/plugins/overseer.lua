@@ -91,7 +91,7 @@ return {
 
 				-- Dev commands
 				{
-					name = "DEV: Compile & Run Rust",
+					name = "Rust: Compile & Run (Rustc)",
 					cmd = 'rustc "${file}" -o "${fileDirname}/${fileBasenameNoExtension}" && "${fileDirname}/${fileBasenameNoExtension}"',
 					type = "dev",
 				},

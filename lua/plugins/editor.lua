@@ -532,40 +532,7 @@ return {
       },
     }
   },
-  -- Visual Whitespace - Show whitespace characters in visual mode like VSCode
-  {
-    "mcauley-penney/visual-whitespace.nvim",
-    event = "ModeChanged *:[vV\22]*", -- lazy load on entering any visual mode
-    config = function()
-      require("visual-whitespace").setup({
-        enabled = false, -- default visibility off
-        highlight = { link = "Visual", default = true },
-        match_types = {
-          space = true,
-          tab = true,
-          nbsp = true,
-          lead = false,  -- set to false by default as per docs
-          trail = false, -- set to false by default as per docs
-        },
-        list_chars = {
-          space = "·",
-          tab = "↦", -- using the recommended character from docs
-          nbsp = "␣",
-          lead = "‹",
-          trail = "›",
-        },
-        fileformat_chars = {
-          unix = "↲",
-          mac = "←",
-          dos = "↙",
-        },
-        ignore = {
-          filetypes = { "help", "dashboard", "alpha", "lazy", "mason", "trouble", "oil", "NvimTree" },
-          buftypes = { "terminal", "nofile", "quickfix", "prompt", "acwrite" }
-        },
-      })
-    end,
-  },
+
 
   {
     'MeanderingProgrammer/render-markdown.nvim',

@@ -147,7 +147,7 @@ function _G.telescope_background_picker()
 
   pickers.new({}, {
     prompt_title = "🎨 Background & Opacity Selector (Current: " .. _G.background_modes[_G.current_bg_index].name .. ")",
-    initial_mode = "normal",
+    initial_mode = "insert",
     finder = finders.new_table({
       results = mode_info,
       entry_maker = function(entry)

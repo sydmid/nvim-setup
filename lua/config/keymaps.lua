@@ -844,6 +844,17 @@ map("n", "<leader>tt", function()
   _G.telescope_background_picker()
 end, { desc = "Select background mode", silent = true })
 
+-- Toggle whitespace display
+map("n", "<leader>tw", function()
+  if vim.opt.list:get() then
+    vim.opt.list = false
+    vim.notify("Whitespace display: OFF", vim.log.levels.INFO)
+  else
+    vim.opt.list = true
+    vim.notify("Whitespace display: ON", vim.log.levels.INFO)
+  end
+end, { desc = "Toggle whitespace display", silent = true })
+
 -- Code Runner - Run code snippets and files
 map("n", "<leader>cr", "<cmd>RunCode<CR>", { desc = "Run code in current buffer" })
 map("v", "<leader>cr", "<cmd>RunCode<CR>", { desc = "Run selected code" })
