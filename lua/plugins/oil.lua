@@ -125,7 +125,7 @@ return {
         --   winbar = "%{v:lua.CustomOilBar()}",
         -- },
         view_options = {
-          show_hidden = true,
+          show_hidden = false,
           is_always_hidden = function(name, _)
             local folder_skip = { "dev-tools.locks", "dune.lock", "_build" }
             return vim.tbl_contains(folder_skip, name)
@@ -133,8 +133,8 @@ return {
         },
       }
 
-      -- Open parent directory in current window
-      --   vim.keymap.set("n", "<BS>", "<CMD>Oil<CR>", { desc = "Open parent directory" })
+      -- Set custom highlight for directories (folders)
+      vim.api.nvim_set_hl(0, "OilDir", { fg = "#84dc85" })
 
       -- Open parent directory in floating window
       vim.keymap.set("n", "<BS>", require("oil").toggle_float)

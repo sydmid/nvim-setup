@@ -396,8 +396,6 @@ return {
     end,
   },
   -- Telescope symbols (replaces symbols-outline with beautiful telescope UI)
-  -- Features:
-  -- Maintains document order while preserving hierarchy
   {
     "nvim-telescope/telescope.nvim",
     keys = {

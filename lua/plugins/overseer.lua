@@ -87,6 +87,7 @@ return {
 				{ name = "SCRATCH: Python", lang = "py", type = "scratch" },
 				{ name = "SCRATCH: Go", lang = "go", type = "scratch" },
 				{ name = "SCRATCH: C#", lang = "cs", type = "scratch" },
+				{ name = "SCRATCH: lua", lang = "lua", type = "scratch" },
 
 				-- Dev commands
 				{
@@ -108,6 +109,7 @@ return {
 				{ name = "DEV: Run Python", cmd = 'python3 "${file}"', type = "dev" },
 				{ name = "DEV: Run Go", cmd = 'go run "${file}"', type = "dev" },
 				{ name = "DEV: Run C# (dotnet)", cmd = 'dotnet "${file}"', type = "dev" },
+				{ name = "DEV: Run lua", cmd = 'lua "${file}"', type = "dev" },
 			}
 
 			-- Register all commands as overseer tasks
