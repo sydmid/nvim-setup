@@ -376,7 +376,7 @@ map({ "n", "t" }, "<Tab>", function()
   end
 end, { desc = "Toggle between main and auxiliary buffers", silent = true })
 
-vim.keymap.set("n", "<D-b>", function()
+vim.keymap.set({ "n", "t" }, "<D-b>", function()
   local current_win = vim.api.nvim_get_current_win()
   local current_buf = vim.api.nvim_win_get_buf(current_win)
 
@@ -558,12 +558,12 @@ map(
 )
 
 -- File Explorer (NERDTree replacement)
-map("n", "<D-1>", ":NvimTreeToggle<CR>", { desc = "Toggle file explorer", silent = true })
+map({ "n", "t" }, "<D-1>", ":NvimTreeToggle<CR>", { desc = "Toggle file explorer", silent = true })
 -- map({ "n", "v" }, "<D-1>", ":NvimTreeToggle<CR>", { desc = "Toggle file explorer", silent = true })
 map({ "n", "v" }, "<D-e>", ":NvimTreeFindFile<CR>", { desc = "Reveal current file in tree", silent = true })
 
 -- Diagnostics with Telescope
-map("n", "<D-6>", function()
+map({ "n", "t" }, "<D-6>", function()
   require("telescope.builtin").diagnostics({
     bufnr = 0,               -- Current buffer only
     theme = "ivy",           -- Use ivy theme for a beautiful compact container
@@ -590,7 +590,7 @@ map("n", "<D-6>", function()
 end, { desc = "Show buffer diagnostics in telescope", silent = true })
 
 -- Harpoon quick menu
-map("n", "<D-3>", function()
+map({ "n", "v" }, "<D-3>", function()
   require("harpoon.ui").toggle_quick_menu()
 end, { desc = "Toggle Harpoon menu", silent = true })
 

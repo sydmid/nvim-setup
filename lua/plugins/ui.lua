@@ -21,7 +21,7 @@ function _G.set_background_mode(mode_index)
   if mode.opacity then
     -- Set transparency for the colorscheme
     vim.g.moonflyTransparent = true
-    -- Apply opacity using winblend for floating windows 
+    -- Apply opacity using winblend for floating windows
     vim.opt.winblend = mode.opacity_value
     vim.opt.pumblend = mode.opacity_value
   else
@@ -251,111 +251,6 @@ return {
       end, { desc = "🎨 Select background/opacity mode", silent = true })
     end,
     lazy = false
-  },
-
-  -- Status line
-  {
-    "nvim-lualine/lualine.nvim",
-    dependencies = { "nvim-tree/nvim-web-devicons" },
-    config = function()
-      local lualine = require("lualine")
-      local lazy_status = require("lazy.status") -- to configure lazy pending updates count
-
-      -- configure lualine with auto theme that adapts to your background system
-      lualine.setup({
-        options = {
-          theme = "auto", -- Let lualine auto-detect theme from colorscheme
-          component_separators = { left = "", right = "" },
-          section_separators = { left = "", right = "" },
-          globalstatus = true, -- Use global statusline for better alignment
-        },
-        sections = {
-          lualine_a = {
-            {
-              "mode",
-              fmt = function(str)
-                return str:sub(1, 1) -- Show only first letter (N, I, V, C, R)
-              end
-            }
-          },
-          lualine_b = {
-            {
-              "filename",
-              path = 0, -- Show filename only (no path)
-              symbols = {
-                modified = "",
-                readonly = "",
-                unnamed = "",
-              }
-            },
-            {
-              "diff",
-              colored = true,
-            }
-          },
-          lualine_c = {
-          },
-          lualine_x = {
-            -- {
-            -- 	lazy_status.updates,
-            -- 	cond = lazy_status.has_updates,
-            -- },
-            {
-              "diagnostics",
-              sources = { "nvim_lsp", "nvim_diagnostic" },
-              sections = { "error", "warn", "info", "hint" },
-              symbols = {
-                error = " ",
-                warn = " ",
-                info = " ",
-                hint = " "
-              },
-            },
-            -- {
-            -- 	"encoding",
-            -- },
-            {
-              "fileformat",
-              symbols = {
-                unix = "LF",
-                dos = "CRLF",
-                mac = "CR",
-              }
-            },
-            {
-              "filetype",
-              colored = true,
-              icon_only = false,
-            },
-          },
-          lualine_y = {
-            {
-              -- "progress",
-            }
-          },
-          lualine_z = {
-            {
-              "branch",
-              icon = "󰊢",
-            }
-          }
-        },
-        inactive_sections = {
-          lualine_a = {},
-          lualine_b = {},
-          lualine_c = {
-            {
-              "filename",
-            }
-          },
-          lualine_x = {
-            -- Location hidden per user request
-          },
-          lualine_y = {},
-          lualine_z = {}
-        },
-      })
-    end,
   },
   -- Highlight yanked text with enhanced styling
   {
