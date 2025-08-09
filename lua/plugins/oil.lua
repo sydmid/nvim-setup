@@ -3,13 +3,6 @@ return {
     "stevearc/oil.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
-      CustomOilBar = function()
-        local path = vim.fn.expand "%"
-        path = path:gsub("oil://", "")
-
-        return "  " .. vim.fn.fnamemodify(path, ":.")
-      end
-
       -- Function to change workspace to selected file's parent folder or selected folder
       local function change_workspace_to_selection()
         local oil = require("oil")
@@ -128,9 +121,9 @@ return {
           },
           preview_split = "auto",
         },
-        win_options = {
-          winbar = "%{v:lua.CustomOilBar()}",
-        },
+        -- win_options = {
+        --   winbar = "%{v:lua.CustomOilBar()}",
+        -- },
         view_options = {
           show_hidden = true,
           is_always_hidden = function(name, _)

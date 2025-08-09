@@ -192,6 +192,7 @@ local theme_opts = {
 }
 
 return {
+  -- ColorScheme
   {
     "bluz71/vim-moonfly-colors",
     priority = 1000,
@@ -261,7 +262,6 @@ return {
       vim.g.highlightedyank_highlight_duration = 200
     end,
   },
-
   -- hlchunk.nvim - Beautiful animated indentation and chunk highlighting
   {
     "shellRaining/hlchunk.nvim",
@@ -344,7 +344,6 @@ return {
       })
     end,
   },
-
   -- Better UI elements with enhanced theming
   {
     "folke/noice.nvim",
@@ -396,7 +395,6 @@ return {
       require("noice").setup(opts)
     end,
   },
-
   -- Telescope symbols (replaces symbols-outline with beautiful telescope UI)
   -- Features:
   -- Maintains document order while preserving hierarchy
@@ -917,7 +915,6 @@ return {
       },
     },
   },
-
   -- Tmux Tab Navigator
   {
     "christoomey/vim-tmux-navigator",
@@ -941,14 +938,12 @@ return {
   {
     "szw/vim-maximizer",
   },
-
   -- Mini.icons for better which-key icon support
   {
     "echasnovski/mini.icons",
     version = false,
     config = true,
   },
-
   -- Show keys
   {
     "folke/which-key.nvim",
@@ -1059,7 +1054,6 @@ return {
       },
     },
   },
-
   -- Add nvim-notify for notification support
   {
     "rcarriga/nvim-notify",
@@ -1072,7 +1066,6 @@ return {
       })
     end,
   },
-
   -- Enhanced yank highlighting with theme colors
   {
     "machakann/vim-highlightedyank",
@@ -1176,7 +1169,6 @@ return {
       })
     end,
   },
-
   -- Tabby.nvim - Beautiful and configurable tab line
   {
     "nanozuki/tabby.nvim",
@@ -1232,7 +1224,6 @@ return {
       end)
     end,
   },
-
   -- Enhanced cursorword highlighting (cursorline disabled to avoid conflicts)
   {
     "ya2s/nvim-cursorline",
@@ -1254,7 +1245,6 @@ return {
       })
     end,
   },
-
   -- Smooth scrolling animations for any movement
   {
     "declancm/cinnamon.nvim",
@@ -1317,5 +1307,4 @@ return {
       })
     end,
   },
-
 }
