@@ -324,13 +324,6 @@ return {
     {
       "<leader>sc",
       function()
-        Snacks.picker.command_history()
-      end,
-      desc = "Command History",
-    },
-    {
-      "<leader>sC",
-      function()
         Snacks.picker.commands()
       end,
       desc = "Commands",
@@ -574,14 +567,6 @@ return {
       end,
       desc = "Toggle Zoom",
     },
-    {
-      "<c-_>",
-      function()
-        Snacks.terminal()
-      end,
-      desc = "which_key_ignore",
-    },
-
     -- Error Lens/Explorer group (<leader>e) - Explorer
     {
       "<leader>ee",

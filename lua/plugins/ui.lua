@@ -1,10 +1,10 @@
 -- Global variables to track current background mode
 _G.background_modes = {
-  { bg = "#282c34", cursorline = "#303640", name = "Light",                opacity = false },
-  { bg = "#1f1f19", cursorline = "#333227", name = "Warm",                 opacity = false },
-  { bg = "#0f1419", cursorline = "#1a1f29", name = "Bluish",               opacity = false },
-  { bg = "#121212", cursorline = "#272727", name = "Dark",                 opacity = false },
-  { bg = "#121212", cursorline = "#272727", name = "Glass",                opacity = true  , opacity_value = 0} -- (opacity_value is not working for some reason)
+  { bg = "#282c34", cursorline = "#303640", name = "Light",  opacity = false },
+  { bg = "#1f1f19", cursorline = "#333227", name = "Warm",   opacity = false },
+  { bg = "#0f1419", cursorline = "#1a1f29", name = "Bluish", opacity = false },
+  { bg = "#121212", cursorline = "#272727", name = "Dark",   opacity = false },
+  { bg = "#121212", cursorline = "#272727", name = "Glass",  opacity = true, opacity_value = 0 }   -- (opacity_value is not working for some reason)
 }
 _G.current_bg_index = 1
 
@@ -913,26 +913,18 @@ return {
       },
     },
   },
-  -- Tmux Tab Navigator
   {
-    "christoomey/vim-tmux-navigator",
-    cmd = {
-      "TmuxNavigateLeft",
-      "TmuxNavigateDown",
-      "TmuxNavigateUp",
-      "TmuxNavigateRight",
-      "TmuxNavigatePrevious",
-      "TmuxNavigatorProcessList",
-    },
+    "swaits/zellij-nav.nvim",
+    lazy = true,
+    event = "VeryLazy",
     keys = {
-      { "<c-h>",  "<cmd><C-U>TmuxNavigateLeft<cr>" },
-      { "<c-j>",  "<cmd><C-U>TmuxNavigateDown<cr>" },
-      { "<c-k>",  "<cmd><C-U>TmuxNavigateUp<cr>" },
-      { "<c-l>",  "<cmd><C-U>TmuxNavigateRight<cr>" },
-      { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+      { "<c-h>", "<cmd>ZellijNavigateLeftTab<cr>",  { silent = true, desc = "navigate left or tab" } },
+      { "<c-j>", "<cmd>ZellijNavigateDown<cr>",     { silent = true, desc = "navigate down" } },
+      { "<c-k>", "<cmd>ZellijNavigateUp<cr>",       { silent = true, desc = "navigate up" } },
+      { "<c-l>", "<cmd>ZellijNavigateRightTab<cr>", { silent = true, desc = "navigate right or tab" } },
     },
+    opts = {},
   },
-
   {
     "szw/vim-maximizer",
   },
@@ -1252,7 +1244,7 @@ return {
       require("cinnamon").setup({
         -- Enable both basic and extra keymaps for comprehensive smooth scrolling
         keymaps = {
-          basic = true, -- Half-window, page, paragraph, search, cursor location movements
+          basic = true,  -- Half-window, page, paragraph, search, cursor location movements
           extra = false, -- Start/end of file/line, screen scrolling, up/down, left/right movements
         },
         options = {

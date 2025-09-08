@@ -94,7 +94,8 @@ return {
           ["<C-p>"] = "actions.preview",
           ["<C-c>"] = { "actions.close", mode = "n" },
           ["<C-l>"] = "actions.refresh",
-          ["_"] = { "actions.open_cwd", mode = "n" },
+          ["_"] = false,
+          -- ["_"] = { "actions.open_cwd", mode = "n" },
           ["`"] = { "actions.cd", mode = "n" },
           ["~"] = { "actions.cd", opts = { scope = "tab" }, mode = "n" },
           ["gs"] = { "actions.change_sort", mode = "n" },
@@ -137,7 +138,7 @@ return {
       vim.api.nvim_set_hl(0, "OilDir", { fg = "#84dc85" })
 
       -- Open parent directory in floating window
-      vim.keymap.set("n", "<BS>", require("oil").toggle_float)
+      -- vim.keymap.set("n", "<BS>", require("oil").toggle_float)
     end,
   },
 }

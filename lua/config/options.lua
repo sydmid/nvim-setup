@@ -113,8 +113,8 @@ opt.infercase = true
 opt.jumpoptions = "stack"
 opt.laststatus = 3
 opt.linebreak = true
--- Enable global whitespace display
-opt.list = true
+-- Default: do NOT show invisible whitespace; toggle with <leader>tw (see keymaps)
+opt.list = false
 opt.listchars = "tab:→ ,nbsp:␣,trail:·,extends:→,precedes:←,space:·"
 opt.magic = true
 opt.mousescroll = "ver:3,hor:6"

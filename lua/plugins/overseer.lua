@@ -110,6 +110,8 @@ return {
 				-- Terminal commands (open terminal with command copied)
 				{ name = "Rust: cargo new --lib", cmd = "cargo new --lib ", type = "terminal" },
 				{ name = "Rust: cargo new --bin", cmd = "cargo new --bin ", type = "terminal" },
+				{ name = "Rust: cargo init", cmd = "cargo new --bin ", type = "terminal" },
+				{ name = "Rust: cargo check", cmd = "cargo check ", type = "terminal" },
 				{ name = "Node: npm init", cmd = "npm init ", type = "terminal" },
 				{ name = "Node: npm create vite@latest", cmd = "npm create vite@latest ", type = "terminal" },
 				{ name = "Python: poetry new", cmd = "poetry new ", type = "terminal" },
@@ -214,17 +216,9 @@ return {
 			local map = vim.keymap.set
 
 			-- Main overseer menu on "-" key
-			map("n", "-", function()
+			map("n", "<D-S-c>", function()
 				vim.cmd("OverseerRun")
 			end, { desc = "Run Scratch or Dev Command", noremap = true, silent = true })
-
-			-- Integration with existing Which-Key groups
-			local wk_ok, wk = pcall(require, "which-key")
-			if wk_ok then
-				wk.add({
-					{ "-", desc = "󱓞 Run Scratch/Dev Command" },
-				})
-			end
 		end,
 	},
 }

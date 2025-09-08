@@ -30,12 +30,12 @@ return {
             ["<D-k>"] = function()
                 neoscroll.scroll(-5, { duration = 60, easing = "quadratic" })
             end,
-            ["<S-j>"] = function()
-                neoscroll.scroll(10, { duration = 60, easing = "quadratic" })
-            end,
-            ["<S-k>"] = function()
-                neoscroll.scroll(-10, { duration = 60, easing = "quadratic" })
-            end,
+            -- ["<S-j>"] = function()
+            --     neoscroll.scroll(10, { duration = 60, easing = "quadratic" })
+            -- end,
+            -- ["<S-k>"] = function()
+            --     neoscroll.scroll(-10, { duration = 60, easing = "quadratic" })
+            -- end,
             ["<C-u>"] = function()
                 neoscroll.ctrl_u({ duration = 40 })
             end,

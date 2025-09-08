@@ -224,9 +224,6 @@ map("i", ">>", "<ESC>la => <ESC>i", { desc = "Add arrow function", silent = true
 map("v", "<", "<gv", { desc = "Indent left and keep selection", silent = true })
 map("v", ">", ">gv", { desc = "Indent right and keep selection", silent = true })
 
--- Miscellaneous
-map({ "n", "i", "v" }, "<D-s>", "<Cmd>w<CR>", { noremap = true, silent = true })
-
 -- Examples of non-main filetypes
 local ignored_filetypes = {
   "NvimTree",
@@ -558,8 +555,7 @@ map(
 )
 
 -- File Explorer (NERDTree replacement)
-map({ "n", "t" }, "<D-1>", ":NvimTreeToggle<CR>", { desc = "Toggle file explorer", silent = true })
--- map({ "n", "v" }, "<D-1>", ":NvimTreeToggle<CR>", { desc = "Toggle file explorer", silent = true })
+map({ "n", "t" }, "<D-s>", ":NvimTreeToggle<CR>", { desc = "Toggle file explorer", silent = true })
 map({ "n", "v" }, "<D-e>", ":NvimTreeFindFile<CR>", { desc = "Reveal current file in tree", silent = true })
 
 -- Diagnostics with Telescope
@@ -858,3 +854,22 @@ end, { desc = "Toggle whitespace display", silent = true })
 -- Code Runner - Run code snippets and files
 map("n", "<leader>cr", "<cmd>RunCode<CR>", { desc = "Run code in current buffer" })
 map("v", "<leader>cr", "<cmd>RunCode<CR>", { desc = "Run selected code" })
+
+-- command + enter combinations for insert blank line top and bottom
+-- Insert a blank line below (Cmd + Enter) in insert mode
+vim.keymap.set("i", "<D-CR>", function()
+  return "<Esc>o" -- exit insert, open line below, stay in insert
+end, { expr = true, silent = true })
+
+-- Insert a blank line above (Cmd + Shift + Enter) in insert mode
+vim.keymap.set("i", "<D-S-CR>", function()
+  return "<Esc>O" -- exit insert, open line above, stay in insert
+end, { expr = true, silent = true })
+
+-- Disable Shift+j and Shift+k in normal mode
+vim.keymap.set("n", "<S-j>", "<Nop>", { noremap = true, silent = true })
+vim.keymap.set("n", "<S-k>", "<Nop>", { noremap = true, silent = true })
+
+-- If you also want to disable them in visual mode:
+vim.keymap.set("v", "<S-j>", "<Nop>", { noremap = true, silent = true })
+vim.keymap.set("v", "<S-k>", "<Nop>", { noremap = true, silent = true })
