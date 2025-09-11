@@ -4,7 +4,7 @@ return {
   {
     "rmagatti/auto-session",
     lazy = false, -- Load immediately to ensure session management works on startup
-    priority = 50, -- High priority but after core plugins
+    -- priority = 50, -- High priority but after core plugins
 
     init = function()
       -- Set recommended sessionoptions early to avoid warnings
@@ -45,7 +45,7 @@ return {
       },
 
       -- Session behavior configuration optimized for automatic saving
-      auto_restore_last_session = false, -- Don't auto-restore to avoid confusion
+      auto_restore_last_session = true, -- Don't auto-restore to avoid confusion
       git_use_branch_name = true, -- Include git branch in session name for better organization
       git_auto_restore_on_branch_change = false, -- Don't auto-restore on branch change (can be disruptive)
       lazy_support = true, -- Wait for Lazy.nvim to finish loading
@@ -69,6 +69,7 @@ return {
         "notify",
         "oil",
         "TelescopePrompt",
+        "snacks_dashboard",
         "trouble",
         "NvimTree",
         "neo-tree",
@@ -150,16 +151,17 @@ return {
         "lua for _, win in ipairs(vim.api.nvim_list_wins()) do local config = vim.api.nvim_win_get_config(win); if config.relative ~= '' and not (config.zindex and config.zindex >= 20) then vim.api.nvim_win_close(win, false) end end",
       },
 
-      post_restore_cmds = {
-        -- Refresh oil if it was open
-        function()
-          -- Re-detect file types after session restore
-          vim.cmd("filetype detect")
-        end,
-      },
+      -- post_restore_cmds = {
+      --   -- Refresh oil if it was open
+      --   function()
+      --     -- Re-detect file types after session restore
+      --     vim.cmd("filetype detect")
+      --   end,
+      -- },
 
       -- Handle cwd changes intelligently
-      cwd_change_handling = false, -- Disable automatic cwd change handling (can be confusing)
+      --
+      -- cwd_change_handling = false, -- Disable automatic cwd change handling (can be confusing)
 
       -- Optional: If you want to enable cwd change handling, use this instead:
       -- cwd_change_handling = {
@@ -179,161 +181,161 @@ return {
 
     keys = {
       -- Minimal session management keybindings
-      -- { "<leader>ss", "<cmd>SessionSave<cr>", desc = "Save session" },
-      -- { "<leader>sr", "<cmd>SessionRestore<cr>", desc = "Restore session" },
+      { "<leader>ss", "<cmd>SessionSave<cr>", desc = "Save session" },
+      { "<leader>sr", "<cmd>SessionRestore<cr>", desc = "Restore session" },
     },
 
-    config = function(_, opts)
-      require("auto-session").setup(opts)
+    -- config = function(_, opts)
+    --   require("auto-session").setup(opts)
 
-      -- Integration with your existing Which-Key groups
-      local wk_ok, wk = pcall(require, "which-key")
-      if wk_ok then
-        wk.add({
-          { "<leader>s", group = "󰅩 Session/Split", desc = "Session management and split commands" },
-          { "<leader>w", group = "󰓩 Workspace/Tabs", desc = "Workspace and tab management" },
-        })
-      end
+    --   -- Integration with your existing Which-Key groups
+    --   local wk_ok, wk = pcall(require, "which-key")
+    --   if wk_ok then
+    --     wk.add({
+    --       { "<leader>s", group = "󰅩 Session/Split", desc = "Session management and split commands" },
+    --       { "<leader>w", group = "󰓩 Workspace/Tabs", desc = "Workspace and tab management" },
+    --     })
+    --   end
 
-      -- Custom highlights for session lens if using your theme
-      vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = "*",
-        callback = function()
-          -- Ensure session picker follows your theme
-          vim.api.nvim_set_hl(0, "TelescopeSessionTitle", { link = "TelescopeTitle" })
-          vim.api.nvim_set_hl(0, "TelescopeSessionNormal", { link = "TelescopeNormal" })
-        end,
-      })
+    --   -- Custom highlights for session lens if using your theme
+    --   vim.api.nvim_create_autocmd("ColorScheme", {
+    --     pattern = "*",
+    --     callback = function()
+    --       -- Ensure session picker follows your theme
+    --       vim.api.nvim_set_hl(0, "TelescopeSessionTitle", { link = "TelescopeTitle" })
+    --       vim.api.nvim_set_hl(0, "TelescopeSessionNormal", { link = "TelescopeNormal" })
+    --     end,
+    --   })
 
-      -- Enhanced notifications for session operations
-      vim.api.nvim_create_autocmd("User", {
-        pattern = "AutoSessionSavePost",
-        callback = function(data)
-          local session_name = data.data.session_name or "current session"
-          vim.notify("💾 Session saved: " .. session_name, vim.log.levels.INFO)
-        end,
-      })
+    --   -- Enhanced notifications for session operations
+    --   vim.api.nvim_create_autocmd("User", {
+    --     pattern = "AutoSessionSavePost",
+    --     callback = function(data)
+    --       local session_name = data.data.session_name or "current session"
+    --       vim.notify("💾 Session saved: " .. session_name, vim.log.levels.INFO)
+    --     end,
+    --   })
 
-      vim.api.nvim_create_autocmd("User", {
-        pattern = "AutoSessionRestorePost",
-        callback = function(data)
-          local session_name = data.data.session_name or "session"
-          vim.notify("🔄 Session restored: " .. session_name, vim.log.levels.INFO)
+    --   vim.api.nvim_create_autocmd("User", {
+    --     pattern = "AutoSessionRestorePost",
+    --     callback = function(data)
+    --       local session_name = data.data.session_name or "session"
+    --       vim.notify("🔄 Session restored: " .. session_name, vim.log.levels.INFO)
 
-          -- Optional: Refresh components after restore
-          vim.schedule(function()
-            vim.cmd("doautoall BufRead")
-          end)
-        end,
-      })
+    --       -- Optional: Refresh components after restore
+    --       vim.schedule(function()
+    --         vim.cmd("doautoall BufRead")
+    --       end)
+    --     end,
+    --   })
 
-      vim.api.nvim_create_autocmd("User", {
-        pattern = "AutoSessionDeletePost",
-        callback = function(data)
-          local session_name = data.data.session_name or "session"
-          vim.notify("🗑️ Session deleted: " .. session_name, vim.log.levels.WARN)
-        end,
-      })
+    --   vim.api.nvim_create_autocmd("User", {
+    --     pattern = "AutoSessionDeletePost",
+    --     callback = function(data)
+    --       local session_name = data.data.session_name or "session"
+    --       vim.notify("🗑️ Session deleted: " .. session_name, vim.log.levels.WARN)
+    --     end,
+    --   })
 
-      -- Additional automatic save triggers for best practices
-      vim.api.nvim_create_autocmd("FocusLost", {
-        group = vim.api.nvim_create_augroup("AutoSessionFocusSave", { clear = true }),
-        callback = function()
-          -- Only save if we're in a real project directory with meaningful content
-          local cwd = vim.fn.getcwd()
-          local suppressed = {
-            vim.fn.expand("~"),
-            vim.fn.expand("~/Projects"),
-            vim.fn.expand("~/Downloads"),
-            vim.fn.expand("~/Desktop"),
-            vim.fn.expand("~/Documents"),
-            "/tmp",
-            "/",
-            "/Users",
-          }
+    --   -- Additional automatic save triggers for best practices
+    --   vim.api.nvim_create_autocmd("FocusLost", {
+    --     group = vim.api.nvim_create_augroup("AutoSessionFocusSave", { clear = true }),
+    --     callback = function()
+    --       -- Only save if we're in a real project directory with meaningful content
+    --       local cwd = vim.fn.getcwd()
+    --       local suppressed = {
+    --         vim.fn.expand("~"),
+    --         vim.fn.expand("~/Projects"),
+    --         vim.fn.expand("~/Downloads"),
+    --         vim.fn.expand("~/Desktop"),
+    --         vim.fn.expand("~/Documents"),
+    --         "/tmp",
+    --         "/",
+    --         "/Users",
+    --       }
 
-          for _, dir in ipairs(suppressed) do
-            if cwd == dir then
-              return -- Skip saving in suppressed directories
-            end
-          end
+    --       for _, dir in ipairs(suppressed) do
+    --         if cwd == dir then
+    --           return -- Skip saving in suppressed directories
+    --         end
+    --       end
 
-          -- Check if we have meaningful buffers open
-          local meaningful_buffers = 0
-          for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-            if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
-              local name = vim.api.nvim_buf_get_name(buf)
-              if name ~= "" and vim.fn.filereadable(name) == 1 then
-                meaningful_buffers = meaningful_buffers + 1
-              end
-            end
-          end
+    --       -- Check if we have meaningful buffers open
+    --       local meaningful_buffers = 0
+    --       for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    --         if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
+    --           local name = vim.api.nvim_buf_get_name(buf)
+    --           if name ~= "" and vim.fn.filereadable(name) == 1 then
+    --             meaningful_buffers = meaningful_buffers + 1
+    --           end
+    --         end
+    --       end
 
-          if meaningful_buffers >= 1 then
-            -- Save all modified files first
-            vim.cmd("silent! wall")
-            -- Then save session
-            vim.schedule(function()
-              pcall(require("auto-session").save_session)
-            end)
-          end
-        end,
-      })
+    --       if meaningful_buffers >= 1 then
+    --         -- Save all modified files first
+    --         vim.cmd("silent! wall")
+    --         -- Then save session
+    --         vim.schedule(function()
+    --           pcall(require("auto-session").save_session)
+    --         end)
+    --       end
+    --     end,
+    --   })
 
-      -- Auto-save on timer (every 5 minutes when idle)
-      local save_timer = vim.loop.new_timer()
-      local function start_autosave_timer()
-        if save_timer then
-          save_timer:start(300000, 300000, vim.schedule_wrap(function() -- 5 minutes = 300000ms
-            -- Only save if Neovim has been idle and we have meaningful content
-            local cwd = vim.fn.getcwd()
-            local suppressed = {
-              vim.fn.expand("~"),
-              vim.fn.expand("~/Projects"),
-              vim.fn.expand("~/Downloads"),
-              vim.fn.expand("~/Desktop"),
-              vim.fn.expand("~/Documents"),
-              "/tmp",
-              "/",
-              "/Users",
-            }
+    --   -- Auto-save on timer (every 5 minutes when idle)
+    --   local save_timer = vim.loop.new_timer()
+    --   local function start_autosave_timer()
+    --     if save_timer then
+    --       save_timer:start(300000, 300000, vim.schedule_wrap(function() -- 5 minutes = 300000ms
+    --         -- Only save if Neovim has been idle and we have meaningful content
+    --         local cwd = vim.fn.getcwd()
+    --         local suppressed = {
+    --           vim.fn.expand("~"),
+    --           vim.fn.expand("~/Projects"),
+    --           vim.fn.expand("~/Downloads"),
+    --           vim.fn.expand("~/Desktop"),
+    --           vim.fn.expand("~/Documents"),
+    --           "/tmp",
+    --           "/",
+    --           "/Users",
+    --         }
 
-            for _, dir in ipairs(suppressed) do
-              if cwd == dir then
-                return
-              end
-            end
+    --         for _, dir in ipairs(suppressed) do
+    --           if cwd == dir then
+    --             return
+    --           end
+    --         end
 
-            -- Check for meaningful buffers
-            local meaningful_buffers = 0
-            for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-              if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
-                local name = vim.api.nvim_buf_get_name(buf)
-                if name ~= "" and vim.fn.filereadable(name) == 1 then
-                  meaningful_buffers = meaningful_buffers + 1
-                end
-              end
-            end
+    --         -- Check for meaningful buffers
+    --         local meaningful_buffers = 0
+    --         for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    --           if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
+    --             local name = vim.api.nvim_buf_get_name(buf)
+    --             if name ~= "" and vim.fn.filereadable(name) == 1 then
+    --               meaningful_buffers = meaningful_buffers + 1
+    --             end
+    --           end
+    --         end
 
-            if meaningful_buffers >= 1 then
-              pcall(require("auto-session").save_session)
-            end
-          end))
-        end
-      end
+    --         if meaningful_buffers >= 1 then
+    --           pcall(require("auto-session").save_session)
+    --         end
+    --       end))
+    --     end
+    --   end
 
-      -- Start the timer
-      start_autosave_timer()
+    --   -- Start the timer
+    --   start_autosave_timer()
 
-      -- Clean up timer on exit
-      vim.api.nvim_create_autocmd("VimLeavePre", {
-        callback = function()
-          if save_timer then
-            save_timer:stop()
-            save_timer:close()
-          end
-        end,
-      })
-    end,
+    --   -- Clean up timer on exit
+    --   vim.api.nvim_create_autocmd("VimLeavePre", {
+    --     callback = function()
+    --       if save_timer then
+    --         save_timer:stop()
+    --         save_timer:close()
+    --       end
+    --     end,
+    --   })
+    -- end,
   },
 }

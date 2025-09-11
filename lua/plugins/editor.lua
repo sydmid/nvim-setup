@@ -186,23 +186,24 @@ return {
           end
 
           -- === DEFAULT NVIM-TREE KEYMAPS ===
-          -- File operations
+          vim.keymap.set("n", "h", api.node.navigate.parent_close, opts("Close Directory"))
+          vim.keymap.set("n", "l", api.node.open.edit, opts("Open")) -- File operations
           vim.keymap.set("n", "<2-LeftMouse>", api.node.open.edit, opts("Open"))
           vim.keymap.set("n", "<C-e>", api.node.open.replace_tree_buffer, opts("Open: In Place"))
           vim.keymap.set("n", "<C-]>", api.tree.change_root_to_node, opts("CD"))
-          vim.keymap.set("n", "<C-v>", api.node.open.vertical, opts("Open: Vertical Split"))
-          vim.keymap.set("n", "<C-x>", api.node.open.horizontal, opts("Open: Horizontal Split"))
+          vim.keymap.set("n", "|", api.node.open.vertical, opts("Open: Vertical Split"))
+          vim.keymap.set("n", "_", api.node.open.horizontal, opts("Open: Horizontal Split"))
           vim.keymap.set("n", "<C-t>", api.node.open.tab, opts("Open: New Tab"))
           vim.keymap.set("n", "<", api.node.navigate.sibling.prev, opts("Previous Sibling"))
           vim.keymap.set("n", ">", api.node.navigate.sibling.next, opts("Next Sibling"))
           vim.keymap.set("n", "P", api.node.navigate.parent, opts("Parent Directory"))
           vim.keymap.set("n", "<BS>", api.node.navigate.parent_close, opts("Close Directory"))
-          vim.keymap.set("n", "<Tab>", api.node.open.preview, opts("Open Preview"))
+          -- vim.keymap.set("n", "<Tab>", api.node.open.preview, opts("Open Preview"))
           vim.keymap.set("n", "K", api.node.navigate.sibling.first, opts("First Sibling"))
           vim.keymap.set("n", "J", api.node.navigate.sibling.last, opts("Last Sibling"))
           vim.keymap.set("n", "I", api.tree.toggle_gitignore_filter, opts("Toggle Git Ignore"))
           vim.keymap.set("n", "H", api.tree.toggle_hidden_filter, opts("Toggle Dotfiles"))
-          vim.keymap.set("n", "U", api.tree.toggle_custom_filter, opts("Toggle Hidden"))
+          vim.keymap.set("n", "<leader>th", api.tree.toggle_custom_filter, opts("Toggle Hidden"))
           vim.keymap.set("n", "R", api.tree.reload, opts("Refresh"))
 
           -- File/Directory creation and modification
@@ -468,7 +469,7 @@ return {
     "folke/todo-comments.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
     opts = {
-      signs = true,  -- show icons in the signs column
+      signs = true,      -- show icons in the signs column
       sign_priority = 8, -- sign priority
       -- keywords recognized as todo comments
       keywords = {
@@ -486,8 +487,8 @@ return {
         TEST = { icon = "⏲ ", color = "test", alt = { "TESTING", "PASSED", "FAILED" } },
       },
       gui_style = {
-        fg = "NONE",     -- The gui style to use for the fg highlight group.
-        bg = "BOLD",     -- The gui style to use for the bg highlight group.
+        fg = "NONE",         -- The gui style to use for the fg highlight group.
+        bg = "BOLD",         -- The gui style to use for the bg highlight group.
       },
       merge_keywords = true, -- when true, custom keywords will be merged with the defaults
       -- highlighting of the line containing the todo comment
@@ -495,16 +496,16 @@ return {
       -- * keyword: highlights of the keyword
       -- * after: highlights after the keyword (todo text)
       highlight = {
-        multiline = true,            -- enable multine todo comments
-        multiline_pattern = "^.",    -- lua pattern to match the next multiline from the start of the matched keyword
-        multiline_context = 10,      -- extra lines that will be re-evaluated when changing a line
-        before = "",                 -- "fg" or "bg" or empty
-        keyword = "wide",            -- "fg", "bg", "wide", "wide_bg", "wide_fg" or empty. (wide and wide_bg is the same as bg, but will also highlight surrounding characters, wide_fg acts accordingly but with fg)
-        after = "fg",                -- "fg" or "bg" or empty
+        multiline = true,                -- enable multine todo comments
+        multiline_pattern = "^.",        -- lua pattern to match the next multiline from the start of the matched keyword
+        multiline_context = 10,          -- extra lines that will be re-evaluated when changing a line
+        before = "",                     -- "fg" or "bg" or empty
+        keyword = "wide",                -- "fg", "bg", "wide", "wide_bg", "wide_fg" or empty. (wide and wide_bg is the same as bg, but will also highlight surrounding characters, wide_fg acts accordingly but with fg)
+        after = "fg",                    -- "fg" or "bg" or empty
         pattern = [[.*<(KEYWORDS)\s*:]], -- pattern or table of patterns, used for highlighting (vim regex)
-        comments_only = true,        -- uses treesitter to match keywords in comments only
-        max_line_len = 400,          -- ignore lines longer than this
-        exclude = {},                -- list of file types to exclude highlighting
+        comments_only = true,            -- uses treesitter to match keywords in comments only
+        max_line_len = 400,              -- ignore lines longer than this
+        exclude = {},                    -- list of file types to exclude highlighting
       },
       -- list of named colors where we try to extract the guifg from the
       -- list of highlight groups or use the hex color if hl not found as a fallback
@@ -540,5 +541,72 @@ return {
     ---@module 'render-markdown'
     ---@type render.md.UserConfig
     opts = {},
+  }
+  , { "romainl/vim-cool" }
+, {
+  'mvllow/modes.nvim',
+  config = function()
+    require('modes').setup({
+      colors = {
+        bg = "", -- Optional bg param, defaults to Normal hl group
+        copy = "#f5c359",
+        delete = "#c75c6a",
+        change = "#c75c6a", -- Optional param, defaults to delete
+        format = "#c79585",
+        insert = "#78ccc5",
+        replace = "#245361",
+        select = "#9745be", -- Optional param, defaults to visual
+        visual = "#9745be",
+      },
+
+      -- Set opacity for cursorline and number background
+      line_opacity = 0.25,
+
+      -- Enable cursor highlights
+      set_cursor = true,
+
+      -- Enable cursorline initially, and disable cursorline for inactive windows
+      -- or ignored filetypes
+      set_cursorline = true,
+
+      -- Enable line number highlights to match cursorline
+      set_number = false,
+
+      -- Enable sign column highlights to match cursorline
+      set_signcolumn = true,
+
+      -- Disable modes highlights for specified filetypes
+      -- or enable with prefix "!" if otherwise disabled (please PR common patterns)
+      -- Can also be a function fun():boolean that disables modes highlights when true
+      ignore = { 'NvimTree', 'TelescopePrompt', '!minifiles' }
+    })
+  end
+},
+  { {
+    "sphamba/smear-cursor.nvim",
+    opts = {
+      -- Smear cursor when switching buffers or windows.
+      smear_between_buffers = true,
+
+      -- Smear cursor when moving within line or to neighbor lines.
+      -- Use `min_horizontal_distance_smear` and `min_vertical_distance_smear` for finer control
+      smear_between_neighbor_lines = true,
+
+      -- Draw the smear in buffer space instead of screen space when scrolling
+      scroll_buffer_space = true,
+
+      -- Set to `true` if your font supports legacy computing symbols (block unicode symbols).
+      -- Smears will blend better on all backgrounds.
+      -- legacy_computing_symbols_support = true,
+
+      -- Smear cursor in insert mode.
+      -- See also `vertical_bar_cursor_insert_mode` and `distance_stop_animating_vertical_bar`.
+      smear_insert_mode = true,
+
+      -- vertical_bar_cursor = true,
+      min_horizontal_distance_smear = 50,
+      min_vertical_distance_smear = 5,
+    },
+  }
   }
 }

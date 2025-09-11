@@ -882,44 +882,6 @@ return {
 						vim.lsp.buf_request(0, 'textDocument/hover', params, enhanced_hover_handler)
 					end, { buffer = ev.buf, desc = "Show documentation (Enhanced & Focusable)", silent = true })
 
-					-- Fallback hover using native LSP hover (for troubleshooting)
-					keymap("n", "<D-S-h>", function()
-						vim.lsp.buf.hover()
-					end, { buffer = ev.buf, desc = "Show documentation (Native)", silent = true })
-
-					-- Debug command to test LSP hover capability
-					keymap("n", "<leader>dh", function()
-						local clients = vim.lsp.get_clients({ bufnr = 0 })
-						if #clients == 0 then
-							vim.notify("No LSP clients attached", vim.log.levels.ERROR)
-							return
-						end
-
-						local client_info = {}
-						for _, client in ipairs(clients) do
-							table.insert(client_info, string.format("%s (hover: %s)",
-								client.name,
-								client.server_capabilities.hoverProvider and "yes" or "no"
-							))
-						end
-
-						vim.notify("LSP clients: " .. table.concat(client_info, ", "), vim.log.levels.INFO)
-
-						-- Test hover
-						local params = vim.lsp.util.make_position_params()
-						vim.lsp.buf_request(0, 'textDocument/hover', params, function(err, result, ctx, config)
-							if err then
-								vim.notify("Hover error: " .. tostring(err), vim.log.levels.ERROR)
-							elseif not result or not result.contents then
-								vim.notify("No hover content available", vim.log.levels.WARN)
-							else
-								vim.notify("Hover content received successfully", vim.log.levels.INFO)
-								-- Show the content
-								vim.lsp.handlers["textDocument/hover"](err, result, ctx, config)
-							end
-						end)
-					end, { buffer = ev.buf, desc = "Debug hover functionality", silent = true })
-
 					-- Additional useful Lspsaga keymaps
 					keymap("n", "<leader>ca", "<cmd>Lspsaga code_action<CR>", { buffer = ev.buf, desc = "Code actions (Lspsaga)" })
 					keymap("n", "<leader>lr", "<cmd>Lspsaga rename<CR>", { buffer = ev.buf, desc = "Rename symbol (Lspsaga)" })
@@ -1034,7 +996,8 @@ return {
 							end
 						end, { buffer = buf, nowait = true })
 					end, { buffer = ev.buf, desc = "Line diagnostics (enhanced native)" })
-					keymap("n", "<leader>fx", function()
+
+					keymap("n", "<leader>xf", function()
 						require("telescope.builtin").diagnostics({
 							bufnr = 0,
 							attach_mappings = function(prompt_bufnr, map_func)
@@ -1260,32 +1223,6 @@ return {
 								-- Disable hover in favor of Pyright
 								client.server_capabilities.hoverProvider = false
 							end,
-						})
-					end,
-
-					["csharp_ls"] = function()
-						local handlers = {}
-
-						-- Only add the handler if the plugin is available
-						local ok, csharpls_extended = pcall(require, "csharpls_extended")
-						if ok and csharpls_extended.handler then
-							handlers["textDocument/definition"] = csharpls_extended.handler
-						end
-
-						lspconfig.csharp_ls.setup({
-							capabilities = capabilities,
-							handlers = handlers,
-							root_dir = lspconfig.util.root_pattern("*.sln", "*.csproj", "omnisharp.json", "function.json"),
-							init_options = {
-								AutomaticWorkspaceInit = true,
-							},
-							settings = {
-								csharp = {
-									semanticHighlighting = {
-										enabled = true,
-									},
-								},
-							},
 						})
 					end,
 
@@ -1553,7 +1490,7 @@ return {
 				-- Set up servers manually
 				local servers = {
 					"ts_ls", "html", "cssls", "tailwindcss", "svelte", "lua_ls", "graphql",
-					"emmet_ls", "prismals", "pyright", "ruff", "eslint", "bashls", "csharp_ls",
+					"emmet_ls", "prismals", "pyright", "ruff", "eslint", "bashls", "roslyn",
 					"gopls", "rust_analyzer", "taplo"
 				}
 
@@ -1639,30 +1576,6 @@ return {
 								-- Disable hover in favor of Pyright
 								client.server_capabilities.hoverProvider = false
 							end,
-						})
-					elseif server_name == "csharp_ls" then
-						local handlers = {}
-
-						-- Only add the handler if the plugin is available
-						local ok, csharpls_extended = pcall(require, "csharpls_extended")
-						if ok and csharpls_extended.handler then
-							handlers["textDocument/definition"] = csharpls_extended.handler
-						end
-
-						lspconfig.csharp_ls.setup({
-							capabilities = capabilities,
-							handlers = handlers,
-							root_dir = lspconfig.util.root_pattern("*.sln", "*.csproj", "omnisharp.json", "function.json"),
-							init_options = {
-								AutomaticWorkspaceInit = true,
-							},
-							settings = {
-								csharp = {
-									semanticHighlighting = {
-										enabled = true,
-									},
-								},
-							},
 						})
 					elseif server_name == "rust_analyzer" then
 						-- Professional Rust LSP configuration with rust-analyzer (fallback)
@@ -1846,12 +1759,6 @@ return {
 					end
 				end,
 			})
-
-			-- Setup csharpls-extended for Neovim 0.11+
-			local has_csharpls_extended, csharpls_extended = pcall(require, "csharpls_extended")
-			if has_csharpls_extended and csharpls_extended.buf_read_cmd_bind then
-				csharpls_extended.buf_read_cmd_bind()
-			end
 		end,
 	},
 }

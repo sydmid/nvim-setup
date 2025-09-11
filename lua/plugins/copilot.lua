@@ -1,6 +1,4 @@
--- filepath: /Users/omid/.config/nvim/lua/plugins/copilot.lua
 -- GitHub Copilot integration for Neovim with full AI assistant capabilities
--- Consolidated configuration following nvim architecture best practices
 
 -- Available models configuration
 local MODELS = {

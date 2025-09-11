@@ -1,10 +1,10 @@
 -- Global variables to track current background mode
 _G.background_modes = {
-  { bg = "#282c34", cursorline = "#303640", name = "Light",  opacity = false },
-  { bg = "#1f1f19", cursorline = "#333227", name = "Warm",   opacity = false },
-  { bg = "#0f1419", cursorline = "#1a1f29", name = "Bluish", opacity = false },
-  { bg = "#121212", cursorline = "#272727", name = "Dark",   opacity = false },
-  { bg = "#121212", cursorline = "#272727", name = "Glass",  opacity = true, opacity_value = 0 }   -- (opacity_value is not working for some reason)
+  { bg = "#282c34", secondary = "#373c47", cursorline = "#303640", name = "Light",  opacity = false },
+  { bg = "#1f1f19", secondary = "#34342a", cursorline = "#333227", name = "Warm",   opacity = false },
+  { bg = "#0f1419", secondary = "#1c262f", cursorline = "#1a1f29", name = "Bluish", opacity = false },
+  { bg = "#121212", secondary = "#313131", cursorline = "#272727", name = "Dark",   opacity = false },
+  { bg = "#121212", secondary = "#313131",  cursorline = "#272727", name = "Glass",  opacity = true, opacity_value = 0 } -- (opacity_value is not working for some reason)
 }
 _G.current_bg_index = 1
 
@@ -20,13 +20,13 @@ function _G.set_background_mode(mode_index)
   -- Handle opacity settings
   if mode.opacity then
     -- Set transparency for the colorscheme
-    vim.g.moonflyTransparent = true
+    vim.g.molokaiTransparent = true
     -- Apply opacity using winblend for floating windows
     vim.opt.winblend = mode.opacity_value
     vim.opt.pumblend = mode.opacity_value
   else
     -- Disable transparency
-    vim.g.moonflyTransparent = false
+    vim.g.molokaiTransparent = false
     vim.opt.winblend = 0
     vim.opt.pumblend = 0
   end
@@ -57,6 +57,8 @@ function _G.set_background_mode(mode_index)
     NoicePopupBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
     NoiceConfirm = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
     NoiceConfirmBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+    TreesitterContext = mode.opacity and { bg = "NONE" } or { bg = mode.secondary },
+    TreesitterContextLineNumber = mode.opacity and { bg = "NONE" } or { bg = mode.secondary },
   }
 
   -- Apply the highlights
@@ -67,7 +69,7 @@ function _G.set_background_mode(mode_index)
 
   _G.save_background_preference()
   local opacity_text = mode.opacity and (" (" .. mode.opacity_value .. "% opacity)") or ""
-  vim.notify("🎨 Background mode: " .. mode.name .. opacity_text, vim.log.levels.INFO)
+  vim.notify("Background mode: " .. mode.name .. opacity_text, vim.log.levels.INFO)
 end
 
 -- Function to cycle through background modes
@@ -99,18 +101,6 @@ function _G.load_background_preference()
   end
 end
 
--- Function to list all available background modes
-function _G.list_background_modes()
-  local mode_names = {}
-  for i, mode in ipairs(_G.background_modes) do
-    table.insert(mode_names, mode.name)
-  end
-  vim.notify(
-    "Background modes: " ..
-    table.concat(mode_names, ", ") .. "\nCurrent: " .. _G.background_modes[_G.current_bg_index].name, vim.log.levels
-    .INFO)
-end
-
 -- Function to create a Telescope background mode picker
 function _G.telescope_background_picker()
   if not pcall(require, "telescope") then
@@ -127,9 +117,7 @@ function _G.telescope_background_picker()
   local mode_info = {}
   for i, mode in ipairs(_G.background_modes) do
     local opacity_text = mode.opacity and string.format(" (Opacity: %d%%)", mode.opacity_value) or ""
-    local display_text = mode.opacity and
-        string.format("🎨 %s - Transparent%s", mode.name, opacity_text) or
-        string.format("🎨 %s - BG: %s, Line: %s", mode.name, mode.bg, mode.cursorline)
+    local display_text = mode.name
 
     table.insert(mode_info, {
       index = i,
@@ -146,7 +134,7 @@ function _G.telescope_background_picker()
   end
 
   pickers.new({}, {
-    prompt_title = "🎨 Background & Opacity Selector (Current: " .. _G.background_modes[_G.current_bg_index].name .. ")",
+    prompt_title = "Background Selector (Current: " .. _G.background_modes[_G.current_bg_index].name .. ")",
     initial_mode = "insert",
     finder = finders.new_table({
       results = mode_info,
@@ -194,31 +182,31 @@ local theme_opts = {
 return {
   -- ColorScheme
   {
-    "bluz71/vim-moonfly-colors",
-    priority = 1000,
-    name = "moonfly",
+    "tomasr/molokai",
+    lazy = false,
+    name = "molokai",
     config = function()
-      -- Configure moonfly theme options
-      vim.g.moonflyCursorColor = true
-      vim.g.moonflyItalics = true
+      -- Configure molokai theme options
+      vim.g.molokaiCursorColor = true
+      vim.g.molokaiItalics = true
       -- Transparency will be set by background mode function
-      vim.g.moonflyUndercurls = true
-      vim.g.moonflyUnderlineMatchParen = true
-      vim.g.moonflyVirtualTextColor = true
+      vim.g.molokaiUndercurls = true
+      vim.g.molokaiUnderlineMatchParen = true
+      vim.g.molokaiVirtualTextColor = true
 
       -- Load saved background preference
       _G.load_background_preference()
 
       -- Set the colorscheme
       vim.opt.background = "dark"
-      vim.cmd.colorscheme("moonfly")
+      vim.cmd.colorscheme("molokai")
 
       -- Apply the current background mode
       _G.set_background_mode(_G.current_bg_index)
 
       -- Create autocmd to reapply background highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = "moonfly",
+        pattern = "molokai",
         group = vim.api.nvim_create_augroup("AyuBackground", { clear = true }),
         callback = function()
           -- Reapply current background mode
@@ -249,7 +237,7 @@ return {
 
       vim.keymap.set("n", "<leader>tt", function()
         _G.telescope_background_picker()
-      end, { desc = "🎨 Select background/opacity mode", silent = true })
+      end, { desc = "Change Background", silent = true })
     end,
     lazy = false
   },
@@ -925,9 +913,6 @@ return {
     },
     opts = {},
   },
-  {
-    "szw/vim-maximizer",
-  },
   -- Mini.icons for better which-key icon support
   {
     "echasnovski/mini.icons",
@@ -977,7 +962,6 @@ return {
       wk.add({
         -- AI/Avante group with streamlined commands
         { "<leader>a",  group = "AI" },
-        { "<leader>ac", desc = "Toggle chat" },
         { "<leader>ai", desc = "Ask input" },
         { "<leader>af", desc = "Focus chat" },
         { "<leader>al", desc = "Clear chat" },
@@ -992,46 +976,27 @@ return {
         { "<leader>ad", desc = "Add docs" },
         { "<leader>ao", desc = "Optimize code" },
         -- Git integration
-        { "<leader>am", desc = "Commit message" },
-        -- Provider management
-        { "<leader>ap", desc = "Switch provider" },
-        { "<leader>aT", desc = "Test Ollama" },
-        { "<leader>aP", desc = "Test current provider" },
-
+        { "<leader>ac", desc = "Commit message" },
         -- Other groups
-        { "<leader>b",  group = "Buffer" },
-        { "<leader>c",  group = "Context/Code-Actions" },
-        { "<leader>ch", desc = "Toggle context header" },
-        { "<leader>ck", desc = "Jump to context" },
         { "<leader>d",  group = "Debug" },
         { "<leader>e",  group = "Error Lens/Explorer" },
-        { "<leader>el", desc = "Toggle Error Lens" },
-        { "<leader>ee", desc = "Enable Error Lens" },
-        { "<leader>ed", desc = "Disable Error Lens" },
-        { "<leader>er", desc = "Refresh Error Lens" },
-        { "<leader>en", desc = "Next diagnostic (with Error Lens)" },
-        { "<leader>ep", desc = "Previous diagnostic (with Error Lens)" },
+        { "<leader>b",  group = "Buffer" },
+        { "<leader>c",  group = "Context/Code-Actions" },
         { "<leader>f",  group = "File/Find" },
         { "<leader>g",  group = "Git/Goto" },
         { "<leader>h",  group = "Hunks/Git-Stage" },
-        { "<leader>i",  group = "Info/Implementations" },
         { "<leader>j",  group = "Jump" },
         { "<leader>k",  group = "Jump/Flash" },
         { "<leader>l",  group = "LSP" },
         { "<leader>m",  group = "Marks" },
-        { "<leader>n",  group = "Navigation" },
-        { "<leader>o",  group = "Overseer/Tasks" },
         { "<leader>p",  group = "Peek/Preview" },
         { "<leader>r",  group = "Rename/Refactor" },
-        { "<leader>s",  group = "Snacks/Split" },
-        { "<leader>t",  group = "Terminal/Tabs/Themes" },
-        { "<leader>tt", desc = "Select theme" },
+        { "<leader>s",  group = "Snacks" },
+        { "<leader>t",  group = "Toggles" },
         { "<leader>u",  group = "Test/Utils" },
         { "<leader>v",  group = "Visual/View" },
-        { "<leader>w",  group = "Workspace/Tabs" },
         { "<leader>x",  group = "Diagnostics/Trouble" },
         { "<leader>z",  group = "Fold" },
-        { "g",          group = "Goto" },
       })
     end,
     keys = {
@@ -1217,17 +1182,14 @@ return {
   -- Enhanced cursorword highlighting (cursorline disabled to avoid conflicts)
   {
     "ya2s/nvim-cursorline",
-    event = { "BufReadPre", "BufNewFile" },
     config = function()
       require('nvim-cursorline').setup({
         cursorline = {
-          -- Disable cursorline management to avoid conflicts with existing setup
-          enable = false,
-          timeout = 1000,
+          enable = true,
+          timeout = 0,
           number = false,
         },
         cursorword = {
-          -- Keep cursorword functionality for highlighting words under cursor
           enable = true,
           min_length = 3,
           hl = { underline = true },

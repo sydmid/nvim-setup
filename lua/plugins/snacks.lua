@@ -357,13 +357,6 @@ return {
       desc = "Highlights",
     },
     {
-      "<leader>ii",
-      function()
-        Snacks.picker.icons()
-      end,
-      desc = "Insert Icons",
-    },
-    {
       "<leader>sj",
       function()
         Snacks.picker.jumps()
@@ -567,15 +560,6 @@ return {
       end,
       desc = "Toggle Zoom",
     },
-    -- Error Lens/Explorer group (<leader>e) - Explorer
-    {
-      "<leader>ee",
-      function()
-        Snacks.explorer()
-      end,
-      desc = "File Explorer",
-    },
-
     -- Scratch operations (using consistent prefix)
     {
       "<leader>.",

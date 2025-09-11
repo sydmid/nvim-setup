@@ -39,6 +39,7 @@ return {
           "markdown",
           "markdown_inline",
           "c_sharp", -- C# syntax highlighting
+          "razor",
         },
         -- enable autotagging (w/ nvim-ts-autotag plugin)
         autotag = {

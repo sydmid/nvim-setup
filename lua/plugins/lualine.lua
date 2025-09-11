@@ -26,7 +26,7 @@ return {
 		custom_theme.insert.b.fg = "#cad3f5"
 		custom_theme.visual.b.fg = "#cad3f5"
 		custom_theme.replace.b.fg = "#cad3f5"
-		custom_theme.command.b.fg = "#cad3f5"
+		-- custom_theme.command.b.fg = "#cad3f5"
 		custom_theme.inactive.b.fg = "#cad3f5"
 
 		custom_theme.normal.c.fg = "#6e738d"

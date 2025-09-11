@@ -88,9 +88,6 @@ end, { desc = "Toggle terminal" })
 -- Improved redo
 map({ "n", "v" }, "U", "<C-r>", { desc = "Redo", silent = true })
 
--- Jump list navigation (fix Ctrl+i being overridden by Tab mapping)
-map("n", "<C-i>", "<C-i>", { desc = "Jump forward in jump list", silent = true })
-
 vim.keymap.set('n', '<C-Tab>', ':bnext<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<C-S-Tab>', ':bprevious<CR>', { noremap = true, silent = true })
 
@@ -469,7 +466,7 @@ end, { desc = "Close non-main buffers", silent = true })
 map({ "n", "v" }, "<D-m>", ":MaximizerToggle<CR>", { desc = "Toggle Maximize/minimize", silent = true })
 map("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
 map("i", "kj", "<ESC>", { desc = "Exit insert mode with kj" })
-map("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
+-- map("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
 -- map("n", "<esc>", ":noh<return><esc>", { desc = "Clear search highlight" })
 vim.keymap.set("n", "<Esc>", function()
   -- Get current buffer details
@@ -555,8 +552,10 @@ map(
 )
 
 -- File Explorer (NERDTree replacement)
-map({ "n", "t" }, "<D-s>", ":NvimTreeToggle<CR>", { desc = "Toggle file explorer", silent = true })
-map({ "n", "v" }, "<D-e>", ":NvimTreeFindFile<CR>", { desc = "Reveal current file in tree", silent = true })
+map({ "n", "v" }, "<D-s>", ":NvimTreeFindFileToggle<CR>", {
+  desc = "Toggle NvimTree and reveal current file",
+  silent = true,
+})
 
 -- Diagnostics with Telescope
 map({ "n", "t" }, "<D-6>", function()
@@ -867,9 +866,25 @@ vim.keymap.set("i", "<D-S-CR>", function()
 end, { expr = true, silent = true })
 
 -- Disable Shift+j and Shift+k in normal mode
-vim.keymap.set("n", "<S-j>", "<Nop>", { noremap = true, silent = true })
-vim.keymap.set("n", "<S-k>", "<Nop>", { noremap = true, silent = true })
+vim.keymap.set({ "n", "v" }, "<S-j>", "<Nop>", { noremap = true, silent = true })
+vim.keymap.set({ "n", "v" }, "<S-k>", "<Nop>", { noremap = true, silent = true })
 
--- If you also want to disable them in visual mode:
-vim.keymap.set("v", "<S-j>", "<Nop>", { noremap = true, silent = true })
-vim.keymap.set("v", "<S-k>", "<Nop>", { noremap = true, silent = true })
+-- Oil.nvim keymaps
+vim.keymap.set("n", "<BS>", "<CMD>Oil<CR>", { desc = "Open parent directory with Oil" })
+
+-- Open workspace root in Oil
+vim.keymap.set("n", "<S-BS>", function()
+  -- Use Neovim's LSP workspaceFolders or fallback to current working dir
+  local clients = vim.lsp.get_active_clients({ bufnr = 0 })
+  local root = nil
+  for _, client in ipairs(clients) do
+    if client.config.root_dir then
+      root = client.config.root_dir
+      break
+    end
+  end
+  if not root then
+    root = vim.fn.getcwd()
+  end
+  require("oil").open(root)
+end, { desc = "Open workspace root with Oil" })
