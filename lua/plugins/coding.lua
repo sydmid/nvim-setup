@@ -129,8 +129,9 @@ return {
         mapping = cmp.mapping.preset.insert({
           ["<D-i>"] = cmp.mapping.complete(), -- show completion suggestions
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
-          ["<Tab>"] = cmp.mapping.select_next_item(),
-          ["<S-Tab>"] = cmp.mapping.select_prev_item(),
+          ["<Tab>"] = cmp.mapping.confirm({ select = true }),
+          -- ["<Tab>"] = cmp.mapping.select_next_item(),
+          -- ["<S-Tab>"] = cmp.mapping.select_prev_item(),
         }),
         -- sources for autocompletion
         sources = cmp.config.sources({

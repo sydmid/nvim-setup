@@ -3,11 +3,30 @@ return {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
     dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
+      -- Automatically install LSPs and related tools to stdpath for Neovim
+      ---@diagnostic disable-next-line: missing-fields
+      { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
+      'williamboman/mason-lspconfig.nvim',
+      'WhoIsSethDaniel/mason-tool-installer.nvim',
+
+      -- Useful status updates for LSP.
+      -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
+      ---@diagnostic disable-next-line: missing-fields
+      { 'j-hui/fidget.nvim',       opts = {} },
+
+      -- Allows extra capabilities provided by nvim-cmp
+      'hrsh7th/cmp-nvim-lsp',
       { "folke/neodev.nvim", opts = {} },
-      "williamboman/mason-lspconfig.nvim",
       "glepnir/lspsaga.nvim",
-      "Hoffs/omnisharp-extended-lsp.nvim",
+    },
+    opts = {
+      setup = {
+        clangd = function(_, opts)
+          local clangd_ext_opts = LazyVim.opts 'clangd_extensions.nvim'
+          require('clangd_extensions').setup(vim.tbl_deep_extend('force', clangd_ext_opts or {}, { server = opts }))
+          return false
+        end,
+      },
     },
     config = function()
       -- Fix position_encoding warning
@@ -1166,5 +1185,36 @@ return {
         end,
       })
     end,
+  },
+  {
+    'p00f/clangd_extensions.nvim',
+    dependencies = { 'mortepau/codicons.nvim' },
+    lazy = true,
+    config = function() end,
+    opts = {
+      inlay_hints = {
+        inline = false,
+      },
+      ast = {
+        --These require codicons (https://github.com/microsoft/vscode-codicons)
+        role_icons = {
+          type = '',
+          declaration = '',
+          expression = '',
+          specifier = '',
+          statement = '',
+          ['template argument'] = '',
+        },
+        kind_icons = {
+          Compound = '',
+          Recovery = '',
+          TranslationUnit = '',
+          PackExpansion = '',
+          TemplateTypeParm = '',
+          TemplateTemplateParm = '',
+          TemplateParamObject = '',
+        },
+      },
+    },
   },
 }
