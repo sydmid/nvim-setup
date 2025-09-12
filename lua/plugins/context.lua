@@ -151,7 +151,7 @@ return {
         desc = "Jump to context (breadcrumb)"
       })
 
-      vim.keymap.set("n", "<leader>ch", function()
+      vim.keymap.set("n", "<leader>th", function()
         local tsc = require("treesitter-context")
 
         -- Store current state before toggling
@@ -205,7 +205,7 @@ return {
           )
         end, 50) -- Small delay to allow the toggle to complete
       end, {
-        desc = "Toggle treesitter context"
+        desc = "[t]oggle treesitter context [h]eader"
       })
     end,
   },

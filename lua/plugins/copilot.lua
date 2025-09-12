@@ -1034,6 +1034,7 @@ return {
 	-- Works alongside avante.nvim for comprehensive AI assistance
 	{
 		"zbirenbaum/copilot.lua",
+    enabled = false,
 		cmd = "Copilot",
 		event = "InsertEnter",
 		opts = {
