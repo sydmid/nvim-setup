@@ -67,9 +67,16 @@ return {
     {
       "<D-p>",
       function()
-        Snacks.picker.files()
+        local is_git = vim.fn.isdirectory(".git") == 1
+            or vim.fn.system("git rev-parse --is-inside-work-tree 2>/dev/null") == "true\n"
+
+        if is_git then
+          Snacks.picker.git_files()
+        else
+          Snacks.picker.files()
+        end
       end,
-      desc = "Find Files",
+      desc = "Smart File Picker (git-aware)",
     },
     {
       "<leader>fg",
@@ -79,13 +86,6 @@ return {
       desc = "Find Git Files",
     },
     {
-      "<D-P>",
-      function()
-        Snacks.picker.recent()
-      end,
-      desc = "Recent Files",
-    },
-    {
       "<leader>fc",
       function()
         Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
@@ -93,7 +93,7 @@ return {
       desc = "Find Config File",
     },
     {
-      "<leader>fp",
+      "<D-P>",
       function()
         Snacks.picker.projects()
       end,
@@ -110,8 +110,22 @@ return {
                 ["<c-d>"] = { "bufdelete", mode = { "n", "i" } },
               },
             },
-            list = { keys = { ["dd"] = "bufdelete" } },
+            list = {
+              keys = {
+                ["dd"] = "bufdelete",
+              },
+            },
           },
+          on_show = function(picker)
+            -- force normal mode right after opening
+            vim.schedule(function()
+              vim.api.nvim_feedkeys(
+                vim.api.nvim_replace_termcodes("<Esc>", true, false, true),
+                "n",
+                false
+              )
+            end)
+          end,
         })
       end,
       desc = "Open Buffers",
@@ -279,19 +293,31 @@ return {
       desc = "Set Global Mark",
     },
     {
-      "<leader>st",
+      "<D-S-f>",
+        function()
+        Snacks.picker.grep_word({
+          on_show = function(picker)
+            -- force normal mode right after opening
+            vim.schedule(function()
+              vim.api.nvim_feedkeys(
+                vim.api.nvim_replace_termcodes("<Esc>", true, false, true),
+                "n",
+                false
+              )
+            end)
+          end,
+        })
+      end,
+      desc = "Grep Text",
+      mode = { "x" },
+    },
+    {
+      "<D-S-f>",
       function()
         Snacks.picker.grep()
       end,
-      desc = "Grep Text",
-    },
-    {
-      "<leader>sw",
-      function()
-        Snacks.picker.grep_word()
-      end,
       desc = "Visual selection or word",
-      mode = { "n", "x" },
+      mode = { "n" },
     },
     {
       "<leader>sb",

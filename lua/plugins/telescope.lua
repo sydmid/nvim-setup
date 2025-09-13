@@ -235,18 +235,18 @@ return {
       end
 
       -- Separate normal and visual mode mappings for D-S-f
-      local multi_ripgrep = require("helpers.multi-ripgrep")
-      vim.keymap.set("n", "<D-S-f>", multi_ripgrep,
-        { desc = "search word under cursor in current file", silent = true })
+      -- local multi_ripgrep = require("helpers.multi-ripgrep")
+      -- vim.keymap.set("n", "<D-S-f>", multi_ripgrep,
+      --   { desc = "search word under cursor in current file", silent = true })
 
-      vim.keymap.set("v", "<D-S-f>", function()
-        -- Yank the selected text to the unnamed register
-        vim.cmd("normal! y")
-        -- Get the yanked text
-        local selected_text = vim.fn.getreg('"')
-        -- No need to escape special characters since we're using literal search
-        pcall(multi_ripgrep, { default_text = selected_text, initial_mode = "normal" })
-      end, { desc = "telescope find selected text in all files (literal search)", silent = true })
+      -- vim.keymap.set("v", "<D-S-f>", function()
+      --   -- Yank the selected text to the unnamed register
+      --   vim.cmd("normal! y")
+      --   -- Get the yanked text
+      --   local selected_text = vim.fn.getreg('"')
+      --   -- No need to escape special characters since we're using literal search
+      --   pcall(multi_ripgrep, { default_text = selected_text, initial_mode = "normal" })
+      -- end, { desc = "telescope find selected text in all files (literal search)", silent = true })
 
       -- Enhanced search function that searches for word under cursor
       local function search_word_under_cursor()
