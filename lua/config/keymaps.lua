@@ -221,6 +221,9 @@ map("i", ">>", "<ESC>la => <ESC>i", { desc = "Add arrow function", silent = true
 map("v", "<", "<gv", { desc = "Indent left and keep selection", silent = true })
 map("v", ">", ">gv", { desc = "Indent right and keep selection", silent = true })
 
+-- Prevent yanked text being overwritten when pasting
+vim.keymap.set("v", "p", '"_dP', { noremap = true })
+
 -- Examples of non-main filetypes
 local ignored_filetypes = {
   "NvimTree",
