@@ -39,6 +39,11 @@ return {
     },
     picker = {
       enabled = true,
+      exclude = { -- add folder names here to exclude
+        ".DS_STORE",
+        "node_modules",
+        "*.meta",
+      },
       sources = {
         files = { hidden = true },
       },
@@ -70,16 +75,25 @@ return {
         local is_git = vim.fn.isdirectory(".git") == 1
             or vim.fn.system("git rev-parse --is-inside-work-tree 2>/dev/null") == "true\n"
 
-        if is_git then
-          Snacks.picker.git_files()
-        else
-          Snacks.picker.files()
-        end
+        -- if is_git then
+        --   Snacks.picker.git_files()
+        -- else
+        --   Snacks.picker.files()
+        -- end
+        Snacks.picker.files({
+          exclude = {   -- add folder names here to exclude
+            ".git",
+            "node_modules",
+            ".DS_STORE",
+            "*.meta",
+          },
+          ignored = false,
+        })
       end,
       desc = "Smart File Picker (git-aware)",
     },
     {
-      "<leader>fg",
+      "<leader>gf",
       function()
         Snacks.picker.git_files()
       end,
@@ -194,20 +208,23 @@ return {
         Snacks.picker.marks({
           global = false,
           ["local"] = true,
+          -- filter only a-z and A-Z marks
+          filter = function(mark)
+            return mark.mark:match("^[a-zA-Z]$")
+          end,
         })
       end,
       desc = "List All Local Marks",
-    },
-    {
-      "<leader>fM",
-      function()
-        Snacks.picker.marks({
-          global = true,
-          ["local"] = false,
-        })
-      end,
-      desc = "List All Global Marks",
-    },
+    }, {
+    "<leader>fM",
+    function()
+      Snacks.picker.marks({
+        global = true,
+        ["local"] = false,
+      })
+    end,
+    desc = "List All Global Marks",
+  },
     {
       "<leader>mj",
       function()
@@ -294,7 +311,7 @@ return {
     },
     {
       "<D-S-f>",
-        function()
+      function()
         Snacks.picker.grep_word({
           on_show = function(picker)
             -- force normal mode right after opening
@@ -468,13 +485,13 @@ return {
       end,
       desc = "Git Log Line",
     },
-    {
-      "<leader>gs",
-      function()
-        Snacks.picker.git_status()
-      end,
-      desc = "Git Status",
-    },
+    -- {
+    --   "<leader>gs",
+    --   function()
+    --     Snacks.picker.git_status()
+    --   end,
+    --   desc = "Git Status",
+    -- },
     {
       "<leader>gS",
       function()
@@ -489,13 +506,13 @@ return {
       end,
       desc = "Git Diff (Hunks)",
     },
-    {
-      "<leader>gf",
-      function()
-        Snacks.picker.git_log_file()
-      end,
-      desc = "Git Log File",
-    },
+    -- {
+    --   "<leader>gf",
+    --   function()
+    --     Snacks.picker.git_log_file()
+    --   end,
+    --   desc = "Git Log File",
+    -- },
     {
       "<leader>gB",
       function()

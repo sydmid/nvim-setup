@@ -129,10 +129,24 @@ return {
         view_options = {
           show_hidden = false,
           is_always_hidden = function(name, _)
+            -- folders/files you already skip
             local folder_skip = { "dev-tools.locks", "dune.lock", "_build" }
-            return vim.tbl_contains(folder_skip, name)
-          end,
-        },
+            if vim.tbl_contains(folder_skip, name) then
+              return true
+            end
+
+            -- Always hide .DS_Store
+            if name == ".DS_Store" then
+              return true
+            end
+
+            -- Always hide files ending with .meta
+            if name:match("%.meta$") then
+              return true
+            end
+
+            return false
+          end, },
       }
 
       -- Set custom highlight for directories (folders)

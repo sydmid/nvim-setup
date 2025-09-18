@@ -130,7 +130,7 @@ return {
 			})
 
 			-- Fugitive keymaps for comprehensive Git workflow
-			vim.keymap.set("n", "<leader>gs", "<cmd>Git<cr>", { desc = "Git status " })
+			-- vim.keymap.set("n", "<leader>gs", "<cmd>Git<cr>", { desc = "Git status " })
 
 			-- Git commit with enhanced workflow
 			vim.keymap.set("n", "<leader>gC", function()
@@ -333,7 +333,7 @@ return {
 			end, { desc = "Git stashes (Telescope)" })
 
 			-- Enhanced git status files picker with fugitive backend
-			vim.keymap.set("n", "<leader>gf", function()
+			vim.keymap.set("n", "<leader>fg", function()
 				-- Get current project root for scoping
 				local cwd = vim.fn.getcwd()
 				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
@@ -350,7 +350,7 @@ return {
 					prompt_title = "󰊢  Changed Files - " .. vim.fn.fnamemodify(project_root, ":t"),
 					initial_mode = "normal",
 					theme = "ivy",
-					layout_config = { height = 0.6 },
+					layout_config = { height = 0.9 },
 					cwd = project_root,
 					attach_mappings = function(prompt_bufnr, map)
 						local actions = require("telescope.actions")
@@ -366,7 +366,7 @@ return {
 						end)
 
 						-- Ctrl+S to stage file using fugitive
-						map("i", "<C-s>", function()
+						map("n", "<C-s>", function()
 							local selection = action_state.get_selected_entry()
 							if selection then
 								vim.cmd("Git add " .. selection.value)
@@ -384,7 +384,7 @@ return {
 						end)
 
 						-- Ctrl+U to unstage file using fugitive
-						map("i", "<C-u>", function()
+						map("n", "<C-u>", function()
 							local selection = action_state.get_selected_entry()
 							if selection then
 								vim.cmd("Git reset HEAD " .. selection.value)
@@ -402,7 +402,7 @@ return {
 						end)
 
 						-- Ctrl+D to diff file using fugitive
-						map("i", "<C-d>", function()
+						map("n", "<C-d>", function()
 							local selection = action_state.get_selected_entry()
 							if selection then
 								actions.close(prompt_bufnr)
@@ -436,7 +436,7 @@ return {
 						return true
 					end,
 				})
-			end, { desc = "Git status files " })
+			end, { desc = "Git changed files " })
 
 			-- Quick stash creation
 			vim.keymap.set("n", "<leader>gt", function()

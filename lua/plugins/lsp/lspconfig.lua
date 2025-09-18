@@ -566,19 +566,15 @@ return {
           -- 	vim.defer_fn(auto_signature_help, 100)
           -- end, { buffer = ev.buf, desc = "Auto-trigger signature help", silent = true })
 
-          -- Enhanced hover with beautiful styling and proper persistence
           keymap("n", "<D-i>", function()
-            -- Get LSP clients for current buffer
             local clients = vim.lsp.get_clients({ bufnr = 0 })
             if #clients == 0 then
               vim.notify("No LSP client attached to current buffer", vim.log.levels.WARN)
               return
             end
 
-            -- Use vim.lsp.buf.hover with enhanced configuration
             local params = vim.lsp.util.make_position_params()
 
-            -- Create custom hover handler with enhanced styling and proper focus management
             local function enhanced_hover_handler(err, result, ctx, config)
               if err then
                 vim.notify("LSP hover error: " .. tostring(err), vim.log.levels.ERROR)
@@ -588,6 +584,37 @@ return {
               if not result or not result.contents then
                 vim.notify("No hover information available", vim.log.levels.INFO)
                 return
+              end
+
+              -- 🔧 Normalize the hover text so it renders clean
+              local function normalize_hover(contents)
+                local text = ""
+                if type(contents) == "string" then
+                  text = contents
+                elseif vim.tbl_islist(contents) then
+                  for _, v in ipairs(contents) do
+                    if type(v) == "string" then
+                      text = text .. v .. "\n"
+                    elseif type(v) == "table" and v.value then
+                      text = text .. v.value .. "\n"
+                    end
+                  end
+                elseif type(contents) == "table" and contents.value then
+                  text = contents.value
+                end
+
+                return {
+                  kind = "markdown",
+                  value = text
+                      :gsub("\\%.", ".")   -- unescape dots
+                      :gsub("\\%-", "-")   -- unescape -
+                      :gsub("\\%(", "`(") --
+                      :gsub("\\%)", ")`") --
+                      :gsub("\\%*", "*") --
+                      :gsub("&nbsp;", " ") -- fix spaces
+                      :gsub("\\_", "_")    -- unescape underscores
+                      :gsub("\\`", "`"),   -- unescape backticks
+                }
               end
 
               -- Enhanced window configuration with proper focus management
@@ -600,30 +627,33 @@ return {
                 wrap = true,
                 title = " Documentation ",
                 title_pos = "center",
-                close_events = { "BufHidden" }, -- Only close on buffer change, not cursor movement
+                close_events = { "BufHidden" },
               })
+              local bufnr = {}
+              local winnr = {}
+              for _, client in ipairs(clients) do
+                if client.name == "roslyn" or client.name == "gopls" then
+                  local cleaned = normalize_hover(result.contents)
+                  local new_result = { contents = cleaned }
+                  -- Use default hover handler, but with cleaned contents
+                  bufnr, winnr = vim.lsp.handlers["textDocument/hover"](err, new_result, ctx, opts)
+                else
+                  bufnr, winnr = vim.lsp.handlers["textDocument/hover"](err, result, ctx, opts)
+                end
+              end
 
-              -- Call the default hover handler with our custom styling
-              local bufnr, winnr = vim.lsp.handlers["textDocument/hover"](err, result, ctx, opts)
-
-              -- Ensure the hover window is focusable and can be navigated
               if winnr and vim.api.nvim_win_is_valid(winnr) then
-                -- Set up keymaps for the hover window to allow focusing
                 vim.defer_fn(function()
                   if vim.api.nvim_win_is_valid(winnr) then
-                    -- Store the original buffer to set up Tab mapping
                     local original_buf = vim.api.nvim_get_current_buf()
 
-                    -- Allow focusing the hover window with Tab
                     vim.keymap.set('n', '<Tab>', function()
                       if vim.api.nvim_win_is_valid(winnr) then
                         vim.api.nvim_set_current_win(winnr)
                       end
                     end, { buffer = original_buf, desc = "Focus hover window", nowait = true })
 
-                    -- Set up keymaps within the hover window for navigation
                     if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
-                      -- High priority ESC mapping for the hover buffer
                       vim.keymap.set('n', '<Esc>', function()
                         if vim.api.nvim_win_is_valid(winnr) then
                           vim.api.nvim_win_close(winnr, true)
@@ -636,7 +666,6 @@ return {
                         end
                       end, { buffer = bufnr, nowait = true, silent = true })
 
-                      -- Allow scrolling within the hover window
                       vim.keymap.set('n', 'j', function()
                         if vim.api.nvim_win_is_valid(winnr) then
                           vim.api.nvim_win_call(winnr, function()
@@ -653,22 +682,18 @@ return {
                         end
                       end, { buffer = bufnr, nowait = true, silent = true })
 
-                      -- Additional ESC mapping for the original buffer when hover is open
                       vim.keymap.set('n', '<Esc>', function()
                         if vim.api.nvim_win_is_valid(winnr) then
                           vim.api.nvim_win_close(winnr, true)
                           return
                         end
-                        -- If hover window is not valid, let the default ESC behavior run
                         vim.cmd("nohlsearch")
                       end, { buffer = original_buf, nowait = true, silent = true })
 
-                      -- Clean up the extra ESC mapping when hover window closes
                       vim.api.nvim_create_autocmd("WinClosed", {
                         pattern = tostring(winnr),
                         once = true,
                         callback = function()
-                          -- Remove the temporary ESC mapping from original buffer
                           pcall(vim.keymap.del, 'n', '<Esc>', { buffer = original_buf })
                         end,
                       })
@@ -676,14 +701,12 @@ return {
                   end
                 end, 10)
 
-                -- Additional safety: Create an autocmd to ensure ESC works
                 local group = vim.api.nvim_create_augroup("LspHoverEscClose_" .. winnr, { clear = true })
                 vim.api.nvim_create_autocmd("WinEnter", {
                   group = group,
                   callback = function()
                     local current_win = vim.api.nvim_get_current_win()
                     if current_win == winnr and vim.api.nvim_win_is_valid(winnr) then
-                      -- Ensure ESC mapping is present when entering hover window
                       vim.keymap.set('n', '<Esc>', function()
                         if vim.api.nvim_win_is_valid(winnr) then
                           vim.api.nvim_win_close(winnr, true)
@@ -693,7 +716,6 @@ return {
                   end,
                 })
 
-                -- Clean up the autocmd when window closes
                 vim.api.nvim_create_autocmd("WinClosed", {
                   pattern = tostring(winnr),
                   once = true,
@@ -704,10 +726,8 @@ return {
               end
             end
 
-            -- Make the hover request with our enhanced handler
             vim.lsp.buf_request(0, 'textDocument/hover', params, enhanced_hover_handler)
           end, { buffer = ev.buf, desc = "Show documentation (Enhanced & Focusable)", silent = true })
-
           -- Additional useful Lspsaga keymaps
           keymap("n", "<leader>ca", "<cmd>Lspsaga code_action<CR>",
             { buffer = ev.buf, desc = "Code actions (Lspsaga)" })
