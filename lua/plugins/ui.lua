@@ -1030,70 +1030,157 @@ return {
       vim.g.highlightedyank_highlight_duration = 200
     end,
   },
-  -- Features: Cursor position, Search results, Diagnostics, Git hunks, Marks, Quickfix
+  -- nvim-scrollbar
   {
-    "lewis6991/satellite.nvim",
-    event = "VeryLazy",
-    dependencies = { "lewis6991/gitsigns.nvim" }, -- For git hunks display
+    "petertriho/nvim-scrollbar",
     config = function()
-      require("satellite").setup({
-        current_only = false, -- Show scrollbars for all windows
-        winblend = 40,        -- Slight transparency for better integration
-        zindex = 40,          -- Layer ordering
-        excluded_filetypes = {
-          "dashboard",        -- Exclude dashboard
-          "alpha",            -- Exclude alpha dashboard
-          "TelescopePrompt",  -- Exclude Telescope
-          "TelescopeResults",
-          "TelescopePreview",
-          "mason",      -- Exclude Mason
-          "lazy",       -- Exclude Lazy plugin manager
-          "help",       -- Exclude help windows
-          "Outline",    -- Exclude symbols outline
-          "NvimTree",   -- Exclude file explorer
-          "neo-tree",   -- Exclude neo-tree
-          "terminal",   -- Exclude terminal
-          "toggleterm", -- Exclude toggleterm
-          "notify",     -- Exclude notifications
-          "noice",      -- Exclude noice popups
+      require("scrollbar").setup({
+        show = true,
+        show_in_active_only = false,
+        set_highlights = true,
+        folds = 1000,                -- handle folds, set to number to disable folds if no. of lines in buffer exceeds this
+        max_lines = false,           -- disables if no. of lines in buffer exceeds this
+        hide_if_all_visible = false, -- Hides everything if all lines are visible
+        throttle_ms = 100,
+        handle = {
+          text = " ",
+          blend = 30,                 -- Integer between 0 and 100. 0 for fully opaque and 100 to full transparent. Defaults to 30.
+          color = nil,
+          color_nr = nil,             -- cterm
+          highlight = "CursorColumn",
+          hide_if_all_visible = true, -- Hides handle if all lines are visible
         },
-        width = 2,      -- Scrollbar width
+        marks = {
+          Cursor = {
+            text = "•",
+            priority = 0,
+            gui = nil,
+            color = nil,
+            cterm = nil,
+            color_nr = nil, -- cterm
+            highlight = "Normal",
+          },
+          Search = {
+            text = { "-", "=" },
+            priority = 1,
+            gui = nil,
+            color = nil,
+            cterm = nil,
+            color_nr = nil, -- cterm
+            highlight = "Search",
+          },
+          Error = {
+            text = { "-", "=" },
+            priority = 2,
+            gui = nil,
+            color = nil,
+            cterm = nil,
+            color_nr = nil, -- cterm
+            highlight = "DiagnosticVirtualTextError",
+          },
+          Warn = {
+            text = { "-", "=" },
+            priority = 3,
+            gui = nil,
+            color = nil,
+            cterm = nil,
+            color_nr = nil, -- cterm
+            highlight = "DiagnosticVirtualTextWarn",
+          },
+          Info = {
+            text = { "-", "=" },
+            priority = 4,
+            gui = nil,
+            color = nil,
+            cterm = nil,
+            color_nr = nil, -- cterm
+            highlight = "DiagnosticVirtualTextInfo",
+          },
+          Hint = {
+            text = { "-", "=" },
+            priority = 5,
+            gui = nil,
+            color = nil,
+            cterm = nil,
+            color_nr = nil, -- cterm
+            highlight = "DiagnosticVirtualTextHint",
+          },
+          Misc = {
+            text = { "-", "=" },
+            priority = 6,
+            gui = nil,
+            color = nil,
+            cterm = nil,
+            color_nr = nil, -- cterm
+            highlight = "Normal",
+          },
+          GitAdd = {
+            text = "┆",
+            priority = 7,
+            gui = nil,
+            color = nil,
+            cterm = nil,
+            color_nr = nil, -- cterm
+            highlight = "GitSignsAdd",
+          },
+          GitChange = {
+            text = "┆",
+            priority = 7,
+            gui = nil,
+            color = nil,
+            cterm = nil,
+            color_nr = nil, -- cterm
+            highlight = "GitSignsChange",
+          },
+          GitDelete = {
+            text = "▁",
+            priority = 7,
+            gui = nil,
+            color = nil,
+            cterm = nil,
+            color_nr = nil, -- cterm
+            highlight = "GitSignsDelete",
+          },
+        },
+        excluded_buftypes = {
+          "terminal",
+        },
+        excluded_filetypes = {
+          "blink-cmp-menu",
+          "dropbar_menu",
+          "dropbar_menu_fzf",
+          "DressingInput",
+          "cmp_docs",
+          "cmp_menu",
+          "noice",
+          "prompt",
+          "TelescopePrompt",
+        },
+        autocmd = {
+          render = {
+            "BufWinEnter",
+            "TabEnter",
+            "TermEnter",
+            "WinEnter",
+            "CmdwinLeave",
+            "TextChanged",
+            "VimResized",
+            "WinScrolled",
+          },
+          clear = {
+            "BufWinLeave",
+            "TabLeave",
+            "TermLeave",
+            "WinLeave",
+          },
+        },
         handlers = {
-          cursor = {
-            enable = true,
-            -- Unicode block characters for smooth cursor indication
-            symbols = { "⎺", "⎻", "⎼", "⎽" },
-            -- Alternative minimal symbols: symbols = { "⎻", "⎼" },
-          },
-          search = {
-            enable = true,
-            -- Uses SatelliteSearch and SatelliteSearchCurrent highlights
-          },
-          diagnostic = {
-            enable = true,
-            -- Different symbols for different diagnostic severities
-            -- signs = { "-", "=", "≡" },
-            min_severity = vim.diagnostic.severity.ERROR,
-            -- Shows all diagnostic levels including hints
-          },
-          gitsigns = {
-            enable = true,
-            signs = {
-              add = "+",    -- Git addition indicator
-              change = "~", -- Git change indicator
-              delete = "-", -- Git deletion indicator
-            },
-            -- Uses SatelliteGitSignsAdd, SatelliteGitSignsChange, SatelliteGitSignsDelete
-          },
-          marks = {
-            enable = true,
-            show_builtins = false, -- Hide builtin marks like [ ] < >
-            key = "m",             -- Key for setting marks
-            -- Uses SatelliteMark highlight
-          },
-          quickfix = {
-            enable = false,
-          },
+          cursor = true,
+          diagnostic = true,
+          gitsigns = false, -- Requires gitsigns
+          handle = true,
+          search = false,   -- Requires hlslens
+          ale = false,      -- Requires ALE
         },
       })
     end,
