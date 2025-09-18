@@ -142,7 +142,7 @@ return {
           dotfiles = false, -- don't show dotfiles unless toggled
           custom = {
             ".DS_Store",    -- file
-            ".gitignore",    -- file
+            ".gitignore",   -- file
             "._build",      -- folder
             "*.meta",       -- file pattern
           },
@@ -496,6 +496,7 @@ return {
       { "<leader>xt", "<cmd>Trouble todo toggle<CR>",        desc = "Open todos in trouble" },
     },
   },
+  -- TODO Comments
   {
     "folke/todo-comments.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
@@ -564,6 +565,7 @@ return {
       },
     }
   },
+  -- Render Markdown
   {
     'MeanderingProgrammer/render-markdown.nvim',
     dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
@@ -573,7 +575,9 @@ return {
     ---@type render.md.UserConfig
     opts = {},
   }
+  -- vim cool
   , { "romainl/vim-cool" }
+-- modes nvim
 , {
   'mvllow/modes.nvim',
   config = function()
@@ -640,6 +644,7 @@ return {
     },
   }
   },
+  -- outline
   {
     'hedyhli/outline.nvim',
     enabled = true,
@@ -693,5 +698,45 @@ return {
         },
       }
     end,
+  },
+  -- origami
+  {
+    "chrisgrieser/nvim-origami",
+    event = "VeryLazy",
+    opts = {}, -- needed even when using default config
+
+    -- recommended: disable vim's auto-folding
+    init = function()
+      vim.opt.foldlevel = 99
+      vim.opt.foldlevelstart = 99
+    end,
+  },
+  -- sesible
+  {
+    "tpope/vim-sensible"
+  },
+  {
+    "rmagatti/auto-session",
+    lazy = false,
+
+    ---enables autocomplete for opts
+    ---@module "auto-session"
+    ---@type AutoSession.Config
+    opts = {
+      log_level = "error",
+      -- Saving / restoring
+      auto_save = true,
+      cwd_change_handling = true,
+      -- Filtering
+      suppressed_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
+      allowed_dirs = nil,                       -- Allow session restore/create in certain directories
+      auto_session_enable_last_session = true,
+      pre_save_cmds = { "silent! normal! zx" }, -- optional: recompute folds
+      session_lens = {
+        -- optional
+      },
+      session_options = { "buffers", "curdir", "folds", "winsize" } -- <--- important
+      -- log_level = 'debug',
+    },
   },
 }

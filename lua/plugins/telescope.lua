@@ -12,11 +12,13 @@ return {
         "nvim-telescope/telescope-frecency.nvim",
         dependencies = { "kkharji/sqlite.lua" },
       },
+      { "jvgrootveld/telescope-zoxide" }
     },
     config = function()
       local telescope = require("telescope")
       local actions = require("telescope.actions")
       local transform_mod = require("telescope.actions.mt").transform_mod
+      local z_utils = require("telescope._extensions.zoxide.utils")
 
       local trouble = require("trouble")
       local trouble_telescope = require("trouble.sources.telescope")
@@ -78,12 +80,46 @@ return {
               borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
             }),
           },
+          zoxide = {
+            prompt_title = "[ Zoxide List ]",
+            -- Zoxide list command with score
+            list_command = "zoxide query -ls",
+            mappings = {
+              default = {
+                action = function(selection)
+                  vim.cmd.cd(selection.path)
+                end,
+                after_action = function(selection)
+                  vim.notify("Directory changed to " .. selection.path)
+                end,
+              },
+              ["<CR>"] = { action = z_utils.create_basic_command("edit") },
+              ["<C-s>"] = { action = z_utils.create_basic_command("split") },
+              ["<C-v>"] = { action = z_utils.create_basic_command("vsplit") },
+              -- ["<C-e>"] = { action = z_utils.create_basic_command("edit") },
+              ["<C-f>"] = {
+                keepinsert = true,
+                action = function(selection)
+                  builtin.find_files({ cwd = selection.path })
+                end,
+              },
+              ["<C-t>"] = {
+                action = function(selection)
+                  vim.cmd.tcd(selection.path)
+                end,
+              },
+            }
+          }
         },
       })
 
       telescope.load_extension("fzf")
       telescope.load_extension("frecency")
       telescope.load_extension("ui-select")
+      telescope.load_extension("zoxide")
+
+      -- Add a mapping
+      vim.keymap.set("n", "<leader>cd", telescope.extensions.zoxide.list)
 
       -- Load todo-comments telescope extension if available
       local has_todo_comments = pcall(require, "todo-comments")
@@ -312,7 +348,8 @@ return {
           builtin.live_grep({
             prompt_title = "🔍 Find TODOs",
             -- Using the exact pattern from your todo-comments config
-            default_text = "\\b(FIX|FIXME|BUG|FIXIT|ISSUE|TODO|HACK|WARN|WARNING|XXX|PERF|OPTIM|PERFORMANCE|OPTIMIZE|NOTE|INFO|TEST|TESTING|PASSED|FAILED):",
+            default_text =
+            "\\b(FIX|FIXME|BUG|FIXIT|ISSUE|TODO|HACK|WARN|WARNING|XXX|PERF|OPTIM|PERFORMANCE|OPTIMIZE|NOTE|INFO|TEST|TESTING|PASSED|FAILED):",
             additional_args = { "--regex" },
             attach_mappings = function(prompt_bufnr, map_func)
               local actions = require("telescope.actions")
@@ -329,6 +366,7 @@ return {
       keymap.set("n", "<leader>fj", telescope_with_esc(builtin.jumplist, { initial_mode = "normal" }),
         { desc = "Find jumps" })
       keymap.set("n", "<leader>fc", telescope_with_esc(builtin.command_history), { desc = "Find command history" })
+      keymap.set("n", "<leader>cd", require("telescope").extensions.zoxide.list, { desc = "cd using zoxide" })
 
       -- Enable line numbers in telescope preview windows
       vim.api.nvim_create_autocmd("User", {
