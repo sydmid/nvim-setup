@@ -608,9 +608,11 @@ return {
                   value = text
                       :gsub("\\%.", ".")   -- unescape dots
                       :gsub("\\%-", "-")   -- unescape -
-                      :gsub("\\%(", "`(") --
-                      :gsub("\\%)", ")`") --
-                      :gsub("\\%*", "*") --
+                      :gsub("\\%(", "(")  --
+                      :gsub("\\%[", "[")  --
+                      :gsub("\\%)", ")")  --
+                      :gsub("\\%]", "]")  --
+                      :gsub("\\%*", "*")   --
                       :gsub("&nbsp;", " ") -- fix spaces
                       :gsub("\\_", "_")    -- unescape underscores
                       :gsub("\\`", "`"),   -- unescape backticks
