@@ -901,6 +901,7 @@ return {
       },
     },
   },
+  -- Zellij Navigation
   {
     "swaits/zellij-nav.nvim",
     lazy = true,
@@ -1215,6 +1216,7 @@ return {
   {
     "nanozuki/tabby.nvim",
     event = "VimEnter",
+    enabled = false,
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       local theme = {
