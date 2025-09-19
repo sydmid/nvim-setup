@@ -664,7 +664,7 @@ return {
         },
         keymaps = {
           -- override the mapping for Tab for resolving the conflict with default behaviour of it
-          fold_toggle = "<C-n>", 
+          fold_toggle = "<C-n>",
         },
       }
     end,
@@ -701,7 +701,7 @@ return {
       -- Filtering
       suppressed_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
       allowed_dirs = nil,                       -- Allow session restore/create in certain directories
-      auto_session_enable_last_session = true,
+      auto_session_enable_last_session = false,
       pre_save_cmds = { "silent! normal! zx" }, -- optional: recompute folds
       session_lens = {
         -- optional
@@ -710,4 +710,10 @@ return {
       -- log_level = 'debug',
     },
   },
+  -- marks
+  {
+    "chentoast/marks.nvim",
+    event = "VeryLazy",
+    opts = {},
+  }
 }

@@ -151,164 +151,6 @@ return {
       end,
       desc = "Delete Buffer",
     },
-
-    -- Bookmarks group (<leader>m) - Marks and bookmarks functionality
-    {
-      "<leader>mm",
-      function()
-        -- Smart mark toggle - uses next available local mark or toggles existing mark
-        local function toggle_smart_mark()
-          local marks = vim.fn.getmarklist('%')
-          local used_marks = {}
-          local current_line = vim.fn.line('.')
-          local existing_mark_on_line = nil
-
-          -- Get currently used local marks in this buffer and check for mark on current line
-          for _, mark in ipairs(marks) do
-            if mark.mark:match("^'[a-z]$") then
-              local mark_char = mark.mark:sub(2)
-              used_marks[mark_char] = true
-
-              -- Check if there's already a mark on the current line
-              if mark.pos and mark.pos[2] == current_line then
-                existing_mark_on_line = mark_char
-              end
-            end
-          end
-
-          -- If there's already a mark on the current line, remove it (toggle off)
-          if existing_mark_on_line then
-            vim.cmd('delmarks ' .. existing_mark_on_line)
-            vim.notify("🗑️ Removed mark '" .. existing_mark_on_line .. "' from line " .. current_line,
-              vim.log.levels.INFO)
-            return
-          end
-
-          -- Find first available mark a-z
-          for i = string.byte('a'), string.byte('z') do
-            local char = string.char(i)
-            if not used_marks[char] then
-              vim.cmd('normal! m' .. char)
-              vim.notify("📌 Set mark '" .. char .. "' at line " .. current_line, vim.log.levels.INFO)
-              return
-            end
-          end
-
-          -- If all marks are used, reuse 'a'
-          vim.cmd('normal! ma')
-          vim.notify("📌 Set mark 'a' at line " .. current_line .. " (reused)", vim.log.levels.INFO)
-        end
-        toggle_smart_mark()
-      end,
-      desc = "Smart Mark Toggle",
-    },
-    {
-      "<leader>fm",
-      function()
-        Snacks.picker.marks({
-          global = false,
-          ["local"] = true,
-          -- filter only a-z and A-Z marks
-          filter = function(mark)
-            return mark.mark:match("^[a-zA-Z]$")
-          end,
-        })
-      end,
-      desc = "List All Local Marks",
-    }, {
-    "<leader>fM",
-    function()
-      Snacks.picker.marks({
-        global = true,
-        ["local"] = false,
-      })
-    end,
-    desc = "List All Global Marks",
-  },
-    {
-      "<leader>mj",
-      function()
-        -- Next mark navigation
-        local marks = vim.fn.getmarklist('%')
-        local current_line = vim.fn.line('.')
-        local next_mark = nil
-        local next_line = math.huge
-
-        for _, mark in ipairs(marks) do
-          if mark.mark:match("^'[a-zA-Z]$") and mark.pos[2] > current_line and mark.pos[2] < next_line then
-            next_mark = mark
-            next_line = mark.pos[2]
-          end
-        end
-
-        if next_mark then
-          vim.cmd('normal! ' .. next_mark.mark)
-          vim.notify("📍 Jumped to mark " .. next_mark.mark:sub(2), vim.log.levels.INFO)
-        else
-          vim.notify("📍 No marks found after current line", vim.log.levels.WARN)
-        end
-      end,
-      desc = "Next Mark",
-    },
-    {
-      "<leader>mk",
-      function()
-        -- Previous mark navigation
-        local marks = vim.fn.getmarklist('%')
-        local current_line = vim.fn.line('.')
-        local prev_mark = nil
-        local prev_line = 0
-
-        for _, mark in ipairs(marks) do
-          if mark.mark:match("^'[a-zA-Z]$") and mark.pos[2] < current_line and mark.pos[2] > prev_line then
-            prev_mark = mark
-            prev_line = mark.pos[2]
-          end
-        end
-
-        if prev_mark then
-          vim.cmd('normal! ' .. prev_mark.mark)
-          vim.notify("📍 Jumped to mark " .. prev_mark.mark:sub(2), vim.log.levels.INFO)
-        else
-          vim.notify("📍 No marks found before current line", vim.log.levels.WARN)
-        end
-      end,
-      desc = "Previous Mark",
-    },
-    {
-      "<leader>mc",
-      function()
-        -- Clear all marks in current buffer
-        vim.cmd('delmarks!')
-        vim.notify("🗑️ Cleared all marks in current buffer", vim.log.levels.INFO)
-      end,
-      desc = "Clear Buffer Marks",
-    },
-    {
-      "<leader>mC",
-      function()
-        -- Clear all global marks
-        vim.cmd('delmarks A-Z')
-        vim.notify("🗑️ Cleared all global marks", vim.log.levels.INFO)
-      end,
-      desc = "Clear Global Marks",
-    },
-    {
-      "<leader>ma",
-      function()
-        -- Set global mark with input
-        vim.ui.input({ prompt = "Global mark letter (A-Z): " }, function(input)
-          if input and input:match("^[A-Z]$") then
-            vim.cmd('normal! m' .. input)
-            vim.notify("🌟 Set global mark '" .. input .. "' at " .. vim.fn.expand('%:t') .. ":" .. vim.fn.line('.'),
-              vim.log.levels.INFO)
-          elseif input then
-            vim.notify("❌ Invalid mark. Use A-Z for global marks", vim.log.levels.ERROR)
-          end
-        end)
-      end,
-      desc = "Set Global Mark",
-    },
     {
       "<D-S-f>",
       function()
@@ -485,13 +327,6 @@ return {
       end,
       desc = "Git Log Line",
     },
-    -- {
-    --   "<leader>gs",
-    --   function()
-    --     Snacks.picker.git_status()
-    --   end,
-    --   desc = "Git Status",
-    -- },
     {
       "<leader>gS",
       function()
@@ -506,13 +341,6 @@ return {
       end,
       desc = "Git Diff (Hunks)",
     },
-    -- {
-    --   "<leader>gf",
-    --   function()
-    --     Snacks.picker.git_log_file()
-    --   end,
-    --   desc = "Git Log File",
-    -- },
     {
       "<leader>gB",
       function()
@@ -641,37 +469,6 @@ return {
       end,
       desc = "Grep Open Buffers",
     },
-
-    -- LSP navigation (global mappings following goto conventions)
-    -- {
-    --   "gd",
-    --   function()
-    --     Snacks.picker.lsp_definitions()
-    --   end,
-    --   desc = "Goto Definition",
-    -- },
-    -- {
-    --   "gD",
-    --   function()
-    --     Snacks.picker.lsp_declarations()
-    --   end,
-    --   desc = "Goto Declaration",
-    -- },
-    -- {
-    --   "gr",
-    --   function()
-    --     Snacks.picker.lsp_references()
-    --   end,
-    --   nowait = true,
-    --   desc = "References",
-    -- },
-    -- {
-    --   "gI",
-    --   function()
-    --     Snacks.picker.lsp_implementations()
-    --   end,
-    --   desc = "Goto Implementation",
-    -- },
     {
       "gy",
       function()
@@ -679,7 +476,7 @@ return {
       end,
       desc = "Goto T[y]pe Definition",
     },
-
+    
     -- Words navigation (using bracket keys for consistency)
     {
       "]]",
@@ -718,64 +515,4 @@ return {
       end,
     },
   },
-
-  init = function()
-    vim.api.nvim_create_autocmd("User", {
-      pattern = "VeryLazy",
-      callback = function()
-        -- Setup some globals for debugging (lazy-loaded)
-        _G.dd = function(...)
-          Snacks.debug.inspect(...)
-        end
-        _G.bt = function()
-          Snacks.debug.backtrace()
-        end
-        vim.print = _G.dd -- Override print to use snacks for `:=` command
-
-        -- Create toggle mappings using Test/Utils group (<leader>u)
-        -- Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
-        -- Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
-        -- Snacks.toggle.option("relativenumber", { name = "Relative Number" }):map("<leader>uL")
-        -- Snacks.toggle.diagnostics():map("<leader>ud")
-        -- Snacks.toggle.line_number():map("<leader>ul")
-        -- Snacks.toggle
-        --     .option("conceallevel", { off = 0, on = vim.o.conceallevel > 0 and vim.o.conceallevel or 2 })
-        --     :map("<leader>uc")
-        -- Snacks.toggle.treesitter():map("<leader>uT")
-        -- Snacks.toggle.option("background", { off = "light", on = "dark", name = "Dark Background" }):map("<leader>ub")
-        -- Snacks.toggle.inlay_hints():map("<leader>uh")
-        -- Snacks.toggle.indent():map("<leader>ug")
-        -- Snacks.toggle.dim():map("<leader>uD")
-      end,
-    })
-  end,
-
-  config = function(_, opts)
-    require("snacks").setup(opts)
-
-    -- Custom mark commands that work with snacks
-    vim.api.nvim_create_user_command("MarksList", function()
-      require("snacks").picker.marks()
-    end, { desc = "List all marks using snacks picker" })
-
-    vim.api.nvim_create_user_command("MarksProject", function()
-      -- Call the project marks function directly
-      local snacks = require("snacks")
-      local function get_project_root()
-        local cwd = vim.fn.getcwd()
-        local git_root = vim.fn.systemlist("git -C " ..
-          vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
-        return (vim.v.shell_error == 0 and git_root) or cwd
-      end
-
-      local project_root = get_project_root()
-      snacks.picker.marks({
-        prompt_title = "📍 Project Marks - " .. vim.fn.fnamemodify(project_root, ":t"),
-      })
-    end, { desc = "List project marks only" })
-
-    vim.api.nvim_create_user_command("MarksGlobal", function()
-      require("snacks").picker.marks()
-    end, { desc = "List all global marks" })
-  end,
 }

@@ -989,7 +989,6 @@ return {
         { "<leader>j",  group = "Jump" },
         { "<leader>k",  group = "Jump/Flash" },
         { "<leader>l",  group = "LSP" },
-        { "<leader>m",  group = "Marks" },
         { "<leader>p",  group = "Peek/Preview" },
         { "<leader>r",  group = "Rename/Refactor" },
         { "<leader>s",  group = "Snacks" },
