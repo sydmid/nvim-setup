@@ -123,9 +123,17 @@ return {
           },
           preview_split = "auto",
         },
-        -- win_options = {
-        --   winbar = "%{v:lua.CustomOilBar()}",
-        -- },
+        win_options = {
+          wrap = false,
+          signcolumn = "no",
+          cursorcolumn = false,
+          foldcolumn = "0",
+          spell = false,
+          list = false,
+          conceallevel = 3,
+          concealcursor = "nvic",
+        },
+        skip_confirm_for_simple_edits = true,
         view_options = {
           show_hidden = false,
           is_always_hidden = function(name, _)

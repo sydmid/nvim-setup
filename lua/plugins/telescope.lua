@@ -12,7 +12,8 @@ return {
         "nvim-telescope/telescope-frecency.nvim",
         dependencies = { "kkharji/sqlite.lua" },
       },
-      { "jvgrootveld/telescope-zoxide" }
+      { "jvgrootveld/telescope-zoxide" },
+      { "smartpde/telescope-recent-files" }
     },
     config = function()
       local telescope = require("telescope")
@@ -109,6 +110,16 @@ return {
                 end,
               },
             }
+          },
+          recent_files = {
+            only_cwd = true,
+            ignore_patterns = {
+              -- "temp", -- matches "temp" anywhere
+              "%.git", -- dot must be escaped
+              "node_modules", -- matches "node_modules" anywhere
+              "%.DS_STORE", -- escape the dot
+              ".*%.meta", -- match anything ending with ".meta"
+            }
           }
         },
       })
@@ -117,9 +128,12 @@ return {
       telescope.load_extension("frecency")
       telescope.load_extension("ui-select")
       telescope.load_extension("zoxide")
+      telescope.load_extension("recent_files")
 
       -- Add a mapping
       vim.keymap.set("n", "<leader>cd", telescope.extensions.zoxide.list)
+
+      vim.keymap.set("n", "<D-p>", telescope.extensions.recent_files.pick)
 
       -- Load todo-comments telescope extension if available
       local has_todo_comments = pcall(require, "todo-comments")

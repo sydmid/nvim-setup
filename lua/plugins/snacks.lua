@@ -69,29 +69,21 @@ return {
       end,
       desc = "Find Files",
     },
-    {
-      "<D-p>",
-      function()
-        local is_git = vim.fn.isdirectory(".git") == 1
-            or vim.fn.system("git rev-parse --is-inside-work-tree 2>/dev/null") == "true\n"
-
-        -- if is_git then
-        --   Snacks.picker.git_files()
-        -- else
-        --   Snacks.picker.files()
-        -- end
-        Snacks.picker.files({
-          exclude = {   -- add folder names here to exclude
-            ".git",
-            "node_modules",
-            ".DS_STORE",
-            "*.meta",
-          },
-          ignored = false,
-        })
-      end,
-      desc = "Smart File Picker (git-aware)",
-    },
+    -- {
+    --   "<D-p>",
+    --   function()
+    --     Snacks.picker.files({
+    --       exclude = {
+    --         ".git",
+    --         "node_modules",
+    --         ".DS_STORE",
+    --         "*.meta",
+    --       },
+    --       ignored = false,
+    --     })
+    --   end,
+    --   desc = "Smart File Picker (git-aware)",
+    -- },
     {
       "<leader>gf",
       function()
@@ -476,7 +468,7 @@ return {
       end,
       desc = "Goto T[y]pe Definition",
     },
-    
+
     -- Words navigation (using bracket keys for consistency)
     {
       "]]",

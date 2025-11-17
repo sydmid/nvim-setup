@@ -7,7 +7,7 @@ return {
     dependencies = {
       {
         "nvim-treesitter/nvim-treesitter-textobjects",
-        lazy = false, -- Make sure this is loaded early
+        lazy = false,   -- Make sure this is loaded early
         priority = 100, -- High priority to ensure it's loaded before keymaps
       },
       "windwp/nvim-ts-autotag",
@@ -93,7 +93,7 @@ return {
     event = "InsertEnter",
     dependencies = {
       "hrsh7th/cmp-buffer", -- source for text in buffer
-      "hrsh7th/cmp-path", -- source for file system paths
+      "hrsh7th/cmp-path",   -- source for file system paths
       {
         "L3MON4D3/LuaSnip",
         -- follow latest release.
@@ -101,10 +101,10 @@ return {
         -- install jsregexp (optional!).
         build = "make install_jsregexp",
       },
-      "saadparwaiz1/cmp_luasnip",  -- for autocompletion
+      "saadparwaiz1/cmp_luasnip",     -- for autocompletion
       "rafamadriz/friendly-snippets", -- useful snippets
-      "onsails/lspkind.nvim",      -- vs-code like pictograms
-      "zbirenbaum/copilot-cmp",    -- GitHub Copilot completions (for inline suggestions)
+      "onsails/lspkind.nvim",         -- vs-code like pictograms
+      "zbirenbaum/copilot-cmp",       -- GitHub Copilot completions (for inline suggestions)
     },
     config = function()
       local cmp = require("cmp")
@@ -135,10 +135,10 @@ return {
         }),
         -- sources for autocompletion
         sources = cmp.config.sources({
-          { name = "copilot",  group_index = 1, priority = 100 },                  -- GitHub Copilot inline suggestions
+          { name = "copilot",  group_index = 1,         priority = 100 },                        -- GitHub Copilot inline suggestions
           -- Note: Avante.nvim handles chat functionality separately
           { name = "luasnip",  trigger_characters = {}, option = { show_autosnippets = true } }, -- snippets
-          { name = "nvim_lsp", keyword_length = 1 },                                       -- lsp
+          { name = "nvim_lsp", keyword_length = 1 },                                             -- lsp
           -- { name = "buffer",   keyword_length = 2 },                                       -- text within current buffer
           -- { name = "path",     keyword_length = 2 },                                       -- file system paths
         }),
@@ -239,11 +239,11 @@ return {
 
       -- configure autopairs
       autopairs.setup({
-        check_ts = true,                 -- enable treesitter
+        check_ts = true,                      -- enable treesitter
         ts_config = {
-          lua = { "string" },            -- don't add pairs in lua string treesitter nodes
+          lua = { "string" },                 -- don't add pairs in lua string treesitter nodes
           javascript = { "template_string" }, -- don't add pairs in javscript template_string treesitter nodes
-          java = false,                  -- don't check treesitter on java
+          java = false,                       -- don't check treesitter on java
         },
       })
 
@@ -268,6 +268,7 @@ return {
         log_level = vim.log.levels.WARN,
         notify_on_error = true,
         notify_no_formatters = false,
+        async = true,
 
         -- Explicitly disable default format on save
         default_format_opts = {
@@ -292,7 +293,8 @@ return {
           sh = { "shfmt" },
           bash = { "shfmt" },
           zsh = { "shfmt_zsh", "zsh_indent" }, -- Try shfmt_zsh first, fallback to custom indenter
-          cs = { "csharpier" },           -- C# formatting
+          cs = { "my_csharpier" },             -- C# formatting
+          csproj = { "my_csharpier" },         -- C# formatting
         },
         formatters = {
           -- Modern Python formatting with Ruff
@@ -318,24 +320,13 @@ return {
             },
             stdin = true,
           },
-          csharpier = {
-            command = function()
-              -- First try to find csharpier in Mason's bin directory
-              local mason_bin = vim.fn.expand("~/.local/share/nvim/mason/bin/csharpier")
-              if vim.fn.executable(mason_bin) == 1 then
-                return mason_bin
-              end
-              -- Fallback to system PATH
-              return "csharpier"
-            end,
+          my_csharpier = {
+            command = "csharpier",
             args = {
               "format",
-              "--config-path",
-              vim.fn.expand("~/.config/nvim/.csharpierrc.json"),
-              "--write-stdout"
+              "--write-stdout",
             },
-            stdin = true,
-            cwd = require("conform.util").root_file({ ".csproj", "*.sln", "Directory.Build.props" }),
+            to_stdin = true,
           },
           shfmt = {
             prepend_args = { "-i", "2", "-ci" } -- 2-space indentation and indent switch cases

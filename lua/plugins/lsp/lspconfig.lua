@@ -422,7 +422,7 @@ return {
               default_selection_index = 1,
             })
           end, { buffer = ev.buf, desc = '[g]o [r]eferences' })
-          keymap("n", "gI", function()
+          keymap("n", "gi", function()
             require("telescope.builtin").lsp_implementations({
               initial_mode = "normal",
               attach_mappings = function(prompt_bufnr, map_func)
@@ -608,12 +608,12 @@ return {
                   value = text
                       :gsub("\\%.", ".")   -- unescape dots
                       :gsub("\\%-", "-")   -- unescape -
-                      :gsub("\\%(", "(")  --
-                      :gsub("\\%[", "[")  --
-                      :gsub("\\%<", "<")  --
-                      :gsub("\\%)", ")")  --
-                      :gsub("\\%]", "]")  --
-                      :gsub("\\%>", ">")  --
+                      :gsub("\\%(", "(")   --
+                      :gsub("\\%[", "[")   --
+                      :gsub("\\%<", "<")   --
+                      :gsub("\\%)", ")")   --
+                      :gsub("\\%]", "]")   --
+                      :gsub("\\%>", ">")   --
                       :gsub("\\%*", "*")   --
                       :gsub("&nbsp;", " ") -- fix spaces
                       :gsub("\\_", "_")    -- unescape underscores
@@ -860,25 +860,27 @@ return {
           end, { buffer = ev.buf, desc = "Buffer diagnostics" })
 
           -- Enhanced diagnostic navigation that works with Error Lens
-          keymap("n", "<leader>xj", function()
-            vim.diagnostic.goto_next()
-            -- Trigger Error Lens update after navigation
+          keymap("n", "]x", function()
+            vim.diagnostic.goto_next({
+              severity = { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR },
+            })
             if _G.ErrorLens and _G.ErrorLens.enabled then
               vim.defer_fn(function()
                 _G.ErrorLens.refresh_current_buffer()
               end, 50)
             end
-          end, { buffer = ev.buf, desc = "Next diagnostic (with Error Lens sync)" })
+          end, { buffer = ev.buf, desc = "Next error (with Error Lens sync)" })
 
-          keymap("n", "<leader>xk", function()
-            vim.diagnostic.goto_prev()
-            -- Trigger Error Lens update after navigation
+          keymap("n", "[x", function()
+            vim.diagnostic.goto_prev({
+              severity = { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR },
+            })
             if _G.ErrorLens and _G.ErrorLens.enabled then
               vim.defer_fn(function()
                 _G.ErrorLens.refresh_current_buffer()
               end, 50)
             end
-          end, { buffer = ev.buf, desc = "Previous diagnostic (with Error Lens sync)" })
+          end, { buffer = ev.buf, desc = "Previous error (with Error Lens sync)" })
         end,
       })
 

@@ -4,7 +4,7 @@ _G.background_modes = {
   { bg = "#1f1f19", secondary = "#34342a", cursorline = "#333227", name = "Warm",   opacity = false },
   { bg = "#0f1419", secondary = "#1c262f", cursorline = "#1a1f29", name = "Bluish", opacity = false },
   { bg = "#121212", secondary = "#313131", cursorline = "#272727", name = "Dark",   opacity = false },
-  { bg = "#121212", secondary = "#313131",  cursorline = "#272727", name = "Glass",  opacity = true, opacity_value = 0 } -- (opacity_value is not working for some reason)
+  { bg = "#121212", secondary = "#313131", cursorline = "#272727", name = "Glass",  opacity = true, opacity_value = 0 } -- (opacity_value is not working for some reason)
 }
 _G.current_bg_index = 1
 
@@ -182,31 +182,31 @@ local theme_opts = {
 return {
   -- ColorScheme
   {
-    "tomasr/molokai",
+    "xStormyy/bearded-theme.nvim",
     lazy = false,
-    name = "molokai",
+    name = "bearded-theme",
     config = function()
       -- Configure molokai theme options
-      vim.g.molokaiCursorColor = true
-      vim.g.molokaiItalics = true
+      -- vim.g.molokaiCursorColor = true
+      -- vim.g.molokaiItalics = true
       -- Transparency will be set by background mode function
-      vim.g.molokaiUndercurls = true
-      vim.g.molokaiUnderlineMatchParen = true
-      vim.g.molokaiVirtualTextColor = true
+      -- vim.g.molokaiUndercurls = true
+      -- vim.g.molokaiUnderlineMatchParen = true
+      -- vim.g.molokaiVirtualTextColor = true
 
       -- Load saved background preference
       _G.load_background_preference()
 
       -- Set the colorscheme
       vim.opt.background = "dark"
-      vim.cmd.colorscheme("molokai")
+      vim.cmd.colorscheme("bearded-theme")
 
       -- Apply the current background mode
       _G.set_background_mode(_G.current_bg_index)
 
       -- Create autocmd to reapply background highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = "molokai",
+        pattern = "bearded-theme",
         group = vim.api.nvim_create_augroup("AyuBackground", { clear = true }),
         callback = function()
           -- Reapply current background mode
@@ -1345,6 +1345,24 @@ return {
           vim.b.cinnamon_disable = true
         end,
       })
+    end,
+  },
+  {
+    "goolord/alpha-nvim",
+    dependencies = {
+      -- 'echasnovski/mini.icons',
+      'nvim-lua/plenary.nvim',
+      'nvim-tree/nvim-web-devicons'
+    },
+    config = function()
+      local startify = require("alpha.themes.startify")
+      -- available: devicons, mini, default is mini
+      -- if provider not loaded and enabled is true, it will try to use another provider
+      startify.file_icons.provider = "devicons"
+      require 'alpha'.setup(require 'alpha.themes.theta'.config)
+      -- require("alpha").setup(
+      --   startify.config
+      -- )
     end,
   },
 }

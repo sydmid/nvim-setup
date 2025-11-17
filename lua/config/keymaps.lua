@@ -92,75 +92,9 @@ vim.keymap.set('n', '<C-Tab>', ':bnext<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<C-S-Tab>', ':bprevious<CR>', { noremap = true, silent = true })
 
 -- Code formatting
-map("n", "<leader>fd", function()
-  local conform = require("conform")
-
-  -- Get the current buffer's filename
-  local filename = vim.api.nvim_buf_get_name(0)
-
-  -- Special handling for .zshrc and similar files
-  if filename:match("%.zshrc$") or
-      filename:match("%.zsh_") or
-      filename:match("%.bashrc$") or
-      filename:match("%.bash_") then
-    -- Save cursor position
-    local cursor_pos = vim.api.nvim_win_get_cursor(0)
-
-    -- Handle shell files that might have complex parameter expansions
-    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-    local result = {}
-    local indent_level = 0
-    local indent_size = 2
-
-    for _, line in ipairs(lines) do
-      local trimmed = vim.trim(line)
-
-      -- Check for closing markers to decrease indent first
-      if trimmed:match("^fi$")
-          or trimmed:match("^done$")
-          or trimmed:match("^}$")
-          or trimmed:match("^esac$")
-          or trimmed:match("^%)$") then
-        indent_level = math.max(0, indent_level - 1)
-      end
-
-      -- Add appropriate indent or preserve empty lines
-      if #trimmed > 0 then
-        local indent = string.rep(" ", indent_level * indent_size)
-        table.insert(result, indent .. trimmed)
-      else
-        table.insert(result, "") -- Preserve empty line without indentation
-      end
-
-      -- Check for opening markers to increase indent
-      if trimmed:match("^if ")
-          or trimmed:match("then$")
-          or trimmed:match("^for ")
-          or trimmed:match("do$")
-          or trimmed:match("^while ")
-          or trimmed:match("^{$")
-          or trimmed:match("^case ")
-          or trimmed:match("^function ")
-          or trimmed:match("%([ ]*%)[ ]*{[ ]*$") then
-        indent_level = indent_level + 1
-      end
-    end
-
-    -- Replace buffer content with formatted content
-    vim.api.nvim_buf_set_lines(0, 0, -1, false, result)
-
-    -- Restore cursor position
-    vim.api.nvim_win_set_cursor(0, cursor_pos)
-
-    vim.notify("Applied custom shell formatting", vim.log.levels.INFO)
-  else
-    -- Use conform for regular formatting
-    conform.format({
-      lsp_format = "fallback",
-      timeout_ms = 1000,
-    })
-  end
-end, { desc = "Format document" })
+map({ "n", "x" }, "<leader>fd", function()
+  require("conform").format { lsp_fallback = true }
+end, { desc = "general format file" })
 
 map("n", "<leader>hh", ":lua require('harpoon.mark').add_file()<CR>", { desc = "Add to harpoon" })
 
