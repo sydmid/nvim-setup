@@ -155,18 +155,17 @@ return {
         },
 
         -- configure lspkind for vs-code like pictograms in completion menu
-        -- formatting = {
-        --   fields = { "kind", "abbr", "menu" },
-        --   expandable_indicator = true,
-        --   format = lspkind.cmp_format({
-        --     maxwidth = 50,
-        --     ellipsis_char = "...",
-        --     symbol_map = {
-        --       Copilot = "", -- Inline suggestions
-        --       Avante = "🤖", -- Chat and advanced features
-        --     },
-        --   }),
-        -- },
+        formatting = {
+          fields = { "kind", "abbr", "menu" },
+          expandable_indicator = true,
+          format = lspkind.cmp_format({
+            maxwidth = 50,
+            ellipsis_char = "...",
+            symbol_map = {
+              Copilot = "", -- AI-powered suggestions
+            },
+          }),
+        },
         -- Custom sorting prioritization (removed Copilot, using Avante)
         -- sorting = {
         --   priority_weight = 2,

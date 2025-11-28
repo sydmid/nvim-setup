@@ -234,8 +234,8 @@ local function is_window_visible(win)
   return vim.tbl_contains(all_wins, win)
 end
 
--- -- Tab key toggles between main buffer and auxiliary buffers
-map({ "n", "t" }, "<Tab>", function()
+-- -- Tab key toggles between main buffer and auxiliary buffers (excluding terminal mode for autocomplete)
+map("n", "<Tab>", function()
   local current = vim.api.nvim_get_current_buf()
   local current_win = vim.api.nvim_get_current_win()
 
