@@ -715,5 +715,11 @@ return {
     "chentoast/marks.nvim",
     event = "VeryLazy",
     opts = {},
+  },
+  -- Spectre (Find and Replace Enemy)
+  {
+    "nvim-pack/nvim-spectre",
+    event = "VeryLazy",
+    opts = {},
   }
 }
