@@ -182,31 +182,26 @@ local theme_opts = {
 return {
   -- ColorScheme
   {
-    "xStormyy/bearded-theme.nvim",
+    "Ferouk/bearded-nvim",
     lazy = false,
-    name = "bearded-theme",
+    name = "bearded",
     config = function()
-      -- Configure molokai theme options
-      -- vim.g.molokaiCursorColor = true
-      -- vim.g.molokaiItalics = true
-      -- Transparency will be set by background mode function
-      -- vim.g.molokaiUndercurls = true
-      -- vim.g.molokaiUnderlineMatchParen = true
-      -- vim.g.molokaiVirtualTextColor = true
-
       -- Load saved background preference
       _G.load_background_preference()
+    require("bearded").setup({
+      flavor = "arc", -- any flavor slug
+    })
 
       -- Set the colorscheme
       vim.opt.background = "dark"
-      vim.cmd.colorscheme("bearded-theme")
+      vim.cmd.colorscheme("bearded")
 
       -- Apply the current background mode
       _G.set_background_mode(_G.current_bg_index)
 
       -- Create autocmd to reapply background highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = "bearded-theme",
+        pattern = "bearded",
         group = vim.api.nvim_create_augroup("AyuBackground", { clear = true }),
         callback = function()
           -- Reapply current background mode
