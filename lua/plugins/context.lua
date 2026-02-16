@@ -78,72 +78,7 @@ return {
     config = function(_, opts)
       require("treesitter-context").setup(opts)
 
-      -- Enhanced context refresh mechanism for better reliability
-      local refresh_timer = nil
-      vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
-        group = vim.api.nvim_create_augroup("TreesitterContextRefresh", { clear = true }),
-        callback = function()
-          local tsc = require("treesitter-context")
-          if tsc.enabled() then
-            -- Cancel any pending refresh
-            if refresh_timer then
-              vim.fn.timer_stop(refresh_timer)
-            end
-
-            -- Schedule a refresh with debouncing
-            refresh_timer = vim.fn.timer_start(50, function()
-              if tsc.enabled() then
-                vim.schedule(function()
-                  vim.cmd("doautocmd CursorMoved")
-                  vim.cmd("redraw!")
-                end)
-              end
-              refresh_timer = nil
-            end)
-          end
-        end,
-      })
-
-      -- Separate autocmd for cursor movement with less aggressive refresh
-      vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-        group = vim.api.nvim_create_augroup("TreesitterContextCursor", { clear = true }),
-        callback = function()
-          local tsc = require("treesitter-context")
-          if tsc.enabled() then
-            -- Only refresh on significant cursor movement (every 5th movement)
-            local context_refresh_counter = vim.g.context_refresh_counter or 0
-            context_refresh_counter = context_refresh_counter + 1
-            vim.g.context_refresh_counter = context_refresh_counter
-
-            if context_refresh_counter % 5 == 0 then
-              vim.schedule(function()
-                if tsc.enabled() then
-                  vim.cmd("redraw!")
-                end
-              end)
-            end
-          end
-        end,
-      })
-
-      -- Ensure context is properly displayed after buffer changes
-      vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile", "BufWinEnter" }, {
-        group = vim.api.nvim_create_augroup("TreesitterContextBufferSetup", { clear = true }),
-        callback = function()
-          local tsc = require("treesitter-context")
-          if tsc.enabled() then
-            vim.schedule(function()
-              -- Force context refresh for new buffers
-              vim.cmd("doautocmd CursorMoved")
-              vim.defer_fn(function()
-                vim.cmd("redraw!")
-              end, 100)
-            end)
-          end
-        end,
-      })
-
-      -- Context control keymaps in <leader>h group
+      -- Context control keymaps
       vim.keymap.set("n", "<leader>ck", function()
         require("treesitter-context").go_to_context(vim.v.count1)
       end, {
@@ -153,57 +88,11 @@ return {
 
       vim.keymap.set("n", "<leader>th", function()
         local tsc = require("treesitter-context")
-
-        -- Store current state before toggling
-        local was_enabled = tsc.enabled()
-
-        -- Perform the toggle
         tsc.toggle()
-
-        -- Force a refresh after a short delay to ensure state consistency
-        vim.defer_fn(function()
-          local current_state = tsc.enabled()
-
-          -- If the state didn't change as expected, force the toggle again
-          if current_state == was_enabled then
-            tsc.toggle()
-            current_state = tsc.enabled()
-          end
-
-          -- Force a complete refresh of the context display
-          if current_state then
-            -- When enabling, force multiple refresh attempts
-            tsc.enable() -- Ensure it's really enabled
-            vim.cmd("doautocmd CursorMoved")
-
-            vim.schedule(function()
-              -- Additional refresh attempts
-              vim.cmd("doautocmd CursorMoved")
-              vim.cmd("redraw!")
-
-              -- Final validation and force enable if needed
-              vim.defer_fn(function()
-                if not tsc.enabled() then
-                  tsc.enable()
-                  vim.cmd("doautocmd CursorMoved")
-                  vim.cmd("redraw!")
-                end
-              end, 100)
-            end)
-          else
-            -- When disabling, ensure it's completely hidden
-            tsc.disable() -- Ensure it's really disabled
-            vim.schedule(function()
-              vim.cmd("redraw!")
-            end)
-          end
-
-          -- Notify the final state
-          vim.notify(
-            current_state and "Context enabled" or "Context disabled",
-            vim.log.levels.INFO
-          )
-        end, 50) -- Small delay to allow the toggle to complete
+        vim.notify(
+          tsc.enabled() and "Context enabled" or "Context disabled",
+          vim.log.levels.INFO
+        )
       end, {
         desc = "[t]oggle treesitter context [h]eader"
       })

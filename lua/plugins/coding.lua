@@ -139,8 +139,8 @@ return {
           -- Note: Avante.nvim handles chat functionality separately
           { name = "luasnip",  trigger_characters = {}, option = { show_autosnippets = true } }, -- snippets
           { name = "nvim_lsp", keyword_length = 1 },                                             -- lsp
-          -- { name = "buffer",   keyword_length = 2 },                                       -- text within current buffer
-          -- { name = "path",     keyword_length = 2 },                                       -- file system paths
+          { name = "buffer",   keyword_length = 2 },                                             -- text within current buffer
+          { name = "path",     keyword_length = 2 },                                             -- file system paths
         }),
 
         window = {

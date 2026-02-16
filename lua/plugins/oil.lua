@@ -67,7 +67,11 @@ return {
 
           -- Stop LSP clients after buffer cleanup
           vim.schedule(function()
-            vim.lsp.stop_client(vim.lsp.get_active_clients())
+            pcall(function()
+              for _, client in ipairs(vim.lsp.get_clients()) do
+                client.stop()
+              end
+            end)
           end)
 
           -- Update nvim-tree to reflect the new workspace

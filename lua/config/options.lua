@@ -23,7 +23,6 @@ opt.relativenumber = true -- Show relative line numbers
 opt.showmatch = true      -- Show matching brackets
 opt.visualbell = true     -- Use visual bell instead of beeping
 opt.belloff = "all"       -- Disable all bells
-t_vb = ""                 -- Disable visual bell effect
 
 -- Search settings
 opt.hlsearch = true   -- Highlight search results
@@ -58,7 +57,7 @@ opt.signcolumn = "yes:1"     -- Always show sign column with fixed width of 2
 opt.updatetime = 200
 opt.scrolloff = 8            -- Keep lines visible around cursor
 opt.sidescrolloff = 8        -- Keep columns visible around cursor
-opt.wrap = true              -- Don't wrap lines
+opt.wrap = true              -- Wrap long lines
 opt.mouse = "a"              -- Enable mouse in all modes
 
 -- backspace

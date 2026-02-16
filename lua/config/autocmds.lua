@@ -1,17 +1,12 @@
 local augroup = vim.api.nvim_create_augroup
 local autocmd = vim.api.nvim_create_autocmd
 
--- Highlight yanked text
-augroup("YankHighlight", { clear = true })
-autocmd("TextYankPost", {
-  group = "YankHighlight",
-  callback = function()
-    vim.highlight.on_yank({ higroup = "IncSearch", timeout = 150 })
-  end,
-})
+-- Yank highlighting handled by vim-highlightedyank plugin (ui.lua)
 
 -- Set up terminal mode mappings for window navigation
+augroup("TerminalMappings", { clear = true })
 autocmd("TermOpen", {
+  group = "TerminalMappings",
   pattern = "*",
   callback = function()
     vim.api.nvim_buf_set_keymap(0, 't', '<C-h>', '[[<Cmd>wincmd h<CR>]]', { noremap = true, silent = true })
@@ -22,7 +17,9 @@ autocmd("TermOpen", {
 })
 
 -- Set indentation for specific file types
+augroup("FileTypeIndent", { clear = true })
 autocmd("FileType", {
+  group = "FileTypeIndent",
   pattern = { "lua", "javascript", "typescript", "json", "html", "css" },
   callback = function()
     vim.bo.tabstop = 2

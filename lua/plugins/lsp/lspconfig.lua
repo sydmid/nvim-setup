@@ -16,7 +16,7 @@ return {
 
       -- Allows extra capabilities provided by nvim-cmp
       'hrsh7th/cmp-nvim-lsp',
-      { "folke/neodev.nvim", opts = {} },
+      { "folke/lazydev.nvim", ft = "lua", opts = {} },
       "glepnir/lspsaga.nvim",
     },
     opts = {

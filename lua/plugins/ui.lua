@@ -179,6 +179,122 @@ local theme_opts = {
   },
 }
 
+-- Shared LSP Symbol kinds mapping with icons (used by both symbol pickers)
+local symbol_icons = {
+  [1] = { icon = "󰈔", name = "File" },
+  [2] = { icon = "󰏖", name = "Module" },
+  [3] = { icon = "󰌗", name = "Namespace" },
+  [4] = { icon = "󰏗", name = "Package" },
+  [5] = { icon = "󰠱", name = "Class" },
+  [6] = { icon = "󰊕", name = "Method" },
+  [7] = { icon = "󰜢", name = "Property" },
+  [8] = { icon = "󰓹", name = "Field" },
+  [9] = { icon = "󰆧", name = "Constructor" },
+  [10] = { icon = "󰕘", name = "Enum" },
+  [11] = { icon = "󰜰", name = "Interface" },
+  [12] = { icon = "󰡱", name = "Function" },
+  [13] = { icon = "󰀫", name = "Variable" },
+  [14] = { icon = "󰏿", name = "Constant" },
+  [15] = { icon = "󰀬", name = "String" },
+  [16] = { icon = "󰎠", name = "Number" },
+  [17] = { icon = "󰨙", name = "Boolean" },
+  [18] = { icon = "󰅪", name = "Array" },
+  [19] = { icon = "󰅩", name = "Object" },
+  [20] = { icon = "󰌋", name = "Key" },
+  [21] = { icon = "󰟢", name = "Null" },
+  [22] = { icon = "󰕘", name = "EnumMember" },
+  [23] = { icon = "󰙅", name = "Struct" },
+  [24] = { icon = "󰉁", name = "Event" },
+  [25] = { icon = "󰆕", name = "Operator" },
+  [26] = { icon = "󰊄", name = "TypeParameter" },
+}
+
+-- Get the start line number from a symbol (handles different LSP response formats)
+local function get_symbol_line(symbol)
+  if symbol.location and symbol.location.range then
+    return symbol.location.range.start.line
+  elseif symbol.selectionRange then
+    return symbol.selectionRange.start.line
+  elseif symbol.range then
+    return symbol.range.start.line
+  end
+  return 0
+end
+
+-- Sort a list of symbols by their line number
+local function sort_symbols_by_line(syms)
+  local sorted = vim.deepcopy(syms)
+  table.sort(sorted, function(a, b)
+    return get_symbol_line(a) < get_symbol_line(b)
+  end)
+  return sorted
+end
+
+-- Create a telescope entry from a processed symbol entry
+local function make_symbol_entry(entry)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local filename = vim.api.nvim_buf_get_name(bufnr)
+  return {
+    value = entry,
+    display = string.format("%s%s %s", entry.indent, entry.icon, entry.name),
+    ordinal = entry.name .. " " .. entry.type_name,
+    symbol = entry.symbol,
+    kind = entry.kind,
+    type_name = entry.type_name,
+    filename = filename,
+    lnum = entry.line + 1,
+    col = 1,
+    bufnr = bufnr,
+    path = filename,
+    row = entry.line + 1,
+    start = entry.line + 1,
+  }
+end
+
+-- Jump to a symbol with visual feedback
+local function jump_to_symbol(selection)
+  if not (selection and selection.symbol) then return end
+  local symbol = selection.symbol
+  local range = symbol.location and symbol.location.range
+      or symbol.selectionRange
+      or symbol.range
+  if not range then return end
+
+  local line = range.start.line + 1
+  local col = range.start.character
+  vim.api.nvim_win_set_cursor(0, { line, col })
+  vim.cmd("normal! zz")
+
+  if vim.fn.has('nvim-0.9') == 1 then
+    vim.cmd("normal! ^")
+    local ns_id = vim.api.nvim_create_namespace("symbol_jump")
+    vim.api.nvim_buf_add_highlight(0, ns_id, "Search", line - 1, 0, -1)
+    vim.defer_fn(function()
+      vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+    end, 150)
+  end
+
+  vim.notify(string.format("Jumped to %s: %s (line %d)",
+      selection.type_name, selection.value.name, line),
+    vim.log.levels.INFO)
+end
+
+-- Fetch and return LSP document symbols, or nil on failure
+local function fetch_lsp_symbols()
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
+  if #clients == 0 then
+    vim.notify("No active LSP clients found", vim.log.levels.WARN)
+    return nil
+  end
+  local params = { textDocument = vim.lsp.util.make_text_document_params() }
+  local results_lsp = vim.lsp.buf_request_sync(0, "textDocument/documentSymbol", params, 3000)
+  if not results_lsp or vim.tbl_isempty(results_lsp) then
+    vim.notify("No LSP symbols found", vim.log.levels.WARN)
+    return nil
+  end
+  return results_lsp
+end
+
 return {
   -- ColorScheme
   {
@@ -388,57 +504,13 @@ return {
           -- Create advanced symbol picker with hierarchical document order
           local function ordered_symbols_picker()
             local finders = require("telescope.finders")
-            local make_entry = require("telescope.make_entry")
             local pickers = require("telescope.pickers")
             local conf = require("telescope.config").values
             local actions = require("telescope.actions")
             local action_state = require("telescope.actions.state")
 
-            -- LSP Symbol kinds mapping with beautiful icons
-            local symbol_icons = {
-              [1] = { icon = "󰈔", name = "File" }, -- File: Document icon
-              [2] = { icon = "󰏖", name = "Module" }, -- Module: Package/box icon
-              [3] = { icon = "󰌗", name = "Namespace" }, -- Namespace: Folder tree icon
-              [4] = { icon = "󰏗", name = "Package" }, -- Package: Package icon
-              [5] = { icon = "󰠱", name = "Class" }, -- Class: Class icon (distinct from namespace)
-              [6] = { icon = "󰊕", name = "Method" }, -- Method: Function icon with different style
-              [7] = { icon = "󰜢", name = "Property" }, -- Property: Property icon
-              [8] = { icon = "󰓹", name = "Field" }, -- Field: Field/variable icon
-              [9] = { icon = "󰆧", name = "Constructor" }, -- Constructor: Constructor icon
-              [10] = { icon = "󰕘", name = "Enum" }, -- Enum: Enum icon
-              [11] = { icon = "󰜰", name = "Interface" }, -- Interface: Interface icon
-              [12] = { icon = "󰡱", name = "Function" }, -- Function: Lambda/function icon
-              [13] = { icon = "󰀫", name = "Variable" }, -- Variable: Variable icon
-              [14] = { icon = "󰏿", name = "Constant" }, -- Constant: Constant icon
-              [15] = { icon = "󰀬", name = "String" }, -- String: String icon
-              [16] = { icon = "󰎠", name = "Number" }, -- Number: Hash/number icon
-              [17] = { icon = "󰨙", name = "Boolean" }, -- Boolean: Boolean icon
-              [18] = { icon = "󰅪", name = "Array" }, -- Array: Array/list icon
-              [19] = { icon = "󰅩", name = "Object" }, -- Object: Object/map icon
-              [20] = { icon = "󰌋", name = "Key" }, -- Key: Key icon
-              [21] = { icon = "󰟢", name = "Null" }, -- Null: Null/empty icon
-              [22] = { icon = "󰕘", name = "EnumMember" }, -- EnumMember: Enum member icon
-              [23] = { icon = "󰙅", name = "Struct" }, -- Struct: Struct icon (different from class)
-              [24] = { icon = "󰉁", name = "Event" }, -- Event: Event/lightning icon
-              [25] = { icon = "󰆕", name = "Operator" }, -- Operator: Operator icon
-              [26] = { icon = "󰊄", name = "TypeParameter" }, -- TypeParameter: Generic type icon
-            }
-
-            -- Check if LSP is available
-            local clients = vim.lsp.get_active_clients({ bufnr = 0 })
-            if #clients == 0 then
-              vim.notify("No active LSP clients found", vim.log.levels.WARN)
-              return
-            end
-
-            -- Get LSP symbols
-            local params = { textDocument = vim.lsp.util.make_text_document_params() }
-            local results_lsp = vim.lsp.buf_request_sync(0, "textDocument/documentSymbol", params, 3000)
-
-            if not results_lsp or vim.tbl_isempty(results_lsp) then
-              vim.notify("No LSP symbols found", vim.log.levels.WARN)
-              return
-            end
+            local results_lsp = fetch_lsp_symbols()
+            if not results_lsp then return end
 
             -- Process symbols maintaining strict document order
             local symbols = {}
@@ -446,49 +518,12 @@ return {
               level = level or 0
               prefix_order = prefix_order or ""
 
-              -- Sort symbols at current level by line number ONLY
-              local sorted_syms = vim.deepcopy(syms)
-              table.sort(sorted_syms, function(a, b)
-                local line_a = 0
-                local line_b = 0
+              local sorted_syms = sort_symbols_by_line(syms)
 
-                if a.location and a.location.range then
-                  line_a = a.location.range.start.line
-                elseif a.selectionRange then
-                  line_a = a.selectionRange.start.line
-                elseif a.range then
-                  line_a = a.range.start.line
-                end
-
-                if b.location and b.location.range then
-                  line_b = b.location.range.start.line
-                elseif b.selectionRange then
-                  line_b = b.selectionRange.start.line
-                elseif b.range then
-                  line_b = b.range.start.line
-                end
-
-                return line_a < line_b
-              end)
-
-              for i, symbol in ipairs(sorted_syms) do
+              for _, symbol in ipairs(sorted_syms) do
                 local kind = symbol.kind or symbol.symbolKind or 1
                 local icon_info = symbol_icons[kind] or { icon = "", name = "Unknown" }
-
-                -- Create proper indentation for hierarchy
-                local indent = string.rep("  ", level)
-
-                -- Get line number for ordering
-                local line = 0
-                if symbol.location and symbol.location.range then
-                  line = symbol.location.range.start.line
-                elseif symbol.selectionRange then
-                  line = symbol.selectionRange.start.line
-                elseif symbol.range then
-                  line = symbol.range.start.line
-                end
-
-                -- Create strict document order key
+                local line = get_symbol_line(symbol)
                 local order_key = prefix_order .. string.format("%06d", line)
 
                 table.insert(symbols, {
@@ -497,28 +532,25 @@ return {
                   icon = icon_info.icon,
                   type_name = icon_info.name,
                   name = symbol.name,
-                  indent = indent,
+                  indent = string.rep("  ", level),
                   level = level,
                   line = line,
                   order_key = order_key,
-                  document_order = #symbols + 1, -- Track insertion order
+                  document_order = #symbols + 1,
                 })
 
-                -- Process children recursively with enhanced ordering
                 if symbol.children and #symbol.children > 0 then
                   process_symbols(symbol.children, level + 1, order_key .. "_")
                 end
               end
             end
 
-            -- Process all symbols from all LSP clients
-            for client_id, response in pairs(results_lsp) do
+            for _, response in pairs(results_lsp) do
               if response.result then
                 process_symbols(response.result)
               end
             end
 
-            -- Ensure symbols are in strict document order
             table.sort(symbols, function(a, b)
               return a.document_order < b.document_order
             end)
@@ -528,31 +560,6 @@ return {
               return
             end
 
-            -- Function to create entry with proper display format and preview support
-            local function make_symbol_entry(entry)
-              -- Get the current buffer name for preview
-              local bufnr = vim.api.nvim_get_current_buf()
-              local filename = vim.api.nvim_buf_get_name(bufnr)
-
-              return {
-                value = entry,
-                display = string.format("%s%s %s", entry.indent, entry.icon, entry.name),
-                ordinal = entry.name .. " " .. entry.type_name,
-                symbol = entry.symbol,
-                kind = entry.kind,
-                type_name = entry.type_name,
-                filename = filename,
-                lnum = entry.line + 1,
-                col = 1,
-                bufnr = bufnr,
-                -- Add these fields for proper preview navigation
-                path = filename,
-                row = entry.line + 1,
-                start = entry.line + 1,
-              }
-            end
-
-            -- Create advanced picker with working preview
             pickers
                 .new({}, {
                   prompt_title = "󰘦 Document Symbols (Document Order)",
@@ -561,51 +568,17 @@ return {
                     entry_maker = make_symbol_entry,
                   }),
                   sorter = conf.generic_sorter({}),
-                  previewer = conf.grep_previewer({}), -- Use grep_previewer for line-aware preview
+                  previewer = conf.grep_previewer({}),
                   initial_mode = "normal",
                   attach_mappings = function(prompt_bufnr, map)
-                    -- Add proper Esc handling
                     map("i", "<Esc>", actions.close)
                     map("n", "<Esc>", actions.close)
                     map("n", "q", actions.close)
-                    -- Enhanced default action with better visual feedback
                     actions.select_default:replace(function()
                       local selection = action_state.get_selected_entry()
                       actions.close(prompt_bufnr)
-
-                      if selection and selection.symbol then
-                        local symbol = selection.symbol
-                        local range = symbol.location and symbol.location.range
-                            or symbol.selectionRange
-                            or symbol.range
-
-                        if range then
-                          -- Jump to symbol location with precise positioning
-                          local line = range.start.line + 1
-                          local col = range.start.character
-
-                          vim.api.nvim_win_set_cursor(0, { line, col })
-                          vim.cmd("normal! zz") -- Center the line
-
-                          -- Enhanced visual feedback
-                          if vim.fn.has('nvim-0.9') == 1 then
-                            -- Brief highlight of the jumped-to symbol
-                            vim.cmd("normal! ^")
-                            local ns_id = vim.api.nvim_create_namespace("symbol_jump")
-                            vim.api.nvim_buf_add_highlight(0, ns_id, "Search", line - 1, 0, -1)
-                            vim.defer_fn(function()
-                              vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
-                            end, 150)
-                          end
-
-                          -- Show symbol info
-                          vim.notify(string.format("Jumped to %s: %s (line %d)",
-                              selection.type_name, selection.value.name, line),
-                            vim.log.levels.INFO)
-                        end
-                      end
+                      jump_to_symbol(selection)
                     end)
-
                     return true
                   end,
                 })
@@ -626,93 +599,20 @@ return {
             local actions = require("telescope.actions")
             local action_state = require("telescope.actions.state")
 
-            -- LSP Symbol kinds mapping
-            local symbol_icons = {
-              [1] = { icon = "󰈔", name = "File" }, -- File: Document icon
-              [2] = { icon = "󰏖", name = "Module" }, -- Module: Package/box icon
-              [3] = { icon = "󰌗", name = "Namespace" }, -- Namespace: Folder tree icon
-              [4] = { icon = "󰏗", name = "Package" }, -- Package: Package icon
-              [5] = { icon = "󰠱", name = "Class" }, -- Class: Class icon (distinct from namespace)
-              [6] = { icon = "󰊕", name = "Method" }, -- Method: Function icon with different style
-              [7] = { icon = "󰜢", name = "Property" }, -- Property: Property icon
-              [8] = { icon = "󰓹", name = "Field" }, -- Field: Field/variable icon
-              [9] = { icon = "󰆧", name = "Constructor" }, -- Constructor: Constructor icon
-              [10] = { icon = "󰕘", name = "Enum" }, -- Enum: Enum icon
-              [11] = { icon = "󰜰", name = "Interface" }, -- Interface: Interface icon
-              [12] = { icon = "󰡱", name = "Function" }, -- Function: Lambda/function icon
-              [13] = { icon = "󰀫", name = "Variable" }, -- Variable: Variable icon
-              [14] = { icon = "󰏿", name = "Constant" }, -- Constant: Constant icon
-              [15] = { icon = "󰀬", name = "String" }, -- String: String icon
-              [16] = { icon = "󰎠", name = "Number" }, -- Number: Hash/number icon
-              [17] = { icon = "󰨙", name = "Boolean" }, -- Boolean: Boolean icon
-              [18] = { icon = "󰅪", name = "Array" }, -- Array: Array/list icon
-              [19] = { icon = "󰅩", name = "Object" }, -- Object: Object/map icon
-              [20] = { icon = "󰌋", name = "Key" }, -- Key: Key icon
-              [21] = { icon = "󰟢", name = "Null" }, -- Null: Null/empty icon
-              [22] = { icon = "󰕘", name = "EnumMember" }, -- EnumMember: Enum member icon
-              [23] = { icon = "󰙅", name = "Struct" }, -- Struct: Struct icon (different from class)
-              [24] = { icon = "󰉁", name = "Event" }, -- Event: Event/lightning icon
-              [25] = { icon = "󰆕", name = "Operator" }, -- Operator: Operator icon
-              [26] = { icon = "󰊄", name = "TypeParameter" }, -- TypeParameter: Generic type icon
-            }
-
-            -- Check if LSP is available
-            local clients = vim.lsp.get_active_clients({ bufnr = 0 })
-            if #clients == 0 then
-              vim.notify("No active LSP clients found", vim.log.levels.WARN)
-              return
-            end
-
-            -- Get LSP symbols
-            local params = { textDocument = vim.lsp.util.make_text_document_params() }
-            local results_lsp = vim.lsp.buf_request_sync(0, "textDocument/documentSymbol", params, 3000)
-
-            if not results_lsp or vim.tbl_isempty(results_lsp) then
-              vim.notify("No LSP symbols found", vim.log.levels.WARN)
-              return
-            end
+            local results_lsp = fetch_lsp_symbols()
+            if not results_lsp then return end
 
             -- Process symbols maintaining document order
             local symbols = {}
             local function process_symbols(syms, level)
               level = level or 0
 
-              local sorted_syms = vim.deepcopy(syms)
-              table.sort(sorted_syms, function(a, b)
-                local line_a = 0
-                local line_b = 0
-
-                if a.location and a.location.range then
-                  line_a = a.location.range.start.line
-                elseif a.selectionRange then
-                  line_a = a.selectionRange.start.line
-                elseif a.range then
-                  line_a = a.range.start.line
-                end
-
-                if b.location and b.location.range then
-                  line_b = b.location.range.start.line
-                elseif b.selectionRange then
-                  line_b = b.selectionRange.start.line
-                elseif b.range then
-                  line_b = b.range.start.line
-                end
-
-                return line_a < line_b
-              end)
+              local sorted_syms = sort_symbols_by_line(syms)
 
               for _, symbol in ipairs(sorted_syms) do
                 local kind = symbol.kind or symbol.symbolKind or 1
                 local icon_info = symbol_icons[kind] or { icon = "", name = "Unknown" }
-
-                local line = 0
-                if symbol.location and symbol.location.range then
-                  line = symbol.location.range.start.line
-                elseif symbol.selectionRange then
-                  line = symbol.selectionRange.start.line
-                elseif symbol.range then
-                  line = symbol.range.start.line
-                end
+                local line = get_symbol_line(symbol)
 
                 table.insert(symbols, {
                   symbol = symbol,
@@ -730,8 +630,7 @@ return {
               end
             end
 
-            -- Process all symbols
-            for client_id, response in pairs(results_lsp) do
+            for _, response in pairs(results_lsp) do
               if response.result then
                 process_symbols(response.result)
               end
@@ -751,20 +650,20 @@ return {
             -- Create filter options
             local type_options = { { name = "All", count = #symbols, icon = "󰒺" } }
             local ordered_types = {
-              { name = "Class", icon = "󰠱" }, -- Class: Class icon
-              { name = "Interface", icon = "󰜰" }, -- Interface: Interface icon
-              { name = "Enum", icon = "󰕘" }, -- Enum: Enum icon
-              { name = "Function", icon = "󰡱" }, -- Function: Lambda/function icon
-              { name = "Method", icon = "󰊕" }, -- Method: Function icon with different style
-              { name = "Constructor", icon = "󰆧" }, -- Constructor: Constructor icon
-              { name = "Property", icon = "󰜢" }, -- Property: Property icon
-              { name = "Field", icon = "󰓹" }, -- Field: Field/variable icon
-              { name = "Variable", icon = "󰀫" }, -- Variable: Variable icon
-              { name = "Constant", icon = "󰏿" }, -- Constant: Constant icon
-              { name = "Module", icon = "󰏖" }, -- Module: Package/box icon
-              { name = "Namespace", icon = "󰌗" }, -- Namespace: Folder tree icon
-              { name = "Struct", icon = "󰙅" }, -- Struct: Struct icon
-              { name = "Event", icon = "󰉁" }, -- Event: Event/lightning icon
+              { name = "Class", icon = "󰠱" },
+              { name = "Interface", icon = "󰜰" },
+              { name = "Enum", icon = "󰕘" },
+              { name = "Function", icon = "󰡱" },
+              { name = "Method", icon = "󰊕" },
+              { name = "Constructor", icon = "󰆧" },
+              { name = "Property", icon = "󰜢" },
+              { name = "Field", icon = "󰓹" },
+              { name = "Variable", icon = "󰀫" },
+              { name = "Constant", icon = "󰏿" },
+              { name = "Module", icon = "󰏖" },
+              { name = "Namespace", icon = "󰌗" },
+              { name = "Struct", icon = "󰙅" },
+              { name = "Event", icon = "󰉁" },
             }
 
             for _, type_info in ipairs(ordered_types) do
@@ -786,29 +685,6 @@ return {
                 end, symbols)
               end
 
-              local function make_symbol_entry(entry)
-                -- Get the current buffer name for preview
-                local bufnr = vim.api.nvim_get_current_buf()
-                local filename = vim.api.nvim_buf_get_name(bufnr)
-
-                return {
-                  value = entry,
-                  display = string.format("%s%s %s", entry.indent, entry.icon, entry.name),
-                  ordinal = entry.name .. " " .. entry.type_name,
-                  symbol = entry.symbol,
-                  kind = entry.kind,
-                  type_name = entry.type_name,
-                  filename = filename,
-                  lnum = entry.line + 1,
-                  col = 1,
-                  bufnr = bufnr,
-                  -- Add these fields for proper preview navigation
-                  path = filename,
-                  row = entry.line + 1,
-                  start = entry.line + 1,
-                }
-              end
-
               pickers.new({}, {
                 prompt_title = "󰘦 Filtered Symbols - " .. filter_type .. " (" .. #filtered_symbols .. ")",
                 finder = finders.new_table({
@@ -816,41 +692,13 @@ return {
                   entry_maker = make_symbol_entry,
                 }),
                 sorter = conf.generic_sorter({}),
-                previewer = conf.grep_previewer({}), -- Use grep_previewer for line-aware preview
+                previewer = conf.grep_previewer({}),
                 initial_mode = "normal",
                 attach_mappings = function(prompt_bufnr, map)
                   actions.select_default:replace(function()
                     local selection = action_state.get_selected_entry()
                     actions.close(prompt_bufnr)
-
-                    if selection and selection.symbol then
-                      local symbol = selection.symbol
-                      local range = symbol.location and symbol.location.range
-                          or symbol.selectionRange
-                          or symbol.range
-
-                      if range then
-                        local line = range.start.line + 1
-                        local col = range.start.character
-
-                        vim.api.nvim_win_set_cursor(0, { line, col })
-                        vim.cmd("normal! zz")
-
-                        -- Visual feedback
-                        if vim.fn.has('nvim-0.9') == 1 then
-                          vim.cmd("normal! ^")
-                          local ns_id = vim.api.nvim_create_namespace("symbol_jump")
-                          vim.api.nvim_buf_add_highlight(0, ns_id, "Search", line - 1, 0, -1)
-                          vim.defer_fn(function()
-                            vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
-                          end, 150)
-                        end
-
-                        vim.notify(string.format("Jumped to %s: %s (line %d)",
-                            selection.type_name, selection.value.name, line),
-                          vim.log.levels.INFO)
-                      end
-                    end
+                    jump_to_symbol(selection)
                   end)
                   return true
                 end,
@@ -873,7 +721,6 @@ return {
               sorter = conf.generic_sorter({}),
               initial_mode = "normal",
               attach_mappings = function(prompt_bufnr, map)
-                -- Add proper Esc handling
                 map("i", "<Esc>", actions.close)
                 map("n", "<Esc>", actions.close)
                 map("n", "q", actions.close)
@@ -1014,15 +861,6 @@ return {
         max_width = 80,
         level = vim.log.levels.ERROR,
       })
-    end,
-  },
-  -- Enhanced yank highlighting with theme colors
-  {
-    "machakann/vim-highlightedyank",
-    event = "TextYankPost",
-    config = function()
-      -- Configure highlighted yank with no-clown-fiesta theme colors
-      vim.g.highlightedyank_highlight_duration = 200
     end,
   },
   -- nvim-scrollbar
@@ -1289,7 +1127,7 @@ return {
       require("cinnamon").setup({
         -- Enable both basic and extra keymaps for comprehensive smooth scrolling
         keymaps = {
-          basic = true,  -- Half-window, page, paragraph, search, cursor location movements
+          basic = false, -- Disabled: neoscroll.nvim handles C-u/C-d/C-f/C-b with finer control
           extra = false, -- Start/end of file/line, screen scrolling, up/down, left/right movements
         },
         options = {

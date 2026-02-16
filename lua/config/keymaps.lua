@@ -63,7 +63,7 @@ map("n", "<leader>br", function()
     return
   end
 
-  local modified = vim.api.nvim_buf_get_option(0, 'modified')
+  local modified = vim.bo[0].modified
   if modified then
     local choice = vim.fn.confirm(
       "Buffer has unsaved changes. Reset anyway?",
@@ -78,7 +78,7 @@ map("n", "<leader>br", function()
   vim.cmd("edit!")
 end, { desc = "Reset buffer (reload from disk)" })
 
-map("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Delete other buffers" })
+map("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Delete current buffer" })
 
 -- Terminal Impls
 map({ "n", "i", "v", "t" }, "<D-`>", function()
@@ -88,8 +88,7 @@ end, { desc = "Toggle terminal" })
 -- Improved redo
 map({ "n", "v" }, "U", "<C-r>", { desc = "Redo", silent = true })
 
-vim.keymap.set('n', '<C-Tab>', ':bnext<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<C-S-Tab>', ':bprevious<CR>', { noremap = true, silent = true })
+-- <C-Tab>/<C-S-Tab> handled by Cybu plugin (editor.lua)
 
 -- Code formatting
 map({ "n", "x" }, "<leader>fd", function()
@@ -688,8 +687,8 @@ local function save_all_modified()
   local buffers = vim.api.nvim_list_bufs()
 
   for _, buf in ipairs(buffers) do
-    if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_buf_get_option(buf, 'modified') then
-      local buftype = vim.api.nvim_buf_get_option(buf, 'buftype')
+    if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].modified then
+      local buftype = vim.bo[buf].buftype
       if buftype == '' then -- Only save normal file buffers
         local ok, err = pcall(function()
           vim.api.nvim_buf_call(buf, function()
@@ -717,10 +716,7 @@ end
 map({ "n", "i", "v" }, "<D-S-s>", save_all_modified,
   { desc = "Save all modified buffers", noremap = true, silent = true })
 
--- Background mode selector keymap
-map("n", "<leader>tt", function()
-  _G.telescope_background_picker()
-end, { desc = "Select background mode", silent = true })
+-- Background mode selector handled by ui.lua (<leader>tt)
 
 -- Toggle whitespace display
 map("n", "<leader>tw", function()
@@ -758,7 +754,7 @@ vim.keymap.set("n", "<BS>", "<CMD>Oil<CR>", { desc = "Open parent directory with
 -- Open workspace root in Oil
 vim.keymap.set("n", "<S-BS>", function()
   -- Use Neovim's LSP workspaceFolders or fallback to current working dir
-  local clients = vim.lsp.get_active_clients({ bufnr = 0 })
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
   local root = nil
   for _, client in ipairs(clients) do
     if client.config.root_dir then
