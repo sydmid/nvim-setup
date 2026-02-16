@@ -36,20 +36,38 @@ return {
         return orig_make_position_params(winnr, encoding or "utf-8")
       end
 
-      -- Configure diagnostics for Error Lens integration
-      -- Enhanced diagnostic configuration with Error Lens support
+      -- Native diagnostic display configuration (errors-only by default)
+      local diag_sign_icons = {
+        [vim.diagnostic.severity.ERROR] = " ",
+        [vim.diagnostic.severity.WARN] = " ",
+        [vim.diagnostic.severity.INFO] = " ",
+        [vim.diagnostic.severity.HINT] = " ",
+      }
+
+      local function diag_virt_format(diagnostic)
+        local icons = {
+          [vim.diagnostic.severity.ERROR] = "",
+          [vim.diagnostic.severity.WARN] = "",
+          [vim.diagnostic.severity.INFO] = "",
+          [vim.diagnostic.severity.HINT] = "",
+        }
+        local icon = icons[diagnostic.severity] or ""
+        local source = diagnostic.source and (" [" .. diagnostic.source .. "]") or ""
+        return string.format("%s %s%s", icon, diagnostic.message, source)
+      end
+
       vim.diagnostic.config({
-        virtual_text = false,                                -- Disabled - Error Lens handles inline display
-        signs = {
-          severity = { min = vim.diagnostic.severity.HINT }, -- Show all diagnostic signs
-          text = {
-            [vim.diagnostic.severity.ERROR] = " ",
-            [vim.diagnostic.severity.WARN] = " ",
-            [vim.diagnostic.severity.INFO] = " ",
-            [vim.diagnostic.severity.HINT] = " ",
-          }
+        virtual_text = {
+          severity = { min = vim.diagnostic.severity.ERROR },
+          spacing = 4,
+          prefix = "●",
+          format = diag_virt_format,
         },
-        underline = false, -- Disabled - No diagnostic underlines
+        signs = {
+          severity = { min = vim.diagnostic.severity.ERROR },
+          text = diag_sign_icons,
+        },
+        underline = false,
         update_in_insert = false,
         severity_sort = true,
         float = {
@@ -60,18 +78,160 @@ return {
           header = "",
           prefix = "",
           format = function(diagnostic)
-            -- Enhanced formatting for floating diagnostics
             local severity_map = {
               [vim.diagnostic.severity.ERROR] = "ERROR",
               [vim.diagnostic.severity.WARN] = "WARN",
               [vim.diagnostic.severity.INFO] = "INFO",
-              [vim.diagnostic.severity.HINT] = "HINT"
+              [vim.diagnostic.severity.HINT] = "HINT",
             }
             local severity = severity_map[diagnostic.severity] or "UNKNOWN"
             local code = diagnostic.code and string.format(" [%s]", diagnostic.code) or ""
             return string.format("%s: %s%s", severity, diagnostic.message, code)
           end,
         },
+      })
+
+      -- ============================================================
+      -- Diagnostic Severity Visibility Management
+      -- <leader>xv toggles which severities appear, resets on :cd
+      -- ============================================================
+
+      _G.diagnostic_severity_state = {
+        [vim.diagnostic.severity.ERROR] = true,
+        [vim.diagnostic.severity.WARN] = false,
+        [vim.diagnostic.severity.INFO] = false,
+        [vim.diagnostic.severity.HINT] = false,
+      }
+
+      local function get_active_severities()
+        local sevs = {}
+        for sev, active in pairs(_G.diagnostic_severity_state) do
+          if active then
+            table.insert(sevs, sev)
+          end
+        end
+        return sevs
+      end
+
+      local function apply_diagnostic_config()
+        local active = get_active_severities()
+
+        if #active == 0 then
+          vim.diagnostic.config({
+            virtual_text = false,
+            signs = false,
+          })
+        else
+          vim.diagnostic.config({
+            virtual_text = {
+              severity = active,
+              spacing = 4,
+              prefix = "●",
+              format = diag_virt_format,
+            },
+            signs = {
+              severity = active,
+              text = diag_sign_icons,
+            },
+          })
+        end
+
+        -- Force re-display for all loaded buffers
+        for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+          if vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_is_loaded(bufnr) then
+            for ns_id in pairs(vim.diagnostic.get_namespaces()) do
+              vim.diagnostic.show(ns_id, bufnr)
+            end
+          end
+        end
+      end
+
+      local function reset_diagnostic_defaults()
+        _G.diagnostic_severity_state = {
+          [vim.diagnostic.severity.ERROR] = true,
+          [vim.diagnostic.severity.WARN] = false,
+          [vim.diagnostic.severity.INFO] = false,
+          [vim.diagnostic.severity.HINT] = false,
+        }
+        apply_diagnostic_config()
+      end
+
+      -- Telescope picker: toggle diagnostic severity visibility
+      local function open_diagnostic_severity_picker(initial_idx)
+        if not pcall(require, "telescope") then
+          vim.notify("Telescope not available", vim.log.levels.WARN)
+          return
+        end
+
+        local pickers = require("telescope.pickers")
+        local finders = require("telescope.finders")
+        local conf = require("telescope.config").values
+        local actions = require("telescope.actions")
+        local action_state = require("telescope.actions.state")
+
+        local severity_items = {
+          { severity = vim.diagnostic.severity.ERROR, name = "Errors",   icon = " " },
+          { severity = vim.diagnostic.severity.WARN,  name = "Warnings", icon = " " },
+          { severity = vim.diagnostic.severity.INFO,  name = "Info",     icon = " " },
+          { severity = vim.diagnostic.severity.HINT,  name = "Hints",    icon = " " },
+        }
+
+        local entries = {}
+        for i, item in ipairs(severity_items) do
+          table.insert(entries, {
+            idx = i,
+            severity = item.severity,
+            name = item.name,
+            icon = item.icon,
+            active = _G.diagnostic_severity_state[item.severity],
+          })
+        end
+
+        pickers.new({}, {
+          prompt_title = "Diagnostic Visibility (Enter: toggle, Esc: close)",
+          initial_mode = "normal",
+          default_selection_index = initial_idx or 1,
+          finder = finders.new_table({
+            results = entries,
+            entry_maker = function(entry)
+              local indicator = entry.active and "[x]" or "[ ]"
+              return {
+                value = entry,
+                display = string.format("%s %s %s", indicator, entry.icon, entry.name),
+                ordinal = entry.name,
+              }
+            end,
+          }),
+          sorter = conf.generic_sorter({}),
+          attach_mappings = function(prompt_bufnr)
+            actions.select_default:replace(function()
+              local selection = action_state.get_selected_entry()
+              if selection then
+                local sev = selection.value.severity
+                local idx = selection.value.idx
+                _G.diagnostic_severity_state[sev] = not _G.diagnostic_severity_state[sev]
+                apply_diagnostic_config()
+                actions.close(prompt_bufnr)
+                vim.schedule(function()
+                  open_diagnostic_severity_picker(idx)
+                end)
+              end
+            end)
+            return true
+          end,
+        }):find()
+      end
+
+      vim.keymap.set("n", "<leader>xv", function()
+        open_diagnostic_severity_picker()
+      end, { desc = "Diagnostic visibility", silent = true })
+
+      -- Reset severity to errors-only on project change
+      vim.api.nvim_create_autocmd("DirChanged", {
+        group = vim.api.nvim_create_augroup("DiagnosticSeverityReset", { clear = true }),
+        callback = function()
+          reset_diagnostic_defaults()
+        end,
       })
 
       -- Configure LSP signature help with improved styling and fixed dimensions
@@ -823,9 +983,9 @@ return {
             vim.api.nvim_win_set_option(win, 'wrap', true)
             vim.api.nvim_win_set_option(win, 'linebreak', true)
 
-            -- Auto-close on buffer change or insert mode (removed CursorMoved for stability)
+            -- Auto-close when cursor moves or on buffer change / insert mode
             local group = vim.api.nvim_create_augroup('LineDiagnosticFloat', { clear = true })
-            vim.api.nvim_create_autocmd({ 'BufLeave', 'InsertEnter' }, {
+            vim.api.nvim_create_autocmd({ 'CursorMoved', 'BufLeave', 'InsertEnter' }, {
               group = group,
               buffer = vim.api.nvim_get_current_buf(),
               once = true,
@@ -872,28 +1032,31 @@ return {
             })
           end, { buffer = ev.buf, desc = "Buffer diagnostics" })
 
-          -- Enhanced diagnostic navigation that works with Error Lens
+          -- Diagnostic navigation (errors only)
           keymap("n", "]x", function()
             vim.diagnostic.goto_next({
               severity = { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR },
             })
-            if _G.ErrorLens and _G.ErrorLens.enabled then
-              vim.defer_fn(function()
-                _G.ErrorLens.refresh_current_buffer()
-              end, 50)
-            end
-          end, { buffer = ev.buf, desc = "Next error (with Error Lens sync)" })
+          end, { buffer = ev.buf, desc = "Next error" })
 
           keymap("n", "[x", function()
             vim.diagnostic.goto_prev({
               severity = { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR },
             })
-            if _G.ErrorLens and _G.ErrorLens.enabled then
-              vim.defer_fn(function()
-                _G.ErrorLens.refresh_current_buffer()
-              end, 50)
-            end
-          end, { buffer = ev.buf, desc = "Previous error (with Error Lens sync)" })
+          end, { buffer = ev.buf, desc = "Previous error" })
+
+          -- Diagnostic navigation (warnings and above)
+          keymap("n", "<leader>xj", function()
+            vim.diagnostic.goto_next({
+              severity = { min = vim.diagnostic.severity.WARN },
+            })
+          end, { buffer = ev.buf, desc = "Next warning or error" })
+
+          keymap("n", "<leader>xk", function()
+            vim.diagnostic.goto_prev({
+              severity = { min = vim.diagnostic.severity.WARN },
+            })
+          end, { buffer = ev.buf, desc = "Previous warning or error" })
         end,
       })
 
