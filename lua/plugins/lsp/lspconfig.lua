@@ -633,17 +633,14 @@ return {
                 title_pos = "center",
                 close_events = { "BufHidden" },
               })
-              local bufnr = {}
-              local winnr = {}
-              for _, client in ipairs(clients) do
-                if client.name == "roslyn" or client.name == "gopls" then
-                  local cleaned = normalize_hover(result.contents)
-                  local new_result = { contents = cleaned }
-                  -- Use default hover handler, but with cleaned contents
-                  bufnr, winnr = vim.lsp.handlers["textDocument/hover"](err, new_result, ctx, opts)
-                else
-                  bufnr, winnr = vim.lsp.handlers["textDocument/hover"](err, result, ctx, opts)
-                end
+              local bufnr, winnr
+              local client = vim.lsp.get_client_by_id(ctx.client_id)
+              if client and (client.name == "roslyn" or client.name == "gopls") then
+                local cleaned = normalize_hover(result.contents)
+                local new_result = { contents = cleaned }
+                bufnr, winnr = vim.lsp.handlers["textDocument/hover"](err, new_result, ctx, opts)
+              else
+                bufnr, winnr = vim.lsp.handlers["textDocument/hover"](err, result, ctx, opts)
               end
 
               if winnr and vim.api.nvim_win_is_valid(winnr) then
