@@ -654,6 +654,22 @@ return {
                       end
                     end, { buffer = original_buf, desc = "Focus hover window", nowait = true })
 
+                    -- Close hover on any cursor movement in the original buffer
+                    local hover_move_group = vim.api.nvim_create_augroup("LspHoverCursorClose_" .. winnr, { clear = true })
+                    vim.api.nvim_create_autocmd("CursorMoved", {
+                      group = hover_move_group,
+                      buffer = original_buf,
+                      callback = function()
+                        if vim.api.nvim_get_current_win() ~= winnr then
+                          if vim.api.nvim_win_is_valid(winnr) then
+                            vim.api.nvim_win_close(winnr, true)
+                          end
+                          pcall(vim.api.nvim_del_augroup_by_id, hover_move_group)
+                          return true
+                        end
+                      end,
+                    })
+
                     if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
                       vim.keymap.set('n', '<Esc>', function()
                         if vim.api.nvim_win_is_valid(winnr) then
