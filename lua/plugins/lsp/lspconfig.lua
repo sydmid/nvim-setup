@@ -272,6 +272,7 @@ return {
           pcall(vim.keymap.del, "i", "<Tab>", { buffer = sig_state.src_buf })
           pcall(vim.keymap.del, "n", "<S-Tab>", { buffer = sig_state.src_buf })
           pcall(vim.keymap.del, "i", "<S-Tab>", { buffer = sig_state.src_buf })
+          pcall(vim.keymap.del, "n", "<Esc>", { buffer = sig_state.src_buf })
         end
         sig_state.winnr = nil
         sig_state.total = 0
@@ -321,23 +322,32 @@ return {
           sig_state.active = active
           sig_state.src_buf = src_buf
 
-          if winnr and vim.api.nvim_win_is_valid(winnr) and total > 1 then
-            -- Buffer-local Tab/S-Tab for overload cycling (auto-removed on window close)
-            vim.keymap.set({ "n", "i" }, "<Tab>", function()
+          if winnr and vim.api.nvim_win_is_valid(winnr) then
+            -- Esc in normal mode closes signature help
+            vim.keymap.set("n", "<Esc>", function()
               if sig_state.winnr and vim.api.nvim_win_is_valid(sig_state.winnr) then
-                local next_idx = (sig_state.active + 1) % sig_state.total
-                show_signature_with_index(next_idx)
+                vim.api.nvim_win_close(sig_state.winnr, true)
               end
-            end, { buffer = src_buf, desc = "Next signature overload", silent = true })
+            end, { buffer = src_buf, desc = "Close signature help", silent = true })
 
-            vim.keymap.set({ "n", "i" }, "<S-Tab>", function()
-              if sig_state.winnr and vim.api.nvim_win_is_valid(sig_state.winnr) then
-                local prev_idx = sig_state.active > 0 and sig_state.active - 1 or sig_state.total - 1
-                show_signature_with_index(prev_idx)
-              end
-            end, { buffer = src_buf, desc = "Previous signature overload", silent = true })
+            if total > 1 then
+              -- Buffer-local Tab/S-Tab for overload cycling (auto-removed on window close)
+              vim.keymap.set({ "n", "i" }, "<Tab>", function()
+                if sig_state.winnr and vim.api.nvim_win_is_valid(sig_state.winnr) then
+                  local next_idx = (sig_state.active + 1) % sig_state.total
+                  show_signature_with_index(next_idx)
+                end
+              end, { buffer = src_buf, desc = "Next signature overload", silent = true })
 
-            -- Clean up Tab/S-Tab overrides when signature window closes
+              vim.keymap.set({ "n", "i" }, "<S-Tab>", function()
+                if sig_state.winnr and vim.api.nvim_win_is_valid(sig_state.winnr) then
+                  local prev_idx = sig_state.active > 0 and sig_state.active - 1 or sig_state.total - 1
+                  show_signature_with_index(prev_idx)
+                end
+              end, { buffer = src_buf, desc = "Previous signature overload", silent = true })
+            end
+
+            -- Clean up all overrides when signature window closes
             vim.api.nvim_create_autocmd("WinClosed", {
               pattern = tostring(winnr),
               once = true,
