@@ -5,6 +5,15 @@ return {
 		"lewis6991/gitsigns.nvim",
 		event = { "BufReadPre", "BufNewFile" },
 		opts = {
+			current_line_blame = true,
+			current_line_blame_opts = {
+				virt_text = true,
+				virt_text_pos = "eol",
+				delay = 300,
+				ignore_whitespace = true,
+				virt_text_priority = 100,
+			},
+			current_line_blame_formatter = " <author>, <author_time:%R> - <summary>",
 			on_attach = function(bufnr)
 				local gs = package.loaded.gitsigns
 
@@ -87,6 +96,9 @@ return {
 						end
 					end, 100) -- Small delay to ensure diff is set up
 				end, "Diff this ~")
+
+				-- Toggle inline blame
+				map("n", "<leader>gn", gs.toggle_current_line_blame, "Toggle line blame")
 
 				-- Text object
 				map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", "GitSigns select hunk")
@@ -589,6 +601,195 @@ return {
 
 			-- Additional keymaps for comprehensive Git workflow
 			-- Note: <leader>gg is already defined in keys table above
+		end,
+	},
+
+	-- Diffview.nvim - VS Code-like side-by-side diff, file history, and merge tool
+	{
+		"sindrets/diffview.nvim",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		cmd = {
+			"DiffviewOpen",
+			"DiffviewClose",
+			"DiffviewToggleFiles",
+			"DiffviewFocusFiles",
+			"DiffviewFileHistory",
+			"DiffviewRefresh",
+		},
+		keys = {
+			{ "<leader>gv", "<cmd>DiffviewOpen<cr>", desc = "Diffview: open (vs HEAD)" },
+			{ "<leader>gV", "<cmd>DiffviewOpen main<cr>", desc = "Diffview: open (vs main)" },
+			{ "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", desc = "Diffview: file history" },
+			{ "<leader>gH", "<cmd>DiffviewFileHistory<cr>", desc = "Diffview: repo history" },
+			{ "<leader>gm", "<cmd>DiffviewOpen<cr>", desc = "Diffview: merge tool" },
+			{ "<leader>gq", "<cmd>DiffviewClose<cr>", desc = "Diffview: close" },
+		},
+		config = function()
+			local actions = require("diffview.actions")
+			require("diffview").setup({
+				diff_binaries = false,
+				enhanced_diff_hl = true,
+				use_icons = true,
+				show_help_hints = true,
+				watch_index = true,
+
+				icons = {
+					folder_closed = "",
+					folder_open = "",
+				},
+				signs = {
+					fold_closed = "",
+					fold_open = "",
+					done = "✓",
+				},
+
+				view = {
+					default = {
+						layout = "diff2_horizontal",
+						disable_diagnostics = true,
+						winbar_info = true,
+					},
+					merge_tool = {
+						layout = "diff3_horizontal",
+						disable_diagnostics = true,
+						winbar_info = true,
+					},
+					file_history = {
+						layout = "diff2_horizontal",
+						disable_diagnostics = true,
+						winbar_info = true,
+					},
+				},
+
+				file_panel = {
+					listing_style = "tree",
+					tree_options = {
+						flatten_dirs = true,
+						folder_statuses = "only_folded",
+					},
+					win_config = {
+						position = "left",
+						width = 35,
+						win_opts = {},
+					},
+				},
+
+				file_history_panel = {
+					log_options = {
+						git = {
+							single_file = {
+								diff_merges = "combined",
+								follow = true,
+							},
+							multi_file = {
+								diff_merges = "first-parent",
+							},
+						},
+					},
+					win_config = {
+						position = "bottom",
+						height = 16,
+						win_opts = {},
+					},
+				},
+
+				keymaps = {
+					disable_defaults = false,
+					view = {
+						{ "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Close Diffview" } },
+						{ "n", "<Esc>", "<cmd>DiffviewClose<cr>", { desc = "Close Diffview" } },
+						{ "n", "<leader>e", actions.focus_files, { desc = "Focus file panel" } },
+						{ "n", "<leader>b", actions.toggle_files, { desc = "Toggle file panel" } },
+					},
+					file_panel = {
+						{ "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Close Diffview" } },
+						{ "n", "<Esc>", "<cmd>DiffviewClose<cr>", { desc = "Close Diffview" } },
+						{ "n", "j", actions.next_entry, { desc = "Next file" } },
+						{ "n", "k", actions.prev_entry, { desc = "Prev file" } },
+						{ "n", "<cr>", actions.select_entry, { desc = "Open diff" } },
+						{ "n", "s", actions.toggle_stage_entry, { desc = "Stage/unstage file" } },
+						{ "n", "S", actions.stage_all, { desc = "Stage all" } },
+						{ "n", "U", actions.unstage_all, { desc = "Unstage all" } },
+						{ "n", "X", actions.restore_entry, { desc = "Discard changes" } },
+						{ "n", "R", actions.refresh_files, { desc = "Refresh" } },
+						{ "n", "L", actions.open_commit_log, { desc = "Open commit log" } },
+						{ "n", "<leader>e", actions.focus_files, { desc = "Focus file panel" } },
+						{ "n", "<leader>b", actions.toggle_files, { desc = "Toggle file panel" } },
+					},
+					file_history_panel = {
+						{ "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Close Diffview" } },
+						{ "n", "<Esc>", "<cmd>DiffviewClose<cr>", { desc = "Close Diffview" } },
+						{ "n", "j", actions.next_entry, { desc = "Next entry" } },
+						{ "n", "k", actions.prev_entry, { desc = "Prev entry" } },
+						{ "n", "<cr>", actions.select_entry, { desc = "Open diff" } },
+						{ "n", "!", actions.options, { desc = "Open options" } },
+						{ "n", "L", actions.open_commit_log, { desc = "Open commit log" } },
+						{ "n", "y", actions.copy_hash, { desc = "Copy commit hash" } },
+						{ "n", "zR", actions.open_all_folds, { desc = "Open all folds" } },
+						{ "n", "zM", actions.close_all_folds, { desc = "Close all folds" } },
+					},
+				},
+			})
+		end,
+	},
+
+	-- git-conflict.nvim - VS Code-style inline merge conflict resolution
+	{
+		"akinsho/git-conflict.nvim",
+		version = "*",
+		event = "BufReadPre",
+		config = function()
+			require("git-conflict").setup({
+				default_mappings = false,
+				default_commands = true,
+				disable_diagnostics = true,
+				list_opener = "copen",
+				highlights = {
+					incoming = "DiffAdd",
+					current = "DiffText",
+				},
+			})
+
+			vim.keymap.set("n", "<leader>gco", "<cmd>GitConflictChooseOurs<cr>", { desc = "Conflict: accept current (ours)" })
+			vim.keymap.set("n", "<leader>gct", "<cmd>GitConflictChooseTheirs<cr>", { desc = "Conflict: accept incoming (theirs)" })
+			vim.keymap.set("n", "<leader>gcb", "<cmd>GitConflictChooseBoth<cr>", { desc = "Conflict: accept both" })
+			vim.keymap.set("n", "<leader>gcn", "<cmd>GitConflictChooseNone<cr>", { desc = "Conflict: accept none" })
+			vim.keymap.set("n", "<leader>gcl", "<cmd>GitConflictListQf<cr>", { desc = "Conflict: list all conflicts" })
+			vim.keymap.set("n", "]X", "<cmd>GitConflictNextConflict<cr>", { desc = "Next git conflict" })
+			vim.keymap.set("n", "[X", "<cmd>GitConflictPrevConflict<cr>", { desc = "Prev git conflict" })
+		end,
+	},
+
+	-- gitlinker.nvim - Generate and copy shareable git URLs
+	{
+		"ruifm/gitlinker.nvim",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		keys = {
+			{
+				"<leader>gy",
+				function()
+					require("gitlinker").get_buf_range_url("n")
+				end,
+				mode = "n",
+				desc = "Copy git URL to clipboard",
+			},
+			{
+				"<leader>gy",
+				function()
+					require("gitlinker").get_buf_range_url("v")
+				end,
+				mode = "v",
+				desc = "Copy git URL for selection",
+			},
+		},
+		config = function()
+			require("gitlinker").setup({
+				opts = {
+					action_callback = require("gitlinker.actions").copy_to_clipboard,
+					print_url = true,
+				},
+				mappings = nil,
+			})
 		end,
 	},
 }

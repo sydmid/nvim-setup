@@ -827,6 +827,7 @@ return {
         { "<leader>c",  group = "Context/Code-Actions" },
         { "<leader>f",  group = "File/Find" },
         { "<leader>g",  group = "Git/Goto" },
+        { "<leader>gc", group = "Conflicts" },
         { "<leader>h",  group = "Hunks/Git-Stage" },
         { "<leader>j",  group = "Jump" },
         { "<leader>k",  group = "Jump/Flash" },
