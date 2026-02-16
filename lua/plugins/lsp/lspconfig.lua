@@ -234,29 +234,18 @@ return {
         end,
       })
 
-      -- Configure LSP signature help with improved styling and fixed dimensions
+      -- Configure LSP signature help
       vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
         border = "rounded",
-        focusable = true,                                -- Make it focusable for navigation
+        focusable = false,
         silent = true,
-        close_events = { "BufHidden", "InsertCharPre" }, -- Remove CursorMoved to keep it open
+        close_events = { "CursorMoved", "BufHidden", "InsertLeave" },
         max_width = 80,
         max_height = 15,
         wrap = true,
-        -- Custom styling
         style = "minimal",
-        -- Position the window near the cursor
-        anchor_bias = "below",
-        -- Force window dimensions
-        width = 80,
-        height = 15,
-        -- Additional styling options
         title = " Signature Help ",
         title_pos = "center",
-        -- Window position
-        relative = "cursor",
-        row = 1,
-        col = 0,
       })
 
       -- Configure LSP hover with consistent styling
@@ -269,82 +258,99 @@ return {
         wrap = true,
         title = " Documentation ",
         title_pos = "center",
-        close_events = { "BufHidden" }, -- Only close when leaving buffer, not on cursor movement
+        close_events = { "CursorMoved", "BufHidden" },
       })
 
 
 
-      -- Custom signature help function with better window management and focus support
-      local function show_signature_help()
+      -- Stateful signature help with Tab/S-Tab overload cycling
+      local sig_state = { winnr = nil, total = 0, active = 0, src_buf = nil }
+
+      local function sig_cleanup()
+        if sig_state.src_buf and vim.api.nvim_buf_is_valid(sig_state.src_buf) then
+          pcall(vim.keymap.del, "n", "<Tab>", { buffer = sig_state.src_buf })
+          pcall(vim.keymap.del, "i", "<Tab>", { buffer = sig_state.src_buf })
+          pcall(vim.keymap.del, "n", "<S-Tab>", { buffer = sig_state.src_buf })
+          pcall(vim.keymap.del, "i", "<S-Tab>", { buffer = sig_state.src_buf })
+        end
+        sig_state.winnr = nil
+        sig_state.total = 0
+        sig_state.active = 0
+        sig_state.src_buf = nil
+      end
+
+      local function show_signature_with_index(override_index)
         local params = vim.lsp.util.make_position_params()
-        vim.lsp.buf_request(0, 'textDocument/signatureHelp', params, function(err, result, ctx, config)
+        vim.lsp.buf_request(0, "textDocument/signatureHelp", params, function(err, result, ctx, config)
           if err or not result or not result.signatures or #result.signatures == 0 then
             return
           end
 
-          -- Custom window configuration with enhanced focus management
-          local opts = {
+          if override_index then
+            result.activeSignature = override_index
+          end
+
+          local active = result.activeSignature or 0
+          local total = #result.signatures
+          local title = total > 1
+            and string.format(" Signature Help (%d/%d) ", active + 1, total)
+            or " Signature Help "
+
+          local opts = vim.tbl_extend("force", config or {}, {
             border = "rounded",
-            focusable = true,
+            focusable = false,
             style = "minimal",
             max_width = 80,
             max_height = 15,
             wrap = true,
-            title = " Signature Help ",
+            title = title,
             title_pos = "center",
-            close_events = { "BufHidden" },
-          }
+            close_events = { "CursorMoved", "BufHidden", "InsertLeave" },
+          })
 
-          local bufnr, winnr = vim.lsp.handlers["textDocument/signatureHelp"](err, result, ctx,
-            vim.tbl_extend("force", config or {}, opts))
+          local _, winnr = vim.lsp.handlers["textDocument/signatureHelp"](err, result, ctx, opts)
 
-          -- Ensure the signature help window is focusable and can be navigated
-          if winnr and vim.api.nvim_win_is_valid(winnr) then
-            -- Set up keymaps for focusing and navigation
-            vim.defer_fn(function()
-              if vim.api.nvim_win_is_valid(winnr) then
-                -- Allow focusing the signature help window with Tab
-                vim.keymap.set('n', '<Tab>', function()
-                    vim.api.nvim_set_current_win(winnr)
-                  end,
-                  { buffer = vim.api.nvim_get_current_buf(), desc = "Focus signature help window", nowait = true })
+          -- Clean up previous state before setting new
+          if sig_state.winnr and sig_state.winnr ~= winnr and vim.api.nvim_win_is_valid(sig_state.winnr) then
+            pcall(vim.api.nvim_win_close, sig_state.winnr, true)
+          end
 
-                vim.keymap.set('i', '<Tab>', function()
-                    vim.api.nvim_set_current_win(winnr)
-                  end,
-                  { buffer = vim.api.nvim_get_current_buf(), desc = "Focus signature help window", nowait = true })
+          local src_buf = vim.api.nvim_get_current_buf()
+          sig_state.winnr = winnr
+          sig_state.total = total
+          sig_state.active = active
+          sig_state.src_buf = src_buf
 
-                -- Set up keymaps within the signature help window for navigation
-                if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
-                  vim.keymap.set('n', '<Esc>', function()
-                    if vim.api.nvim_win_is_valid(winnr) then
-                      vim.api.nvim_win_close(winnr, true)
-                    end
-                  end, { buffer = bufnr, nowait = true })
-
-                  vim.keymap.set('n', 'q', function()
-                    if vim.api.nvim_win_is_valid(winnr) then
-                      vim.api.nvim_win_close(winnr, true)
-                    end
-                  end, { buffer = bufnr, nowait = true })
-
-                  -- Allow scrolling within the signature help window
-                  vim.keymap.set('n', 'j', function()
-                    vim.api.nvim_win_call(winnr, function()
-                      vim.cmd('normal! j')
-                    end)
-                  end, { buffer = bufnr, nowait = true })
-
-                  vim.keymap.set('n', 'k', function()
-                    vim.api.nvim_win_call(winnr, function()
-                      vim.cmd('normal! k')
-                    end)
-                  end, { buffer = bufnr, nowait = true })
-                end
+          if winnr and vim.api.nvim_win_is_valid(winnr) and total > 1 then
+            -- Buffer-local Tab/S-Tab for overload cycling (auto-removed on window close)
+            vim.keymap.set({ "n", "i" }, "<Tab>", function()
+              if sig_state.winnr and vim.api.nvim_win_is_valid(sig_state.winnr) then
+                local next_idx = (sig_state.active + 1) % sig_state.total
+                show_signature_with_index(next_idx)
               end
-            end, 10)
+            end, { buffer = src_buf, desc = "Next signature overload", silent = true })
+
+            vim.keymap.set({ "n", "i" }, "<S-Tab>", function()
+              if sig_state.winnr and vim.api.nvim_win_is_valid(sig_state.winnr) then
+                local prev_idx = sig_state.active > 0 and sig_state.active - 1 or sig_state.total - 1
+                show_signature_with_index(prev_idx)
+              end
+            end, { buffer = src_buf, desc = "Previous signature overload", silent = true })
+
+            -- Clean up Tab/S-Tab overrides when signature window closes
+            vim.api.nvim_create_autocmd("WinClosed", {
+              pattern = tostring(winnr),
+              once = true,
+              callback = function()
+                sig_cleanup()
+              end,
+            })
           end
         end)
+      end
+
+      local function show_signature_help()
+        show_signature_with_index(nil)
       end
 
       -- Setup LSP
@@ -631,15 +637,11 @@ return {
           keymap("n", "<leader>pt", "<cmd>Lspsaga peek_type_definition<CR>",
             { buffer = ev.buf, desc = "[p]eek [t]ype definition" })
 
-          -- Manual signature help triggers (auto-suggestions disabled)
-          -- Use <D-S-i> (Cmd+Shift+I) to manually show function signatures when needed
-          keymap("n", "<D-S-i>", function()
+          -- Signature help: <D-S-i> in both normal and insert mode
+          keymap({ "n", "i" }, "<D-S-i>", function()
             show_signature_help()
-          end, { buffer = ev.buf, desc = "Show method signature (manual & focusable)", silent = true })
+          end, { buffer = ev.buf, desc = "Show signature help", silent = true })
 
-          keymap("i", "<D-S-i>", function()
-            show_signature_help()
-          end, { buffer = ev.buf, desc = "Show method signature (manual & focusable)", silent = true })
 
           -- Signature help navigation between overloads
           keymap("i", "<C-k>", function()
