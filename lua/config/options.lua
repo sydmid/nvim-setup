@@ -40,7 +40,7 @@ opt.smartindent = true -- Smart autoindenting
 
 -- Folding settings
 opt.foldmethod = "expr"                     -- Use expression for folding
-opt.foldexpr = "nvim_treesitter#foldexpr()" -- Use treesitter for folding
+opt.foldexpr = "v:lua.vim.treesitter.foldexpr()" -- Use built-in treesitter folding (Neovim 0.10+)
 opt.foldlevel = 99                          -- Start with all folds open
 opt.foldenable = true                       -- Enable folding
 opt.foldlevelstart = 99                     -- Start with all folds open
@@ -122,7 +122,7 @@ opt.pumblend = 0
 opt.pumheight = 15
 opt.redrawtime = 1500
 opt.ruler = true
-opt.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+opt.sessionoptions = "blank,buffers,curdir,help,tabpages,winsize,winpos,terminal,localoptions"
 opt.shada = "!,'500,<50,@100,s10,h"
 opt.shortmess = "aoOTIcF"
 opt.showbreak = "↳  "
@@ -139,7 +139,7 @@ opt.timeout = true
 opt.ttimeout = true
 opt.undofile = true
 -- Please do NOT set `updatetime` to above 500, otherwise most plugins may not function correctly
-opt.viewoptions = "folds,cursor,curdir,slash,unix"
+opt.viewoptions = "cursor,curdir,slash,unix"
 opt.virtualedit = "block"
 opt.whichwrap = "h,l,<,>,[,],~"
 opt.wildignore =

@@ -57,12 +57,6 @@ return {
             node_decremental = "<C-backspace>",
           },
         },
-        -- Enable folding with treesitter
-        fold = {
-          enable = true,
-          -- Disable for HTML initially to allow custom folding
-          disable = {},
-        },
         textobjects = {
           select = {
             enable = true,

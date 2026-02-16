@@ -705,11 +705,7 @@ return {
       suppressed_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
       allowed_dirs = nil,                       -- Allow session restore/create in certain directories
       auto_session_enable_last_session = false,
-      pre_save_cmds = { "silent! normal! zx" }, -- optional: recompute folds
-      session_lens = {
-        -- optional
-      },
-      session_options = { "buffers", "curdir", "folds", "winsize" } -- <--- important
+      session_options = { "buffers", "curdir", "winsize" } -- <--- important
       -- log_level = 'debug',
     },
   },

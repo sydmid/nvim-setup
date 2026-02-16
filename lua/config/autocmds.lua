@@ -82,3 +82,20 @@ autocmd({ "FocusGained", "BufEnter" }, {
 --   end,
 --   desc = "Force cursor blinking configuration",
 -- })
+
+-- Fix: reset foldlevel on buffer display to prevent collapsed folds
+-- (covers LSP navigation, session restore, file pickers, etc.)
+augroup("TreesitterFoldFix", { clear = true })
+autocmd("BufWinEnter", {
+  group = "TreesitterFoldFix",
+  callback = function()
+    if vim.wo.foldmethod == "expr" then
+      vim.schedule(function()
+        local buf = vim.api.nvim_get_current_buf()
+        if not vim.api.nvim_buf_is_valid(buf) then return end
+        if vim.bo[buf].buftype ~= "" then return end
+        vim.wo.foldlevel = 99
+      end)
+    end
+  end,
+})
