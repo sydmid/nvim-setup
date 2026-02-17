@@ -45,7 +45,7 @@ return {
       },
     },
     symbol_in_winbar = {
-      enable = true,
+      enable = false, -- Disabled: barbecue.nvim handles the winbar/breadcrumbs
       separator = " › ",
       hide_keyword = true,
       show_file = true,

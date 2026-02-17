@@ -411,6 +411,7 @@ return {
           priority = 10,
           use_treesitter = false, -- Keep false for better performance
           chars = { "│" }, -- Simple vertical line character
+          style = { { fg = "#3a3a3a" } }, -- Dark subtle color for indent guides
           ahead_lines = 5, -- Preview range
           delay = 100, -- Throttle delay for smooth scrolling
           exclude_filetypes = {
