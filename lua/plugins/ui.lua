@@ -112,6 +112,9 @@ function _G.apply_theme(theme_name)
   elseif theme_name == "modus_vivendi" then
     vim.opt.background = "dark"
     vim.cmd.colorscheme("modus_vivendi")
+  elseif theme_name == "github_dark_default" then
+    vim.opt.background = "dark"
+    vim.cmd.colorscheme("github_dark_default")
   else
     require("bearded").setup({ flavor = "arc" })
     vim.opt.background = "dark"
@@ -139,12 +142,14 @@ function _G.telescope_theme_picker()
     bearded = "Bearded Arc",
     zenwritten = "Zenwritten (Mono)",
     modus_vivendi = "Modus Vivendi",
+    github_dark_default = "GitHub Dark",
   }
 
   local themes = {
     { name = "Bearded Arc", value = "bearded", desc = "Colorful dark theme with vibrant syntax" },
     { name = "Zenwritten (Mono)", value = "zenwritten", desc = "Elegant monochrome with warm tints" },
     { name = "Modus Vivendi", value = "modus_vivendi", desc = "Accessible dark theme with high contrast" },
+    { name = "GitHub Dark", value = "github_dark_default", desc = "GitHub's official dark color scheme" },
   }
 
   pickers.new({}, {
@@ -418,6 +423,9 @@ return {
       elseif _G.current_theme == "modus_vivendi" then
         vim.opt.background = "dark"
         vim.cmd.colorscheme("modus_vivendi")
+      elseif _G.current_theme == "github_dark_default" then
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("github_dark_default")
       else
         vim.opt.background = "dark"
         vim.cmd.colorscheme("bearded")
@@ -428,7 +436,7 @@ return {
 
       -- Create autocmd to reapply background highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = { "bearded", "zenwritten", "modus_vivendi" },
+        pattern = { "bearded", "zenwritten", "modus_vivendi", "github_dark_default" },
         group = vim.api.nvim_create_augroup("AyuBackground", { clear = true }),
         callback = function()
           -- Reapply current background mode
@@ -476,6 +484,11 @@ return {
   -- Modus Themes: accessible high-contrast themes (Emacs port)
   {
     "miikanissi/modus-themes.nvim",
+    lazy = true,
+  },
+  -- GitHub Theme: official GitHub color schemes
+  {
+    "projekt0n/github-nvim-theme",
     lazy = true,
   },
   -- Highlight yanked text with enhanced styling
