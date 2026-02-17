@@ -366,8 +366,9 @@ return {
       -- Setup LSP
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      -- Disable signature help capability to prevent auto-suggestions
-      capabilities.textDocument.signatureHelp = nil
+      -- NOTE: signatureHelp capability is kept enabled for manual invocation (D-S-i).
+      -- Auto-popup is already disabled by Noice (signature.auto_open.enabled = false)
+      -- and by close_events in the handler config.
 
       local lspconfig = require("lspconfig")
       local mason_lspconfig = require("mason-lspconfig")
@@ -870,6 +871,20 @@ return {
                           end)
                         end
                       end, { buffer = bufnr, nowait = true, silent = true })
+
+                      -- Open URL under cursor in hover window
+                      vim.keymap.set('n', 'gx', function()
+                        local word = vim.fn.expand('<cWORD>')
+                        -- Strip surrounding markdown link syntax like [text](url) or <url>
+                        local url = word:match('%((.-)%)') or word:match('<(.-)>') or word
+                        -- Match http(s) URLs
+                        url = url:match('https?://[%w%-%.%_%~%:%/%?#%[%]@!%$&\'%(%)%*%+,;%%=]+')
+                        if url then
+                          vim.ui.open(url)
+                        else
+                          vim.notify('No URL found under cursor', vim.log.levels.WARN)
+                        end
+                      end, { buffer = bufnr, nowait = true, silent = true, desc = 'Open URL under cursor' })
 
                       vim.keymap.set('n', '<Esc>', function()
                         if vim.api.nvim_win_is_valid(winnr) then

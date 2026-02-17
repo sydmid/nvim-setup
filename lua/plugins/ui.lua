@@ -78,6 +78,107 @@ function _G.toggle_background_mode()
   _G.set_background_mode(next_index)
 end
 
+-- Theme preference persistence
+_G.current_theme = "bearded" -- default theme
+
+function _G.save_theme_preference()
+  local theme_file = vim.fn.stdpath("data") .. "/theme_preference.lua"
+  local file = io.open(theme_file, "w")
+  if file then
+    file:write("return {\n")
+    file:write('  theme = "' .. _G.current_theme .. '"\n')
+    file:write("}\n")
+    file:close()
+  end
+end
+
+function _G.load_theme_preference()
+  local theme_file = vim.fn.stdpath("data") .. "/theme_preference.lua"
+  if vim.fn.filereadable(theme_file) == 1 then
+    local ok, prefs = pcall(dofile, theme_file)
+    if ok and prefs and prefs.theme then
+      _G.current_theme = prefs.theme
+    end
+  end
+end
+
+function _G.apply_theme(theme_name)
+  _G.current_theme = theme_name
+  _G.save_theme_preference()
+
+  if theme_name == "zenwritten" then
+    vim.opt.background = "dark"
+    vim.cmd.colorscheme("zenwritten")
+  elseif theme_name == "modus_vivendi" then
+    vim.opt.background = "dark"
+    vim.cmd.colorscheme("modus_vivendi")
+  else
+    require("bearded").setup({ flavor = "arc" })
+    vim.opt.background = "dark"
+    vim.cmd.colorscheme("bearded")
+  end
+
+  -- Reapply background mode on top of the new theme
+  _G.set_background_mode(_G.current_bg_index)
+end
+
+-- Function to create a Telescope theme picker
+function _G.telescope_theme_picker()
+  if not pcall(require, "telescope") then
+    vim.notify("Telescope not available", vim.log.levels.WARN)
+    return
+  end
+
+  local pickers = require("telescope.pickers")
+  local finders = require("telescope.finders")
+  local conf = require("telescope.config").values
+  local actions = require("telescope.actions")
+  local action_state = require("telescope.actions.state")
+
+  local theme_labels = {
+    bearded = "Bearded Arc",
+    zenwritten = "Zenwritten (Mono)",
+    modus_vivendi = "Modus Vivendi",
+  }
+
+  local themes = {
+    { name = "Bearded Arc", value = "bearded", desc = "Colorful dark theme with vibrant syntax" },
+    { name = "Zenwritten (Mono)", value = "zenwritten", desc = "Elegant monochrome with warm tints" },
+    { name = "Modus Vivendi", value = "modus_vivendi", desc = "Accessible dark theme with high contrast" },
+  }
+
+  pickers.new({}, {
+    prompt_title = "Theme Selector (Current: " .. (theme_labels[_G.current_theme] or "Bearded Arc") .. ")",
+    initial_mode = "insert",
+    finder = finders.new_table({
+      results = themes,
+      entry_maker = function(entry)
+        local display_text = entry.name .. " — " .. entry.desc
+        if entry.value == _G.current_theme then
+          display_text = "✓ " .. display_text .. " 🎯 (CURRENT)"
+        end
+        return {
+          value = entry.value,
+          display = display_text,
+          ordinal = entry.name,
+        }
+      end,
+    }),
+    sorter = conf.generic_sorter({}),
+    attach_mappings = function(prompt_bufnr, map)
+      actions.select_default:replace(function()
+        actions.close(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        if selection then
+          _G.apply_theme(selection.value)
+          vim.notify("Theme: " .. (theme_labels[selection.value] or selection.value), vim.log.levels.INFO)
+        end
+      end)
+      return true
+    end,
+  }):find()
+end
+
 -- Function to save background preference
 function _G.save_background_preference()
   local bg_file = vim.fn.stdpath("data") .. "/background_preference.lua"
@@ -302,22 +403,32 @@ return {
     lazy = false,
     name = "bearded",
     config = function()
-      -- Load saved background preference
+      -- Load saved preferences
       _G.load_background_preference()
-    require("bearded").setup({
-      flavor = "arc", -- any flavor slug
-    })
+      _G.load_theme_preference()
 
-      -- Set the colorscheme
-      vim.opt.background = "dark"
-      vim.cmd.colorscheme("bearded")
+      require("bearded").setup({
+        flavor = "arc", -- any flavor slug
+      })
+
+      -- Apply saved theme
+      if _G.current_theme == "zenwritten" then
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("zenwritten")
+      elseif _G.current_theme == "modus_vivendi" then
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("modus_vivendi")
+      else
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("bearded")
+      end
 
       -- Apply the current background mode
       _G.set_background_mode(_G.current_bg_index)
 
       -- Create autocmd to reapply background highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = "bearded",
+        pattern = { "bearded", "zenwritten", "modus_vivendi" },
         group = vim.api.nvim_create_augroup("AyuBackground", { clear = true }),
         callback = function()
           -- Reapply current background mode
@@ -349,8 +460,23 @@ return {
       vim.keymap.set("n", "<leader>tt", function()
         _G.telescope_background_picker()
       end, { desc = "Change Background", silent = true })
+
+      vim.keymap.set("n", "<leader>tT", function()
+        _G.telescope_theme_picker()
+      end, { desc = "Change Theme", silent = true })
     end,
     lazy = false
+  },
+  -- Zenbones: elegant monochrome theme family (zenwritten flavor)
+  {
+    "zenbones-theme/zenbones.nvim",
+    lazy = true,
+    dependencies = { "rktjmp/lush.nvim" },
+  },
+  -- Modus Themes: accessible high-contrast themes (Emacs port)
+  {
+    "miikanissi/modus-themes.nvim",
+    lazy = true,
   },
   -- Highlight yanked text with enhanced styling
   {
