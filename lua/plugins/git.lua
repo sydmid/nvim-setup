@@ -622,7 +622,6 @@ return {
 			{ "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", desc = "Diffview: file history" },
 			{ "<leader>gH", "<cmd>DiffviewFileHistory<cr>", desc = "Diffview: repo history" },
 			{ "<leader>gm", "<cmd>DiffviewOpen<cr>", desc = "Diffview: merge tool" },
-			{ "<leader>gq", "<cmd>DiffviewClose<cr>", desc = "Diffview: close" },
 		},
 		config = function()
 			local actions = require("diffview.actions")

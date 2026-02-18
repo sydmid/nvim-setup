@@ -115,6 +115,14 @@ function _G.apply_theme(theme_name)
   elseif theme_name == "github_dark_default" then
     vim.opt.background = "dark"
     vim.cmd.colorscheme("github_dark_default")
+  elseif theme_name == "ayu_dark" then
+    require("ayu").setup({ mirage = false })
+    vim.opt.background = "dark"
+    vim.cmd.colorscheme("ayu-dark")
+  elseif theme_name == "ayu_mirage" then
+    require("ayu").setup({ mirage = true })
+    vim.opt.background = "dark"
+    vim.cmd.colorscheme("ayu-mirage")
   else
     require("bearded").setup({ flavor = "arc" })
     vim.opt.background = "dark"
@@ -143,6 +151,8 @@ function _G.telescope_theme_picker()
     zenwritten = "Zenwritten (Mono)",
     modus_vivendi = "Modus Vivendi",
     github_dark_default = "GitHub Dark",
+    ayu_dark = "Ayu Dark",
+    ayu_mirage = "Ayu Mirage",
   }
 
   local themes = {
@@ -150,6 +160,8 @@ function _G.telescope_theme_picker()
     { name = "Zenwritten (Mono)", value = "zenwritten", desc = "Elegant monochrome with warm tints" },
     { name = "Modus Vivendi", value = "modus_vivendi", desc = "Accessible dark theme with high contrast" },
     { name = "GitHub Dark", value = "github_dark_default", desc = "GitHub's official dark color scheme" },
+    { name = "Ayu Dark", value = "ayu_dark", desc = "Ayu dark variant — deep blue-toned background" },
+    { name = "Ayu Mirage", value = "ayu_mirage", desc = "Ayu mirage variant — softer muted blue-grey" },
   }
 
   pickers.new({}, {
@@ -426,6 +438,14 @@ return {
       elseif _G.current_theme == "github_dark_default" then
         vim.opt.background = "dark"
         vim.cmd.colorscheme("github_dark_default")
+      elseif _G.current_theme == "ayu_dark" then
+        require("ayu").setup({ mirage = false })
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("ayu-dark")
+      elseif _G.current_theme == "ayu_mirage" then
+        require("ayu").setup({ mirage = true })
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("ayu-mirage")
       else
         vim.opt.background = "dark"
         vim.cmd.colorscheme("bearded")
@@ -436,7 +456,7 @@ return {
 
       -- Create autocmd to reapply background highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = { "bearded", "zenwritten", "modus_vivendi", "github_dark_default" },
+        pattern = { "bearded", "zenwritten", "modus_vivendi", "github_dark_default", "ayu", "ayu-dark", "ayu-mirage" },
         group = vim.api.nvim_create_augroup("AyuBackground", { clear = true }),
         callback = function()
           -- Reapply current background mode
@@ -489,6 +509,11 @@ return {
   -- GitHub Theme: official GitHub color schemes
   {
     "projekt0n/github-nvim-theme",
+    lazy = true,
+  },
+  -- Ayu Theme: clean dark/mirage/light theme
+  {
+    "Shatur/neovim-ayu",
     lazy = true,
   },
   -- Highlight yanked text with enhanced styling

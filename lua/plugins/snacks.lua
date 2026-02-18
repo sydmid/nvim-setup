@@ -298,13 +298,13 @@ return {
     },
 
     -- Git/Goto group (<leader>g) - Git operations
-    {
-      "<leader>gb",
-      function()
-        Snacks.picker.git_branches()
-      end,
-      desc = "Git Branches",
-    },
+    -- {
+    --   "<leader>gb",
+    --   function()
+    --     Snacks.picker.git_branches()
+    --   end,
+    --   desc = "Git Branches",
+    -- },
     {
       "<leader>gl",
       function()
