@@ -336,7 +336,7 @@ return {
 			end, { desc = "Git stashes (Telescope)" })
 
 			-- Enhanced git status files picker with fugitive backend
-			vim.keymap.set("n", "<leader>fg", function()
+			vim.keymap.set("n", "<leader>gf", function()
 				-- Get current project root for scoping
 				local cwd = vim.fn.getcwd()
 				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
@@ -589,6 +589,19 @@ return {
 			{ "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", desc = "Diffview: file history" },
 			{ "<leader>gH", "<cmd>DiffviewFileHistory<cr>", desc = "Diffview: repo history" },
 			{ "<leader>gm", "<cmd>DiffviewOpen<cr>", desc = "Diffview: merge tool" },
+			{
+				"<D-S-d>",
+				function()
+					local lib = require("diffview.lib")
+					local view = lib.get_current_view()
+					if view then
+						vim.cmd("DiffviewClose")
+					else
+						vim.cmd("DiffviewOpen")
+					end
+				end,
+				desc = "Toggle Diffview",
+			},
 		},
 		config = function()
 			local actions = require("diffview.actions")

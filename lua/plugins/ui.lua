@@ -260,7 +260,7 @@ function _G.telescope_background_picker()
 
   tp.custom({
     prompt_title = "Background Selector (Current: " .. _G.background_modes[_G.current_bg_index].name .. ")",
-    mode = "insert",
+    mode = "normal",
     finder = finders.new_table({
       results = mode_info,
       entry_maker = function(entry)

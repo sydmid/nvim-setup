@@ -85,13 +85,6 @@ return {
     --   desc = "Smart File Picker (git-aware)",
     -- },
     {
-      "<leader>gf",
-      function()
-        Snacks.picker.git_files()
-      end,
-      desc = "Find Git Files",
-    },
-    {
       "<leader>fc",
       function()
         Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
