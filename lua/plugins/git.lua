@@ -587,10 +587,7 @@ return {
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 		},
-		keys = {
-			{ "<leader>gg", "<cmd>LazyGit<cr>", desc = "Open LazyGit" },
-			{ "<leader>gF", "<cmd>LazyGitCurrentFile<cr>", desc = "LazyGit current file" },
-		},
+		keys = {},
 		config = function()
 			-- Configure LazyGit
 			vim.g.lazygit_floating_window_winblend = 0 -- transparency of floating window
@@ -598,9 +595,6 @@ return {
 			vim.g.lazygit_floating_window_corner_chars = {'╭', '╮', '╰', '╯'} -- customize lazygit popup window corner characters
 			vim.g.lazygit_floating_window_use_plenary = 0 -- use plenary.nvim to manage floating window if available
 			vim.g.lazygit_use_neovim_remote = 1 -- fallback to 0 if neovim-remote is not installed
-
-			-- Additional keymaps for comprehensive Git workflow
-			-- Note: <leader>gg is already defined in keys table above
 		end,
 	},
 

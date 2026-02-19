@@ -664,7 +664,7 @@ return {
     "nvim-telescope/telescope.nvim",
     keys = {
       {
-        "<D-S-o>",
+        "<D-o>",
         function()
           -- Create advanced symbol picker with hierarchical document order
           local function ordered_symbols_picker()
@@ -734,7 +734,7 @@ return {
                   }),
                   sorter = conf.generic_sorter({}),
                   previewer = conf.grep_previewer({}),
-                  initial_mode = "normal",
+                  initial_mode = "insert",
                   attach_mappings = function(prompt_bufnr, map)
                     map("i", "<Esc>", actions.close)
                     map("n", "<Esc>", actions.close)
@@ -754,7 +754,7 @@ return {
         desc = "Document Symbols (Hierarchical)",
       },
       {
-        "<D-o>",
+        "<D-S-o>",
         function()
           -- Create symbol type filter picker
           local function symbol_type_filter_picker()
