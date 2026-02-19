@@ -391,6 +391,7 @@ function _G.apply_theme(theme_name)
   vim.api.nvim_set_hl(0, "LspReferenceWrite", { underline = true, bg = "NONE" })
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   -- Cursor — adapt to light/dark theme
   if is_light then
 <<<<<<< HEAD
@@ -416,6 +417,8 @@ function _G.apply_theme(theme_name)
   vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
   vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
 
+=======
+>>>>>>> 602812f (feat: override LSP reference highlights to show only underline without color change)
   -- Reapply background mode on top of the new theme
 >>>>>>> 0e4d1ab (feat: add white block cursor styling for improved visibility)
   _G.set_background_mode(_G.current_bg_index)
@@ -765,12 +768,16 @@ return {
       _G.set_background_mode(_G.current_bg_index)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 602812f (feat: override LSP reference highlights to show only underline without color change)
       -- Override LSP reference highlights to only underline (no color change)
       vim.api.nvim_set_hl(0, "LspReferenceText",  { underline = true, bg = "NONE" })
       vim.api.nvim_set_hl(0, "LspReferenceRead",  { underline = true, bg = "NONE" })
       vim.api.nvim_set_hl(0, "LspReferenceWrite", { underline = true, bg = "NONE" })
 
+<<<<<<< HEAD
 <<<<<<< HEAD
       -- Cursor — adapt to light/dark theme
       if _G.current_theme == "kanagawa_lotus" then
@@ -791,6 +798,8 @@ return {
       vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
 >>>>>>> 0e4d1ab (feat: add white block cursor styling for improved visibility)
 
+=======
+>>>>>>> 602812f (feat: override LSP reference highlights to show only underline without color change)
       -- Create autocmd to reapply background highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
 <<<<<<< HEAD
@@ -809,6 +818,7 @@ return {
           vim.api.nvim_set_hl(0, "LspReferenceRead",  { underline = true, bg = "NONE" })
           vim.api.nvim_set_hl(0, "LspReferenceWrite", { underline = true, bg = "NONE" })
 <<<<<<< HEAD
+<<<<<<< HEAD
           -- Cursor — adapt to light/dark
           if _G.current_theme == "kanagawa_lotus" then
             vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f2ecbc", bg = "#545464" })
@@ -822,6 +832,8 @@ return {
           vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
           vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
 >>>>>>> 0e4d1ab (feat: add white block cursor styling for improved visibility)
+=======
+>>>>>>> 602812f (feat: override LSP reference highlights to show only underline without color change)
         end,
       })
 
