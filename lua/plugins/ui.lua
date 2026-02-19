@@ -123,10 +123,25 @@ function _G.apply_theme(theme_name)
     require("ayu").setup({ mirage = true })
     vim.opt.background = "dark"
     vim.cmd.colorscheme("ayu-mirage")
+  elseif theme_name == "dracula" then
+    vim.opt.background = "dark"
+    vim.cmd.colorscheme("dracula")
   else
     require("bearded").setup({ flavor = "arc" })
     vim.opt.background = "dark"
     vim.cmd.colorscheme("bearded")
+  end
+
+  -- Apply Dracula-specific grey comments and strings
+  if theme_name == "dracula" then
+    vim.api.nvim_set_hl(0, "Comment", { fg = "#857a7b", italic = true })
+    vim.api.nvim_set_hl(0, "@comment", { fg = "#857a7b", italic = true })
+    vim.api.nvim_set_hl(0, "String", { fg = "#857a7b" })
+    vim.api.nvim_set_hl(0, "@string", { fg = "#857a7b" })
+    vim.api.nvim_set_hl(0, "@string.escape", { fg = "#857a7b" })
+    vim.api.nvim_set_hl(0, "@string.special", { fg = "#857a7b" })
+    vim.api.nvim_set_hl(0, "Character", { fg = "#857a7b" })
+    vim.api.nvim_set_hl(0, "@character", { fg = "#857a7b" })
   end
 
   -- Reapply background mode on top of the new theme
@@ -148,6 +163,7 @@ function _G.telescope_theme_picker()
     github_dark_default = "GitHub Dark",
     ayu_dark = "Ayu Dark",
     ayu_mirage = "Ayu Mirage",
+    dracula = "Dracula",
   }
 
   local themes = {
@@ -157,6 +173,7 @@ function _G.telescope_theme_picker()
     { name = "GitHub Dark", value = "github_dark_default", desc = "GitHub's official dark color scheme" },
     { name = "Ayu Dark", value = "ayu_dark", desc = "Ayu dark variant — deep blue-toned background" },
     { name = "Ayu Mirage", value = "ayu_mirage", desc = "Ayu mirage variant — softer muted blue-grey" },
+    { name = "Dracula", value = "dracula", desc = "Classic dark theme with grey comments & strings" },
   }
 
   tp.custom({
@@ -436,9 +453,24 @@ return {
         require("ayu").setup({ mirage = true })
         vim.opt.background = "dark"
         vim.cmd.colorscheme("ayu-mirage")
+      elseif _G.current_theme == "dracula" then
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("dracula")
       else
         vim.opt.background = "dark"
         vim.cmd.colorscheme("bearded")
+      end
+
+      -- Apply Dracula-specific grey comments and strings at startup
+      if _G.current_theme == "dracula" then
+        vim.api.nvim_set_hl(0, "Comment", { fg = "#857a7b", italic = true })
+        vim.api.nvim_set_hl(0, "@comment", { fg = "#857a7b", italic = true })
+        vim.api.nvim_set_hl(0, "String", { fg = "#857a7b" })
+        vim.api.nvim_set_hl(0, "@string", { fg = "#857a7b" })
+        vim.api.nvim_set_hl(0, "@string.escape", { fg = "#857a7b" })
+        vim.api.nvim_set_hl(0, "@string.special", { fg = "#857a7b" })
+        vim.api.nvim_set_hl(0, "Character", { fg = "#857a7b" })
+        vim.api.nvim_set_hl(0, "@character", { fg = "#857a7b" })
       end
 
       -- Apply the current background mode
@@ -446,7 +478,7 @@ return {
 
       -- Create autocmd to reapply background highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = { "bearded", "zenwritten", "modus_vivendi", "github_dark_default", "ayu", "ayu-dark", "ayu-mirage" },
+        pattern = { "bearded", "zenwritten", "modus_vivendi", "github_dark_default", "ayu", "ayu-dark", "ayu-mirage", "dracula" },
         group = vim.api.nvim_create_augroup("AyuBackground", { clear = true }),
         callback = function()
           -- Reapply current background mode
@@ -504,6 +536,11 @@ return {
   -- Ayu Theme: clean dark/mirage/light theme
   {
     "Shatur/neovim-ayu",
+    lazy = true,
+  },
+  -- Dracula Theme: classic dark theme
+  {
+    "Mofiqul/dracula.nvim",
     lazy = true,
   },
   -- Highlight yanked text with enhanced styling
