@@ -85,17 +85,33 @@ autocmd({ "FocusGained", "BufEnter" }, {
 
 -- Fix: reset foldlevel on buffer display to prevent collapsed folds
 -- (covers LSP navigation, session restore, file pickers, etc.)
+-- Uses multiple deferred calls to beat async treesitter/LSP fold computation.
 augroup("TreesitterFoldFix", { clear = true })
 autocmd("BufWinEnter", {
   group = "TreesitterFoldFix",
   callback = function()
-    if vim.wo.foldmethod == "expr" then
-      vim.schedule(function()
-        local buf = vim.api.nvim_get_current_buf()
-        if not vim.api.nvim_buf_is_valid(buf) then return end
-        if vim.bo[buf].buftype ~= "" then return end
+    local buf = vim.api.nvim_get_current_buf()
+    if vim.bo[buf].buftype ~= "" then return end
+
+    local win = vim.api.nvim_get_current_win()
+
+    -- Helper: reset folds on a specific window/buffer if still valid
+    local function reset_folds()
+      if not vim.api.nvim_win_is_valid(win) then return end
+      if not vim.api.nvim_buf_is_valid(buf) then return end
+      if vim.api.nvim_win_get_buf(win) ~= buf then return end
+      vim.api.nvim_win_call(win, function()
+        -- zx = reapply foldlevel (99 = all open) AND reset manual fold states
+        -- This undoes any folds that plugins (like origami) may have closed.
         vim.wo.foldlevel = 99
+        pcall(vim.cmd, "silent! normal! zx")
       end)
     end
+
+    -- Immediate reset
+    reset_folds()
+    -- Deferred resets to catch async treesitter parse / LSP fold computation
+    vim.defer_fn(reset_folds, 100)
+    vim.defer_fn(reset_folds, 400)
   end,
 })

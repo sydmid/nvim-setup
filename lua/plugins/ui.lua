@@ -463,14 +463,14 @@ return {
 
       -- Apply Dracula-specific grey comments and strings at startup
       if _G.current_theme == "dracula" then
-        vim.api.nvim_set_hl(0, "Comment", { fg = "#857a7b", italic = true })
-        vim.api.nvim_set_hl(0, "@comment", { fg = "#857a7b", italic = true })
-        vim.api.nvim_set_hl(0, "String", { fg = "#857a7b" })
-        vim.api.nvim_set_hl(0, "@string", { fg = "#857a7b" })
-        vim.api.nvim_set_hl(0, "@string.escape", { fg = "#857a7b" })
-        vim.api.nvim_set_hl(0, "@string.special", { fg = "#857a7b" })
-        vim.api.nvim_set_hl(0, "Character", { fg = "#857a7b" })
-        vim.api.nvim_set_hl(0, "@character", { fg = "#857a7b" })
+        vim.api.nvim_set_hl(0, "Comment", { fg = "#857a7b", italic = false })
+        vim.api.nvim_set_hl(0, "@comment", { fg = "#857a7b", italic = false })
+        vim.api.nvim_set_hl(0, "String", { fg = "#A19A5E" })
+        vim.api.nvim_set_hl(0, "@string", { fg = "#A19A5E" })
+        vim.api.nvim_set_hl(0, "@string.escape", { fg = "#A19A5E" })
+        vim.api.nvim_set_hl(0, "@string.special", { fg = "#A19A5E" })
+        vim.api.nvim_set_hl(0, "Character", { fg = "#A19A5E" })
+        vim.api.nvim_set_hl(0, "@character", { fg = "#A19A5E" })
       end
 
       -- Apply the current background mode

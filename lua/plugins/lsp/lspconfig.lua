@@ -412,8 +412,18 @@ return {
           local keymap = vim.keymap.set
           local client = vim.lsp.get_client_by_id(ev.data.client_id)
 
+          -- Helper: open fold at cursor after an async LSP jump
+          local function open_fold_after_jump()
+            vim.defer_fn(function()
+              pcall(vim.cmd, "silent! normal! zv")
+            end, 200)
+          end
+
           -- Standard LSP navigation commands for non-C# files
-          keymap("n", "gd", "<cmd>Lspsaga goto_definition<CR>", { buffer = ev.buf, desc = "Go to definition" })
+          keymap("n", "gd", function()
+            vim.cmd("Lspsaga goto_definition")
+            open_fold_after_jump()
+          end, { buffer = ev.buf, desc = "Go to definition" })
           keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>",
             { buffer = ev.buf, desc = "Peek definition" })
           -- Go everywhere for the symbol under the cursor.
@@ -631,8 +641,10 @@ return {
               mode = "normal",
             })
           end, { buffer = ev.buf, desc = '[g]o [I]mplementation' })
-          keymap("n", "gt", "<cmd>Lspsaga goto_type_definition<CR>",
-            { buffer = ev.buf, desc = '[g]o [t]ype definition' })
+          keymap("n", "gt", function()
+            vim.cmd("Lspsaga goto_type_definition")
+            open_fold_after_jump()
+          end, { buffer = ev.buf, desc = '[g]o [t]ype definition' })
 
           -- Common LSP keymaps for all languages
           -- keymap("n", "gD", vim.lsp.buf.declaration, { buffer = ev.buf, desc = "Go to declaration" })

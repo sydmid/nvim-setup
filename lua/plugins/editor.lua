@@ -675,6 +675,17 @@ return {
       foldKeymaps = {
         setup = false,
       },
+      -- IMPORTANT: disable auto-folding comments/imports on buffer open
+      -- This was the main cause of files opening with collapsed folds.
+      autoFold = {
+        enabled = false,
+      },
+      -- Don't let origami override foldexpr (we set it in options.lua)
+      -- Origami's LspAttach handler was racing with treesitter and
+      -- causing unpredictable fold state changes.
+      useLspFoldsWithTreesitterFallback = {
+        enabled = false,
+      },
     },
     -- recommended: disable vim's auto-folding
     init = function()
