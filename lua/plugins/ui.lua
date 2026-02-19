@@ -149,6 +149,10 @@ function _G.apply_theme(theme_name)
   vim.api.nvim_set_hl(0, "LspReferenceRead",  { underline = true, bg = "NONE" })
   vim.api.nvim_set_hl(0, "LspReferenceWrite", { underline = true, bg = "NONE" })
 
+  -- White block cursor
+  vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
+  vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
+
   -- Reapply background mode on top of the new theme
   _G.set_background_mode(_G.current_bg_index)
 end
@@ -486,6 +490,10 @@ return {
       vim.api.nvim_set_hl(0, "LspReferenceRead",  { underline = true, bg = "NONE" })
       vim.api.nvim_set_hl(0, "LspReferenceWrite", { underline = true, bg = "NONE" })
 
+      -- White block cursor
+      vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
+      vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
+
       -- Create autocmd to reapply background highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
         pattern = { "bearded", "zenwritten", "modus_vivendi", "github_dark_default", "ayu", "ayu-dark", "ayu-mirage", "dracula" },
@@ -497,6 +505,9 @@ return {
           vim.api.nvim_set_hl(0, "LspReferenceText",  { underline = true, bg = "NONE" })
           vim.api.nvim_set_hl(0, "LspReferenceRead",  { underline = true, bg = "NONE" })
           vim.api.nvim_set_hl(0, "LspReferenceWrite", { underline = true, bg = "NONE" })
+          -- White block cursor
+          vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
+          vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
         end,
       })
 
