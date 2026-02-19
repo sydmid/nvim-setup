@@ -229,9 +229,30 @@ return {
         end,
       })
 
+      -- Retro terminal-style border for LSP floating windows
+      local retro_border = {
+        { "┌", "LspFloatRetro" },
+        { "─", "LspFloatRetro" },
+        { "┐", "LspFloatRetro" },
+        { "│", "LspFloatRetro" },
+        { "┘", "LspFloatRetro" },
+        { "─", "LspFloatRetro" },
+        { "└", "LspFloatRetro" },
+        { "│", "LspFloatRetro" },
+      }
+
+      -- Set a retro green-on-dark highlight for the border
+      vim.api.nvim_set_hl(0, "LspFloatRetro", { fg = "#7aa89f", bold = true })
+      -- Reapply on colorscheme change
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        callback = function()
+          vim.api.nvim_set_hl(0, "LspFloatRetro", { fg = "#7aa89f", bold = true })
+        end,
+      })
+
       -- Configure LSP signature help
       vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-        border = "rounded",
+        border = retro_border,
         focusable = false,
         silent = true,
         close_events = { "CursorMoved", "BufHidden", "InsertLeave" },
@@ -239,27 +260,23 @@ return {
         max_height = 15,
         wrap = true,
         style = "minimal",
-        title = " Signature Help ",
-        title_pos = "center",
       })
 
       -- Configure LSP hover with consistent styling
       vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-        border = "rounded",
+        border = retro_border,
         focusable = true,
         style = "minimal",
         max_width = 80,
         max_height = 15,
         wrap = true,
-        title = " Documentation ",
-        title_pos = "center",
         close_events = { "CursorMoved", "BufHidden" },
       })
 
 
 
       -- Stateful signature help with Tab/S-Tab overload cycling
-      local sig_state = { winnr = nil, total = 0, active = 0, src_buf = nil }
+      local sig_state = { winnr = nil, total = 0, active = 0, src_buf = nil, params = nil }
 
       local function sig_cleanup()
         if sig_state.src_buf and vim.api.nvim_buf_is_valid(sig_state.src_buf) then
@@ -273,12 +290,16 @@ return {
         sig_state.total = 0
         sig_state.active = 0
         sig_state.src_buf = nil
+        sig_state.params = nil
       end
 
-      local function show_signature_with_index(override_index)
-        local params = vim.lsp.util.make_position_params()
+      local function show_signature_with_index(override_index, custom_params, fallback_params)
+        local params = custom_params or vim.lsp.util.make_position_params()
         vim.lsp.buf_request(0, "textDocument/signatureHelp", params, function(err, result, ctx, config)
           if err or not result or not result.signatures or #result.signatures == 0 then
+            if fallback_params then
+              show_signature_with_index(override_index, fallback_params, nil)
+            end
             return
           end
 
@@ -288,19 +309,14 @@ return {
 
           local active = result.activeSignature or 0
           local total = #result.signatures
-          local title = total > 1
-            and string.format(" Signature Help (%d/%d) ", active + 1, total)
-            or " Signature Help "
 
           local opts = vim.tbl_extend("force", config or {}, {
-            border = "rounded",
+            border = retro_border,
             focusable = false,
             style = "minimal",
             max_width = 80,
             max_height = 15,
             wrap = true,
-            title = title,
-            title_pos = "center",
             close_events = { "CursorMoved", "BufHidden", "InsertLeave" },
           })
 
@@ -316,6 +332,7 @@ return {
           sig_state.total = total
           sig_state.active = active
           sig_state.src_buf = src_buf
+          sig_state.params = params  -- remember working position for overload cycling
 
           if winnr and vim.api.nvim_win_is_valid(winnr) then
             -- Esc in normal mode closes signature help
@@ -330,14 +347,14 @@ return {
               vim.keymap.set({ "n", "i" }, "<Tab>", function()
                 if sig_state.winnr and vim.api.nvim_win_is_valid(sig_state.winnr) then
                   local next_idx = (sig_state.active + 1) % sig_state.total
-                  show_signature_with_index(next_idx)
+                  show_signature_with_index(next_idx, sig_state.params, nil)
                 end
               end, { buffer = src_buf, desc = "Next signature overload", silent = true })
 
               vim.keymap.set({ "n", "i" }, "<S-Tab>", function()
                 if sig_state.winnr and vim.api.nvim_win_is_valid(sig_state.winnr) then
                   local prev_idx = sig_state.active > 0 and sig_state.active - 1 or sig_state.total - 1
-                  show_signature_with_index(prev_idx)
+                  show_signature_with_index(prev_idx, sig_state.params, nil)
                 end
               end, { buffer = src_buf, desc = "Previous signature overload", silent = true })
             end
@@ -355,7 +372,26 @@ return {
       end
 
       local function show_signature_help()
-        show_signature_with_index(nil)
+        local params = vim.lsp.util.make_position_params()
+        -- If cursor is on a word character (e.g. function name), precompute a
+        -- fallback position just after the next '(' on the same line so that
+        -- pressing D-S-i on the method name also shows signature help.
+        local col = vim.api.nvim_win_get_cursor(0)[2]  -- 0-indexed
+        local line = vim.api.nvim_get_current_line()
+        local fallback_params = nil
+        if line:sub(col + 1, col + 1):match('[%w_]') then
+          for i = col + 2, #line do
+            local c = line:sub(i, i)
+            if c == '(' then
+              fallback_params = vim.deepcopy(params)
+              fallback_params.position.character = i  -- 0-indexed: just after '('
+              break
+            elseif not c:match('[%w_.]') then
+              break
+            end
+          end
+        end
+        show_signature_with_index(nil, params, fallback_params)
       end
 
       -- Setup LSP
@@ -651,15 +687,12 @@ return {
                     result.activeSignature = prev
 
                     local opts = {
-                      border = "rounded",
+                      border = retro_border,
                       focusable = true,
                       style = "minimal",
                       max_width = 80,
                       max_height = 15,
                       wrap = true,
-                      title = " Signature Help (" ..
-                          (prev + 1) .. "/" .. #result.signatures .. ") ",
-                      title_pos = "center",
                     }
                     vim.lsp.handlers["textDocument/signatureHelp"](err, result, ctx,
                       vim.tbl_extend("force", config or {}, opts))
@@ -684,15 +717,12 @@ return {
                     result.activeSignature = next
 
                     local opts = {
-                      border = "rounded",
+                      border = retro_border,
                       focusable = true,
                       style = "minimal",
                       max_width = 80,
                       max_height = 15,
                       wrap = true,
-                      title = " Signature Help (" ..
-                          (next + 1) .. "/" .. #result.signatures .. ") ",
-                      title_pos = "center",
                     }
                     vim.lsp.handlers["textDocument/signatureHelp"](err, result, ctx,
                       vim.tbl_extend("force", config or {}, opts))
@@ -780,14 +810,12 @@ return {
 
               -- Enhanced window configuration with proper focus management
               local opts = vim.tbl_extend("force", config or {}, {
-                border = "rounded",
+                border = retro_border,
                 focusable = true,
                 style = "minimal",
                 max_width = 80,
                 max_height = 15,
                 wrap = true,
-                title = " Documentation ",
-                title_pos = "center",
                 close_events = { "BufHidden" },
               })
               local bufnr, winnr
