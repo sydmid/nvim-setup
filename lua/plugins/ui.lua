@@ -144,6 +144,11 @@ function _G.apply_theme(theme_name)
     vim.api.nvim_set_hl(0, "@character", { fg = "#857a7b" })
   end
 
+  -- Override LSP reference highlights to only show underline (no color change)
+  vim.api.nvim_set_hl(0, "LspReferenceText",  { underline = true, bg = "NONE" })
+  vim.api.nvim_set_hl(0, "LspReferenceRead",  { underline = true, bg = "NONE" })
+  vim.api.nvim_set_hl(0, "LspReferenceWrite", { underline = true, bg = "NONE" })
+
   -- Reapply background mode on top of the new theme
   _G.set_background_mode(_G.current_bg_index)
 end
@@ -476,6 +481,11 @@ return {
       -- Apply the current background mode
       _G.set_background_mode(_G.current_bg_index)
 
+      -- Override LSP reference highlights to only underline (no color change)
+      vim.api.nvim_set_hl(0, "LspReferenceText",  { underline = true, bg = "NONE" })
+      vim.api.nvim_set_hl(0, "LspReferenceRead",  { underline = true, bg = "NONE" })
+      vim.api.nvim_set_hl(0, "LspReferenceWrite", { underline = true, bg = "NONE" })
+
       -- Create autocmd to reapply background highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
         pattern = { "bearded", "zenwritten", "modus_vivendi", "github_dark_default", "ayu", "ayu-dark", "ayu-mirage", "dracula" },
@@ -483,6 +493,10 @@ return {
         callback = function()
           -- Reapply current background mode
           _G.set_background_mode(_G.current_bg_index)
+          -- Re-override LSP reference highlights after colorscheme resets them
+          vim.api.nvim_set_hl(0, "LspReferenceText",  { underline = true, bg = "NONE" })
+          vim.api.nvim_set_hl(0, "LspReferenceRead",  { underline = true, bg = "NONE" })
+          vim.api.nvim_set_hl(0, "LspReferenceWrite", { underline = true, bg = "NONE" })
         end,
       })
 
