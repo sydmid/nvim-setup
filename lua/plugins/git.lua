@@ -167,7 +167,7 @@ return {
 			-- vim.keymap.set("n", "<leader>gl", "<cmd>Git log --oneline --graph --decorate --all<cr>", { desc = "Git log " })
 
 			-- Enhanced Telescope Git pickers with Fugitive backend
-			local telescope_builtin = require("telescope.builtin")
+			local tp = require("helpers.telescope_pickers")
 
 			-- Git blame in telescope-style interface
 			vim.keymap.set("n", "<leader>gb", function()
@@ -224,15 +224,12 @@ return {
 
 				local project_root = git_root
 
-				telescope_builtin.git_branches({
+				tp.builtin("git_branches", {
+					layout = "ivy",
+					mode = "normal",
 					prompt_title = "󰘬 Git Branches - " .. vim.fn.fnamemodify(project_root, ":t"),
-                    initial_mode = "normal",
-					theme = "ivy",
-					layout_config = { height = 0.6 },
 					cwd = project_root,
-					-- Show both local and remote branches
 					show_remote_tracking_branches = true,
-					-- Sort by most recently used
 					sort_mru = true,
 					attach_mappings = function(prompt_bufnr, map)
 						local actions = require("telescope.actions")
@@ -262,11 +259,10 @@ return {
 											vim.notify("Deleted branch: " .. branch, vim.log.levels.INFO)
 											-- Refresh the picker
 											actions.close(prompt_bufnr)
-											telescope_builtin.git_branches({
+											tp.builtin("git_branches", {
+												layout = "ivy",
+												mode = "normal",
 												prompt_title = "󰘬 Git Branches - " .. vim.fn.fnamemodify(project_root, ":t"),
-												initial_mode = "normal",
-												theme = "ivy",
-												layout_config = { height = 0.6 },
 												cwd = project_root,
 												show_remote_tracking_branches = true,
 												sort_mru = true,
@@ -278,11 +274,6 @@ return {
 								end
 							end
 						end)
-
-						-- q or Esc to close
-						map("n", "q", actions.close)
-						map("i", "<Esc>", actions.close)
-						map("n", "<Esc>", actions.close)
 
 						return true
 					end,
@@ -299,10 +290,10 @@ return {
 					return
 				end
 
-				telescope_builtin.git_stash({
+				tp.builtin("git_stash", {
+					layout = "ivy",
+					mode = "normal",
 					prompt_title = "󰜦 Git Stashes",
-					theme = "ivy",
-					layout_config = { height = 0.6 },
 					attach_mappings = function(prompt_bufnr, map)
 						local actions = require("telescope.actions")
 						local action_state = require("telescope.actions.state")
@@ -329,10 +320,10 @@ return {
 										vim.notify("Dropped stash: " .. selection.value, vim.log.levels.INFO)
 										-- Refresh the picker
 										actions.close(prompt_bufnr)
-										telescope_builtin.git_stash({
+										tp.builtin("git_stash", {
+											layout = "ivy",
+											mode = "normal",
 											prompt_title = "󰜦 Git Stashes",
-											theme = "ivy",
-											layout_config = { height = 0.6 },
 										})
 									end
 								end)
@@ -358,11 +349,11 @@ return {
 
 				local project_root = git_root
 
-				telescope_builtin.git_status({
+				tp.builtin("git_status", {
+					layout = "ivy",
+					mode = "normal",
+					height = 0.9,
 					prompt_title = "󰊢  Changed Files - " .. vim.fn.fnamemodify(project_root, ":t"),
-					initial_mode = "normal",
-					theme = "ivy",
-					layout_config = { height = 0.9 },
 					cwd = project_root,
 					attach_mappings = function(prompt_bufnr, map)
 						local actions = require("telescope.actions")
@@ -385,11 +376,10 @@ return {
 								vim.notify("Staged: " .. selection.value, vim.log.levels.INFO)
 								-- Refresh the picker
 								actions.close(prompt_bufnr)
-								telescope_builtin.git_status({
+								tp.builtin("git_status", {
+									layout = "ivy",
+									mode = "normal",
 									prompt_title = "󰊢  Changed Files - " .. vim.fn.fnamemodify(project_root, ":t"),
-									initial_mode = "normal",
-									theme = "ivy",
-									layout_config = { height = 0.6 },
 									cwd = project_root,
 								})
 							end
@@ -403,11 +393,10 @@ return {
 								vim.notify("Unstaged: " .. selection.value, vim.log.levels.INFO)
 								-- Refresh the picker
 								actions.close(prompt_bufnr)
-								telescope_builtin.git_status({
+								tp.builtin("git_status", {
+									layout = "ivy",
+									mode = "normal",
 									prompt_title = "󰊢  Changed Files - " .. vim.fn.fnamemodify(project_root, ":t"),
-									initial_mode = "normal",
-									theme = "ivy",
-									layout_config = { height = 0.6 },
 									cwd = project_root,
 								})
 							end
@@ -440,11 +429,6 @@ return {
 						map("n", "<Tab>", focus_preview)
 						map("i", "<Tab>", focus_preview)
 
-						-- q or Esc to close
-						map("n", "q", actions.close)
-						map("i", "<Esc>", actions.close)
-						map("n", "<Esc>", actions.close)
-
 						return true
 					end,
 				})
@@ -475,11 +459,10 @@ return {
 				end
 
 				-- First select a commit/branch, then browse files
-				telescope_builtin.git_commits({
+				tp.builtin("git_commits", {
+					layout = "ivy",
+					mode = "normal",
 					prompt_title = "󰜘 Enhanced Explorable Logs",
-                    initial_mode = "normal",
-					theme = "ivy",
-					layout_config = { height = 0.6 },
 					attach_mappings = function(prompt_bufnr, map)
 						local actions = require("telescope.actions")
 						local action_state = require("telescope.actions.state")
@@ -490,10 +473,10 @@ return {
 							if selection then
 								local commit_hash = selection.value:match("^(%w+)")
 								-- Browse files in that commit using fugitive
-								telescope_builtin.git_files({
+								tp.builtin("git_files", {
+									layout = "ivy",
+									mode = "normal",
 									prompt_title = "󰈞 Files in " .. commit_hash:sub(1, 8) .. " ",
-									initial_mode = "normal",
-									theme = "ivy",
 									git_command = { "git", "ls-tree", "-r", "--name-only", commit_hash },
 									attach_mappings = function(prompt_bufnr2, map2)
 										actions.select_default:replace(function()
@@ -532,11 +515,6 @@ return {
 										map2("n", "<Tab>", focus_preview_files)
 										map2("i", "<Tab>", focus_preview_files)
 
-										-- q or Esc to close
-										map2("n", "q", actions.close)
-										map2("i", "<Esc>", actions.close)
-										map2("n", "<Esc>", actions.close)
-
 										return true
 									end,
 								})
@@ -560,11 +538,6 @@ return {
 						-- Bind Tab to focus preview window for commit log
 						map("n", "<Tab>", focus_preview_commits)
 						map("i", "<Tab>", focus_preview_commits)
-
-						-- q or Esc to close
-						map("n", "q", actions.close)
-						map("i", "<Esc>", actions.close)
-						map("n", "<Esc>", actions.close)
 
 						return true
 					end,

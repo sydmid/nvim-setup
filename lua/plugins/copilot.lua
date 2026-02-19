@@ -45,7 +45,7 @@ end
 
 -- Enhanced model selection with telescope
 local function select_model_telescope()
-	local pickers = require("telescope.pickers")
+	local tp = require("helpers.telescope_pickers")
 	local finders = require("telescope.finders")
 	local conf = require("telescope.config").values
 	local actions = require("telescope.actions")
@@ -73,9 +73,9 @@ local function select_model_telescope()
 		})
 	end
 
-	pickers.new({}, {
+	tp.custom({
 		prompt_title = "🤖 Select Copilot Chat Model (" .. #MODELS .. " available)",
-		initial_mode = "normal",
+		mode = "normal",
 		finder = finders.new_table({
 			results = model_entries,
 			entry_maker = function(entry)
@@ -141,13 +141,9 @@ local function select_model_telescope()
 				end
 			end)
 
-			map("i", "<Esc>", actions.close)
-			map("n", "<Esc>", actions.close)
-			map("n", "q", actions.close)
-
 			return true
 		end,
-	}):find()
+	})
 end
 
 -- Smart commit message generation based on git diff
@@ -218,7 +214,7 @@ end
 
 -- Settings interface using telescope
 local function show_settings()
-	local pickers = require("telescope.pickers")
+	local tp = require("helpers.telescope_pickers")
 	local finders = require("telescope.finders")
 	local conf = require("telescope.config").values
 	local actions = require("telescope.actions")
@@ -234,9 +230,9 @@ local function show_settings()
 		{ name = "🗑️ Clear All History", action = "clear_all", desc = "Permanently delete all chat sessions" },
 	}
 
-	pickers.new({}, {
+	tp.custom({
 		prompt_title = "🤖 Copilot Settings & Configuration",
-		initial_mode = "normal",
+		mode = "normal",
 		finder = finders.new_table({
 			results = settings_options,
 			entry_maker = function(entry)
@@ -340,12 +336,12 @@ local function show_settings()
 
 			return true
 		end,
-	}):find()
+	})
 end
 
 -- Chat mode selection with telescope
 local function select_chat_mode()
-	local pickers = require("telescope.pickers")
+	local tp = require("helpers.telescope_pickers")
 	local finders = require("telescope.finders")
 	local conf = require("telescope.config").values
 	local actions = require("telescope.actions")
@@ -409,9 +405,9 @@ local function select_chat_mode()
 		current_mode = chat.config.mode
 	end
 
-	pickers.new({}, {
+	tp.custom({
 		prompt_title = "🎭 Select Copilot Chat Mode",
-		initial_mode = "normal",
+		mode = "normal",
 		finder = finders.new_table({
 			results = chat_modes,
 			entry_maker = function(entry)
@@ -522,13 +518,9 @@ local function select_chat_mode()
 				vim.notify("Chat Mode Selection:\n• Enter: Select mode\n• BS: Navigate back/close\n• ?: Show this help\n• /: Search modes\n• q/Esc: Close", vim.log.levels.INFO)
 			end)
 
-			map("i", "<Esc>", actions.close)
-			map("n", "<Esc>", actions.close)
-			map("n", "q", actions.close)
-
 			return true
 		end,
-	}):find()
+	})
 end
 
 -- Handle setting actions
@@ -553,7 +545,7 @@ end
 
 -- Show Copilot status using telescope
 local function show_status()
-	local pickers = require("telescope.pickers")
+	local tp = require("helpers.telescope_pickers")
 	local finders = require("telescope.finders")
 	local conf = require("telescope.config").values
 	local actions = require("telescope.actions")
@@ -792,9 +784,9 @@ local function show_status()
 		category = "actions",
 	})
 
-	pickers.new({}, {
+	tp.custom({
 		prompt_title = "📊 Copilot Status & Settings Dashboard",
-		initial_mode = "normal",
+		mode = "normal",
 		finder = finders.new_table({
 			results = status_items,
 			entry_maker = function(entry)
@@ -924,14 +916,9 @@ local function show_status()
 				vim.notify("Copilot Status Dashboard:\n• Enter: Execute action/view details\n• BS: Navigate back/close\n• ?: Show this help\n• /: Search items\n• q/Esc: Close\n• j/k: Navigate up/down", vim.log.levels.INFO)
 			end)
 
-			-- Standard close mappings
-			map("n", "q", actions.close)
-			map("i", "<Esc>", actions.close)
-			map("n", "<Esc>", actions.close)
-
 			return true
 		end,
-	}):find()
+	})
 end
 
 -- Chat history management
@@ -950,7 +937,7 @@ local function show_chat_history()
 		return
 	end
 
-	local pickers = require("telescope.pickers")
+	local tp = require("helpers.telescope_pickers")
 	local finders = require("telescope.finders")
 	local conf = require("telescope.config").values
 	local actions = require("telescope.actions")
@@ -965,7 +952,7 @@ local function show_chat_history()
 		})
 	end
 
-	pickers.new({}, {
+	tp.custom({
 		prompt_title = "💬 Chat Session History",
 		finder = finders.new_table({
 			results = sessions,
@@ -988,7 +975,7 @@ local function show_chat_history()
 			end)
 			return true
 		end,
-	}):find()
+	})
 end
 
 -- Clear all chat history

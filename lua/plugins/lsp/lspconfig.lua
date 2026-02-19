@@ -158,12 +158,7 @@ return {
 
       -- Telescope picker: toggle diagnostic severity visibility
       local function open_diagnostic_severity_picker(initial_idx)
-        if not pcall(require, "telescope") then
-          vim.notify("Telescope not available", vim.log.levels.WARN)
-          return
-        end
-
-        local pickers = require("telescope.pickers")
+        local tp = require("helpers.telescope_pickers")
         local finders = require("telescope.finders")
         local conf = require("telescope.config").values
         local actions = require("telescope.actions")
@@ -187,9 +182,9 @@ return {
           })
         end
 
-        pickers.new({}, {
+        tp.custom({
           prompt_title = "Diagnostic Visibility (Enter: toggle, Esc: close)",
-          initial_mode = "normal",
+          mode = "normal",
           default_selection_index = initial_idx or 1,
           finder = finders.new_table({
             results = entries,
@@ -219,7 +214,7 @@ return {
             end)
             return true
           end,
-        }):find()
+        })
       end
 
       vim.keymap.set("n", "<leader>xv", function()
@@ -389,8 +384,8 @@ return {
           keymap('n', 'ga', "<cmd>lua require('fzf-lua').lsp_finder()<CR>",
             { desc = '[g]o [a]ll usages' })
           keymap("n", "gr", function()
-            require("telescope.builtin").lsp_references({
-              initial_mode = "normal",
+            require("helpers.telescope_pickers").builtin("lsp_references", {
+              mode = "normal",
               path_display = { "smart" },
               include_declaration = false,  -- Exclude the declaration itself
               include_current_line = false, -- Custom option we'll handle
@@ -420,10 +415,6 @@ return {
                     require("telescope.actions").preview_scrolling_down(prompt_bufnr)
                   end
                 end
-
-                map_func("i", "<Esc>", actions.close)
-                map_func("n", "<Esc>", actions.close)
-                map_func("n", "q", actions.close)
 
                 -- Add preview refresh on movement
                 map_func("n", "j", function()
@@ -600,15 +591,8 @@ return {
             })
           end, { buffer = ev.buf, desc = '[g]o [r]eferences' })
           keymap("n", "gi", function()
-            require("telescope.builtin").lsp_implementations({
-              initial_mode = "normal",
-              attach_mappings = function(prompt_bufnr, map_func)
-                local actions = require("telescope.actions")
-                map_func("i", "<Esc>", actions.close)
-                map_func("n", "<Esc>", actions.close)
-                map_func("n", "q", actions.close)
-                return true
-              end,
+            require("helpers.telescope_pickers").builtin("lsp_implementations", {
+              mode = "normal",
             })
           end, { buffer = ev.buf, desc = '[g]o [I]mplementation' })
           keymap("n", "gt", "<cmd>Lspsaga goto_type_definition<CR>",
@@ -1047,15 +1031,8 @@ return {
           end, { buffer = ev.buf, desc = "Line diagnostics (enhanced native)" })
 
           keymap("n", "<leader>xf", function()
-            require("telescope.builtin").diagnostics({
+            require("helpers.telescope_pickers").builtin("diagnostics", {
               bufnr = 0,
-              attach_mappings = function(prompt_bufnr, map_func)
-                local actions = require("telescope.actions")
-                map_func("i", "<Esc>", actions.close)
-                map_func("n", "<Esc>", actions.close)
-                map_func("n", "q", actions.close)
-                return true
-              end,
             })
           end, { buffer = ev.buf, desc = "Buffer diagnostics" })
 

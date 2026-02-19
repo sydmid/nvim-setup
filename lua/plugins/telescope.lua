@@ -101,7 +101,7 @@ return {
               ["<C-f>"] = {
                 keepinsert = true,
                 action = function(selection)
-                  builtin.find_files({ cwd = selection.path })
+                  require("helpers.telescope_pickers").builtin("find_files", { cwd = selection.path })
                 end,
               },
               ["<C-t>"] = {
@@ -147,9 +147,10 @@ return {
         telescope.load_extension("csharpls_definition")
       end
 
+      local tp = require("helpers.telescope_pickers")
+
       local function live_grep_with_dynamic_title(opts)
         local previewers = require("telescope.previewers")
-        local builtin = require("telescope.builtin")
 
         opts = opts or {}
 
@@ -281,7 +282,7 @@ return {
           })
         })
 
-        builtin.live_grep(config)
+        tp.builtin("live_grep", config)
       end
 
       -- Separate normal and visual mode mappings for D-S-f
@@ -320,66 +321,29 @@ return {
 
       -- set keymaps
       local keymap = vim.keymap -- for conciseness
-      local builtin = require("telescope.builtin")
-
-      -- Helper function to create telescope mappings with proper Esc handling
-      local function telescope_with_esc(builtin_func, opts)
-        opts = opts or {}
-        return function()
-          local telescope_opts = vim.tbl_extend("force", opts, {
-            attach_mappings = function(prompt_bufnr, map_func)
-              local actions = require("telescope.actions")
-              map_func("i", "<Esc>", actions.close)
-              map_func("n", "<Esc>", actions.close)
-              map_func("n", "q", actions.close)
-              -- Preserve any existing attach_mappings
-              if opts.attach_mappings then
-                return opts.attach_mappings(prompt_bufnr, map_func)
-              end
-              return true
-            end,
-          })
-          builtin_func(telescope_opts)
-        end
-      end
 
       keymap.set("n", "<leader>ft", function()
         -- Try to use todo-comments telescope extension
         local ok = pcall(function()
           telescope.extensions["todo-comments"].todo({
-            attach_mappings = function(prompt_bufnr, map_func)
-              local actions = require("telescope.actions")
-              map_func("i", "<Esc>", actions.close)
-              map_func("n", "<Esc>", actions.close)
-              map_func("n", "q", actions.close)
-              return true
-            end,
+            attach_mappings = tp.compose_mappings(),
           })
         end)
 
         if not ok then
           --Fallback: use live_grep with the exact keywords from your todo-comments config
-          builtin.live_grep({
+          tp.builtin("live_grep", {
             prompt_title = "🔍 Find TODOs",
-            -- Using the exact pattern from your todo-comments config
             default_text =
             "\\b(FIX|FIXME|BUG|FIXIT|ISSUE|TODO|HACK|WARN|WARNING|XXX|PERF|OPTIM|PERFORMANCE|OPTIMIZE|NOTE|INFO|TEST|TESTING|PASSED|FAILED):",
             additional_args = { "--regex" },
-            attach_mappings = function(prompt_bufnr, map_func)
-              local actions = require("telescope.actions")
-              map_func("i", "<Esc>", actions.close)
-              map_func("n", "<Esc>", actions.close)
-              map_func("n", "q", actions.close)
-              return true
-            end,
           })
         end
       end, { desc = "Find todos" })
 
-      keymap.set("n", "<leader>fh", telescope_with_esc(builtin.help_tags), { desc = "Find help tags" })
-      keymap.set("n", "<leader>fj", telescope_with_esc(builtin.jumplist, { initial_mode = "normal" }),
-        { desc = "Find jumps" })
-      keymap.set("n", "<leader>fc", telescope_with_esc(builtin.command_history), { desc = "Find command history" })
+      keymap.set("n", "<leader>fh", function() tp.builtin("help_tags") end, { desc = "Find help tags" })
+      keymap.set("n", "<leader>fj", function() tp.builtin("jumplist", { mode = "normal" }) end, { desc = "Find jumps" })
+      keymap.set("n", "<leader>fc", function() tp.builtin("command_history") end, { desc = "Find command history" })
       keymap.set("n", "<leader>cd", require("telescope").extensions.zoxide.list, { desc = "cd using zoxide" })
 
       -- Enable line numbers in telescope preview windows

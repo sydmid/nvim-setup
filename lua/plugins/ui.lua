@@ -135,12 +135,7 @@ end
 
 -- Function to create a Telescope theme picker
 function _G.telescope_theme_picker()
-  if not pcall(require, "telescope") then
-    vim.notify("Telescope not available", vim.log.levels.WARN)
-    return
-  end
-
-  local pickers = require("telescope.pickers")
+  local tp = require("helpers.telescope_pickers")
   local finders = require("telescope.finders")
   local conf = require("telescope.config").values
   local actions = require("telescope.actions")
@@ -164,9 +159,9 @@ function _G.telescope_theme_picker()
     { name = "Ayu Mirage", value = "ayu_mirage", desc = "Ayu mirage variant — softer muted blue-grey" },
   }
 
-  pickers.new({}, {
+  tp.custom({
     prompt_title = "Theme Selector (Current: " .. (theme_labels[_G.current_theme] or "Bearded Arc") .. ")",
-    initial_mode = "insert",
+    mode = "insert",
     finder = finders.new_table({
       results = themes,
       entry_maker = function(entry)
@@ -193,7 +188,7 @@ function _G.telescope_theme_picker()
       end)
       return true
     end,
-  }):find()
+  })
 end
 
 -- Function to save background preference
@@ -221,12 +216,7 @@ end
 
 -- Function to create a Telescope background mode picker
 function _G.telescope_background_picker()
-  if not pcall(require, "telescope") then
-    vim.notify("Telescope not available", vim.log.levels.WARN)
-    return
-  end
-
-  local pickers = require("telescope.pickers")
+  local tp = require("helpers.telescope_pickers")
   local finders = require("telescope.finders")
   local conf = require("telescope.config").values
   local actions = require("telescope.actions")
@@ -251,9 +241,9 @@ function _G.telescope_background_picker()
     })
   end
 
-  pickers.new({}, {
+  tp.custom({
     prompt_title = "Background Selector (Current: " .. _G.background_modes[_G.current_bg_index].name .. ")",
-    initial_mode = "insert",
+    mode = "insert",
     finder = finders.new_table({
       results = mode_info,
       entry_maker = function(entry)
@@ -283,7 +273,7 @@ function _G.telescope_background_picker()
       end)
       return true
     end,
-  }):find()
+  })
 end
 
 local theme_opts = {
@@ -669,7 +659,6 @@ return {
           -- Create advanced symbol picker with hierarchical document order
           local function ordered_symbols_picker()
             local finders = require("telescope.finders")
-            local pickers = require("telescope.pickers")
             local conf = require("telescope.config").values
             local actions = require("telescope.actions")
             local action_state = require("telescope.actions.state")
@@ -725,8 +714,8 @@ return {
               return
             end
 
-            pickers
-                .new({}, {
+            local tp = require("helpers.telescope_pickers")
+            tp.custom({
                   prompt_title = "󰘦 Document Symbols (Document Order)",
                   finder = finders.new_table({
                     results = symbols,
@@ -734,11 +723,8 @@ return {
                   }),
                   sorter = conf.generic_sorter({}),
                   previewer = conf.grep_previewer({}),
-                  initial_mode = "insert",
+                  mode = "insert",
                   attach_mappings = function(prompt_bufnr, map)
-                    map("i", "<Esc>", actions.close)
-                    map("n", "<Esc>", actions.close)
-                    map("n", "q", actions.close)
                     actions.select_default:replace(function()
                       local selection = action_state.get_selected_entry()
                       actions.close(prompt_bufnr)
@@ -747,7 +733,6 @@ return {
                     return true
                   end,
                 })
-                :find()
           end
           ordered_symbols_picker()
         end,
@@ -758,8 +743,8 @@ return {
         function()
           -- Create symbol type filter picker
           local function symbol_type_filter_picker()
+            local tp = require("helpers.telescope_pickers")
             local finders = require("telescope.finders")
-            local pickers = require("telescope.pickers")
             local conf = require("telescope.config").values
             local actions = require("telescope.actions")
             local action_state = require("telescope.actions.state")
@@ -850,7 +835,7 @@ return {
                 end, symbols)
               end
 
-              pickers.new({}, {
+              tp.custom({
                 prompt_title = "󰘦 Filtered Symbols - " .. filter_type .. " (" .. #filtered_symbols .. ")",
                 finder = finders.new_table({
                   results = filtered_symbols,
@@ -858,7 +843,7 @@ return {
                 }),
                 sorter = conf.generic_sorter({}),
                 previewer = conf.grep_previewer({}),
-                initial_mode = "normal",
+                mode = "normal",
                 attach_mappings = function(prompt_bufnr, map)
                   actions.select_default:replace(function()
                     local selection = action_state.get_selected_entry()
@@ -867,11 +852,11 @@ return {
                   end)
                   return true
                 end,
-              }):find()
+              })
             end
 
             -- Show type filter picker
-            pickers.new({}, {
+            tp.custom({
               prompt_title = "󰈺 Filter by Symbol Type",
               finder = finders.new_table({
                 results = type_options,
@@ -884,12 +869,8 @@ return {
                 end,
               }),
               sorter = conf.generic_sorter({}),
-              initial_mode = "normal",
+              mode = "normal",
               attach_mappings = function(prompt_bufnr, map)
-                map("i", "<Esc>", actions.close)
-                map("n", "<Esc>", actions.close)
-                map("n", "q", actions.close)
-
                 actions.select_default:replace(function()
                   local selection = action_state.get_selected_entry()
                   actions.close(prompt_bufnr)
@@ -899,7 +880,7 @@ return {
                 end)
                 return true
               end,
-            }):find()
+            })
           end
 
           symbol_type_filter_picker()

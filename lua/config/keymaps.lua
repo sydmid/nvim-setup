@@ -495,28 +495,17 @@ map({ "n", "v" }, "<D-s>", ":NvimTreeFindFileToggle<CR>", {
 
 -- Diagnostics with Telescope
 map({ "n", "t" }, "<D-6>", function()
-  require("telescope.builtin").diagnostics({
-    bufnr = 0,               -- Current buffer only
-    theme = "ivy",           -- Use ivy theme for a beautiful compact container
-    initial_mode = "normal", -- Start in normal mode instead of insert mode
-    layout_config = {
-      height = 0.5,          -- Take 50% of screen height for better visibility
-      preview_cutoff = 120,
-    },
-    -- Enhanced diagnostic display
-    severity_sort = true, -- Group by severity (errors first)
-    no_sign = false,      -- Show diagnostic signs
-    line_width = "full",  -- Full line width for better readability
-    previewer = true,     -- Enable preview for context
-    show_line = true,     -- Show line numbers
-    attach_mappings = function(prompt_bufnr, map_func)
-      local actions = require("telescope.actions")
-      -- Override ESC to close telescope instead of going to normal mode
-      map_func("i", "<Esc>", actions.close)
-      map_func("n", "<Esc>", actions.close)
-      map_func("n", "q", actions.close)
-      return true
-    end,
+  require("helpers.telescope_pickers").builtin("diagnostics", {
+    layout = "ivy",
+    mode = "normal",
+    height = 0.5,
+    bufnr = 0,
+    layout_config = { preview_cutoff = 120 },
+    severity_sort = true,
+    no_sign = false,
+    line_width = "full",
+    previewer = true,
+    show_line = true,
   })
 end, { desc = "Show buffer diagnostics in telescope", silent = true })
 
