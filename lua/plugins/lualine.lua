@@ -45,7 +45,31 @@ return {
 			return " " .. table.concat(c, "|")
 		end
 
+<<<<<<< HEAD
 		lualine.setup({
+=======
+		local custom_theme
+		if _G.current_theme == "kanagawa_lotus" then
+			-- Use a light lualine theme that matches Kanagawa Lotus
+			custom_theme = require("lualine.themes.auto")
+		else
+			custom_theme = require("lualine.themes.moonfly")
+
+			-- Custom colours for dark themes
+			custom_theme.normal.b.fg = "#cad3f5"
+			custom_theme.insert.b.fg = "#cad3f5"
+			custom_theme.visual.b.fg = "#cad3f5"
+			custom_theme.replace.b.fg = "#cad3f5"
+			-- custom_theme.command.b.fg = "#cad3f5"
+			custom_theme.inactive.b.fg = "#cad3f5"
+
+			custom_theme.normal.c.fg = "#6e738d"
+			custom_theme.normal.c.bg = "#1e2030"
+		end
+
+		-- Store full config globally so refresh_bars() can re-setup with updated theme
+		_G._lualine_config = {
+>>>>>>> 0e9ff36 (feat: enhance theme support and color configurations for light/dark modes)
 			options = {
 				theme = "auto",
 				component_separators = "",
@@ -110,6 +134,8 @@ return {
 				lualine_z = { "location" },
 			},
 			extensions = { "toggleterm", "trouble" },
-		})
+		}
+
+		require("lualine").setup(_G._lualine_config)
 	end,
 }

@@ -219,5 +219,12 @@ return {
   },
   config = function(_, opts)
     require("bufferline").setup(opts)
+<<<<<<< HEAD
+=======
+    -- Apply light/dark bar highlights now that bufferline is loaded
+    if _G.refresh_bars then
+      _G.refresh_bars()
+    end
+>>>>>>> 0e9ff36 (feat: enhance theme support and color configurations for light/dark modes)
   end,
 }

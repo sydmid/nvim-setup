@@ -318,6 +318,36 @@ return {
           end, opts("Open file, keep tree open, focus main buffer"))
         end,
       })
+<<<<<<< HEAD
+=======
+
+      -- Set custom colors for folder arrows and hierarchy lines (light/dark aware)
+      local function apply_nvimtree_colors()
+        if _G.current_theme == "kanagawa_lotus" then
+          -- Kanagawa Lotus light palette
+          vim.api.nvim_set_hl(0, "NvimTreeFolderArrowClosed", { fg = "#8a8980" })  -- lotusGray3
+          vim.api.nvim_set_hl(0, "NvimTreeFolderArrowOpen", { fg = "#6f894e" })    -- lotusGreen
+          vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#d5cea3" })       -- lotusWhite0
+          vim.api.nvim_set_hl(0, "NvimTreeFolderName", { fg = "#545464" })         -- lotusInk1
+          vim.api.nvim_set_hl(0, "NvimTreeOpenedFolderName", { fg = "#6f894e" })   -- lotusGreen
+        else
+          vim.api.nvim_set_hl(0, "NvimTreeFolderArrowClosed", { fg = "#9b9d9c" })
+          vim.api.nvim_set_hl(0, "NvimTreeFolderArrowOpen", { fg = "#84dc85" })
+          vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#84dc85" })
+          vim.api.nvim_set_hl(0, "NvimTreeFolderName", { fg = "#9b9d9c" })
+          vim.api.nvim_set_hl(0, "NvimTreeOpenedFolderName", { fg = "#84dc85" })
+        end
+      end
+      apply_nvimtree_colors()
+
+      -- Ensure the highlights persist across colorscheme changes
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        group = vim.api.nvim_create_augroup("NvimTreeCustomColors", { clear = true }),
+        callback = function()
+          apply_nvimtree_colors()
+        end,
+      })
+>>>>>>> 0e9ff36 (feat: enhance theme support and color configurations for light/dark modes)
     end,
   },
   -- Maximizer ( Toggle Maximize )
