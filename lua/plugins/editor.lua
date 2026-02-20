@@ -376,8 +376,8 @@ return {
     config = function()
       require("cybu").setup({
         position = {
-          relative_to = "win",   -- win, editor, cursor
-          anchor = "center",     -- topleft, topcenter, topright, centerleft, center, centerright, bottomleft, bottomcenter, bottomright
+          relative_to = "editor",   -- win, editor, cursor
+          anchor = "topcenter",     -- topleft, topcenter, topright, centerleft, center, centerright, bottomleft, bottomcenter, bottomright
           vertical_offset = 0,   -- vertical offset from anchor in lines
           horizontal_offset = 0, -- vertical offset from anchor in columns
           max_win_height = 5,    -- height of cybu window in lines
@@ -386,7 +386,7 @@ return {
         style = {
           path = "tail", -- absolute, relative, tail (filename only)
           path_abbreviation = "none", -- none, shortened
-          border = "rounded", -- single, double, rounded, none
+          border = "none", -- single, double, rounded, none
           separator = " ", -- string used as separator
           prefix = "…", -- string used as prefix for truncated paths
           padding = 1, -- left & right padding in columns
@@ -429,8 +429,8 @@ return {
       })
 
       -- VSCode-like keybindings for buffer switching
-      vim.keymap.set("n", "<C-Tab>", "<Plug>(CybuLastusedNext)", { desc = "Next buffer (VSCode-like)" })
-      vim.keymap.set("n", "<C-S-Tab>", "<Plug>(CybuLastusedPrev)", { desc = "Previous buffer (VSCode-like)" })
+      vim.keymap.set("n", "<C-Tab>", "<Plug>(CybuNext)", { desc = "Next buffer (VSCode-like)" })
+      vim.keymap.set("n", "<C-S-Tab>", "<Plug>(CybuPrev)", { desc = "Previous buffer (VSCode-like)" })
     end,
   },
 

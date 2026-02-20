@@ -88,8 +88,6 @@ end, { desc = "Toggle terminal" })
 -- Improved redo
 map({ "n", "v" }, "U", "<C-r>", { desc = "Redo", silent = true })
 
--- <C-Tab>/<C-S-Tab> handled by Cybu plugin (editor.lua)
-
 -- Code formatting
 map({ "n", "x" }, "<leader>fd", function()
   require("conform").format { lsp_fallback = true }
@@ -587,10 +585,7 @@ map("n", "|", "<C-w>v", { desc = "Split window vertically" })         -- split w
 map("n", "_", "<C-w>s", { desc = "Split window horizontally" })       -- split window horizontally
 map("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" }) -- make split windows equal width & height
 -- tab management
-map("n", "<D-t>", "<cmd>tabnew<CR>", { desc = "Open new tab" })       -- open new tab
--- Tab navigation (vi-style, most common among pros)
-map("n", "gt", ":tabnext<CR>", { desc = "Next tab" })
-map("n", "gT", ":tabprevious<CR>", { desc = "Previous tab" })
+
 -- Window resizing (professional addition)
 map("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase window height" })
 map("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease window height" })
@@ -704,8 +699,6 @@ end
 
 map({ "n", "i", "v" }, "<D-S-s>", save_all_modified,
   { desc = "Save all modified buffers", noremap = true, silent = true })
-
--- Background mode selector handled by ui.lua (<leader>tt)
 
 -- Toggle whitespace display
 map("n", "<leader>tw", function()

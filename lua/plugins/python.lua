@@ -172,27 +172,27 @@ return {
 
 			-- Python testing keymaps
 			local keymap = vim.keymap.set
-			keymap("n", "<leader>tr", function()
+			keymap("n", "<leader>Tr", function()
 				require("neotest").run.run()
 			end, { desc = "Run nearest test" })
 
-			keymap("n", "<leader>tf", function()
+			keymap("n", "<leader>Tf", function()
 				require("neotest").run.run(vim.fn.expand("%"))
 			end, { desc = "Run file tests" })
 
-			keymap("n", "<leader>td", function()
+			keymap("n", "<leader>Td", function()
 				require("neotest").run.run({ strategy = "dap" })
 			end, { desc = "Debug nearest test" })
 
-			keymap("n", "<leader>ts", function()
+			keymap("n", "<leader>Ts", function()
 				require("neotest").summary.toggle()
 			end, { desc = "Toggle test summary" })
 
-			keymap("n", "<leader>to", function()
+			keymap("n", "<leader>To", function()
 				require("neotest").output.open({ enter = true })
 			end, { desc = "Show test output" })
 
-			keymap("n", "<leader>tS", function()
+			keymap("n", "<leader>TS", function()
 				require("neotest").run.stop()
 			end, { desc = "Stop test" })
 		end,
