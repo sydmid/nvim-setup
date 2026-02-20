@@ -5,12 +5,106 @@ _G.background_modes = {
   { bg = "#0f1419", secondary = "#1c262f", cursorline = "#1a1f29", name = "Bluish",   opacity = false },
   { bg = "#121212", secondary = "#313131", cursorline = "#272727", name = "Dark",     opacity = false },
   { bg = "#121212", secondary = "#313131", cursorline = "#272727", name = "Glass",    opacity = true, opacity_value = 0 }, -- (opacity_value is not working for some reason)
-  { bg = "#f5efdc", secondary = "#e8e2cf", cursorline = "#ece6d4", name = "Daylight", opacity = false },
+  { bg = "#f2ecbc", secondary = "#d5cea3", cursorline = "#e7dba0", name = "Daylight", opacity = false },
 }
 _G.current_bg_index = 1
+_G.last_dark_theme = "bearded" -- remember the last dark theme for switching back
 
--- Function to set background mode
+-- Central function to refresh lualine + bufferline for light/dark
+function _G.refresh_bars()
+  local is_light = (_G.current_theme == "kanagawa_lotus")
+
+  -- Refresh lualine (reuse stored config, just swap theme)
+  local ok_lualine, lualine = pcall(require, "lualine")
+  if ok_lualine and _G._lualine_config then
+    local lualine_theme
+    if is_light then
+      lualine_theme = "auto"
+    else
+      lualine_theme = require("lualine.themes.moonfly")
+      lualine_theme.normal.b.fg = "#cad3f5"
+      lualine_theme.insert.b.fg = "#cad3f5"
+      lualine_theme.visual.b.fg = "#cad3f5"
+      lualine_theme.replace.b.fg = "#cad3f5"
+      lualine_theme.inactive.b.fg = "#cad3f5"
+      lualine_theme.normal.c.fg = "#6e738d"
+      lualine_theme.normal.c.bg = "#1e2030"
+    end
+    _G._lualine_config.options.theme = lualine_theme
+    lualine.setup(_G._lualine_config)
+  end
+
+  -- Refresh bufferline highlights via raw highlight groups (preserves existing config)
+  local ok_bl = pcall(require, "bufferline")
+  if ok_bl then
+    local mode = _G.background_modes[_G.current_bg_index]
+    local bg, bg_sel, fg, fg_sel, fg_dim, sep_fg
+    if is_light then
+      -- Kanagawa Lotus palette
+      bg      = "#d5cea3" -- lotusWhite0 (inactive tab bg)
+      bg_sel  = "#f2ecbc" -- lotusWhite3 (active tab bg = main bg)
+      fg      = "#8a8980" -- lotusGray3  (inactive tab fg)
+      fg_sel  = "#545464" -- lotusInk1   (active tab fg)
+      fg_dim  = "#a09cac" -- lotusViolet1
+      sep_fg  = "#e7dba0" -- lotusWhite4 (separator)
+    else
+      bg      = mode.opacity and "NONE" or mode.secondary
+      bg_sel  = mode.opacity and "NONE" or mode.cursorline
+      fg      = "#6e738d"
+      fg_sel  = "#cad3f5"
+      fg_dim  = "#545c7e"
+      sep_fg  = mode.opacity and "NONE" or mode.bg
+    end
+    local fill_bg = is_light and "#e7dba0" or (mode.opacity and "NONE" or mode.bg)
+
+    -- Map: { HighlightGroupName = { opts } }
+    local bl_hls = {
+      BufferLineFill                     = { bg = fill_bg },
+      BufferLineBackground               = { fg = fg, bg = bg },
+      BufferLineBufferSelected           = { fg = fg_sel, bg = bg_sel, bold = true },
+      BufferLineBufferVisible            = { fg = fg_dim, bg = bg },
+      BufferLineCloseButton              = { fg = fg, bg = bg },
+      BufferLineCloseButtonSelected      = { fg = fg_sel, bg = bg_sel },
+      BufferLineCloseButtonVisible       = { fg = fg_dim, bg = bg },
+      BufferLineSeparator                = { fg = sep_fg, bg = bg },
+      BufferLineSeparatorSelected        = { fg = sep_fg, bg = bg_sel },
+      BufferLineSeparatorVisible         = { fg = sep_fg, bg = bg },
+      BufferLineTab                      = { fg = fg, bg = bg },
+      BufferLineTabSelected              = { fg = fg_sel, bg = bg_sel, bold = true },
+      BufferLineTabSeparator             = { fg = sep_fg, bg = bg },
+      BufferLineTabSeparatorSelected     = { fg = sep_fg, bg = bg_sel },
+      BufferLineModified                 = { fg = "#e6c384", bg = bg },
+      BufferLineModifiedSelected         = { fg = "#e6c384", bg = bg_sel },
+      BufferLineModifiedVisible          = { fg = "#e6c384", bg = bg },
+      BufferLineDuplicate                = { fg = fg_dim, bg = bg, italic = true },
+      BufferLineDuplicateSelected        = { fg = fg_sel, bg = bg_sel, italic = true },
+      BufferLineDuplicateVisible         = { fg = fg_dim, bg = bg, italic = true },
+      BufferLineDiagnostic               = { fg = fg_dim, bg = bg },
+      BufferLineDiagnosticSelected       = { fg = fg_sel, bg = bg_sel },
+      BufferLineDiagnosticVisible        = { fg = fg_dim, bg = bg },
+      BufferLineIndicatorSelected        = { fg = is_light and "#6f894e" or "#7aa89f", bg = bg_sel },
+      BufferLineIndicatorVisible         = { fg = fg_dim, bg = bg },
+      BufferLinePick                     = { fg = is_light and "#b35b79" or "#ff5d62", bg = bg, bold = true },
+      BufferLinePickSelected             = { fg = is_light and "#b35b79" or "#ff5d62", bg = bg_sel, bold = true },
+      BufferLinePickVisible              = { fg = is_light and "#b35b79" or "#ff5d62", bg = bg, bold = true },
+      BufferLineOffsetSeparator          = { fg = sep_fg, bg = fill_bg },
+    }
+
+    for group, opts in pairs(bl_hls) do
+      vim.api.nvim_set_hl(0, group, opts)
+    end
+
+    -- Force tabline redraw
+    vim.cmd("redrawtabline")
+  end
+end
+
+-- Function to set background mode (with re-entry guard)
+_G._setting_bg = false
 function _G.set_background_mode(mode_index)
+  if _G._setting_bg then return end
+  _G._setting_bg = true
+
   if mode_index < 1 or mode_index > #_G.background_modes then
     mode_index = 1
   end
@@ -20,57 +114,143 @@ function _G.set_background_mode(mode_index)
 
   -- Handle opacity settings
   if mode.opacity then
-    -- Set transparency for the colorscheme
     vim.g.molokaiTransparent = true
-    -- Apply opacity using winblend for floating windows
     vim.opt.winblend = mode.opacity_value
     vim.opt.pumblend = mode.opacity_value
   else
-    -- Disable transparency
     vim.g.molokaiTransparent = false
     vim.opt.winblend = 0
     vim.opt.pumblend = 0
   end
 
-  -- Apply custom background highlights
-  local bg_highlights = {
-    Normal = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    NormalFloat = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    SignColumn = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    LineNr = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    CursorLine = mode.opacity and { bg = "NONE" } or { bg = mode.cursorline },
-    CursorLineNr = mode.opacity and { bg = "NONE" } or { bg = mode.cursorline },
-    StatusLine = mode.opacity and { bg = "NONE" } or { bg = mode.cursorline },
-    TabLineFill = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    Pmenu = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    PmenuBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    TelescopeNormal = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    TelescopeBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    TelescopeResultsNormal = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    TelescopeResultsBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    TelescopePreviewNormal = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    TelescopePreviewBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    TelescopePromptNormal = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    TelescopePromptBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    NoiceCmdlinePopup = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    NoiceCmdlinePopupBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    NoicePopup = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    NoicePopupBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    NoiceConfirm = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    NoiceConfirmBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
-    TreesitterContext = mode.opacity and { bg = "NONE" } or { bg = mode.secondary },
-    TreesitterContextLineNumber = mode.opacity and { bg = "NONE" } or { bg = mode.secondary },
-  }
+  -- Step 1: Auto-switch theme when crossing the light/dark boundary
+  -- This MUST happen before highlight application so is_light is correct.
+  local is_light_bg = (mode.name == "Daylight")
+  local is_light_theme = (_G.current_theme == "kanagawa_lotus")
 
-  -- Apply the highlights
-  for group, opts in pairs(bg_highlights) do
-    local current_hl = vim.api.nvim_get_hl(0, { name = group })
-    vim.api.nvim_set_hl(0, group, vim.tbl_extend("force", current_hl, opts))
+  if is_light_bg and not is_light_theme then
+    -- Switching to Daylight bg → auto-switch to Kanagawa Lotus
+    _G.last_dark_theme = _G.current_theme
+    _G.current_theme = "kanagawa_lotus"
+    _G.save_theme_preference()
+    vim.opt.background = "light"
+    vim.cmd.colorscheme("kanagawa-lotus")
+  elseif not is_light_bg and is_light_theme then
+    -- Switching away from Daylight → restore previous dark theme
+    local dark_theme = _G.last_dark_theme or "bearded"
+    _G.current_theme = dark_theme
+    _G.save_theme_preference()
+    vim.opt.background = "dark"
+    if dark_theme == "zenwritten" then
+      vim.cmd.colorscheme("zenwritten")
+    elseif dark_theme == "modus_vivendi" then
+      vim.cmd.colorscheme("modus_vivendi")
+    elseif dark_theme == "github_dark_default" then
+      vim.cmd.colorscheme("github_dark_default")
+    elseif dark_theme == "ayu_dark" then
+      require("ayu").setup({ mirage = false })
+      vim.cmd.colorscheme("ayu-dark")
+    elseif dark_theme == "ayu_mirage" then
+      require("ayu").setup({ mirage = true })
+      vim.cmd.colorscheme("ayu-mirage")
+    elseif dark_theme == "dracula" then
+      vim.cmd.colorscheme("dracula")
+    else
+      require("bearded").setup({ flavor = "arc" })
+      vim.cmd.colorscheme("bearded")
+    end
   end
+
+  -- Step 2: Apply highlight overrides (is_light now reflects the actual current theme)
+  local is_light = (_G.current_theme == "kanagawa_lotus")
+
+  if is_light and mode.name == "Daylight" then
+    -- Kanagawa Lotus: nudge highlight groups to exact palette values
+    local lotus = {
+      bg      = "#f2ecbc", -- lotusWhite3 (main bg)
+      bg_dim  = "#dcd5ac", -- lotusWhite1 (dimmed bg / floats border)
+      gutter  = "#e7dba0", -- lotusWhite4 (gutter / cursorline)
+      float   = "#d5cea3", -- lotusWhite0 (float bg)
+      fg      = "#545464", -- lotusInk1
+      fg_dim  = "#43436c", -- lotusInk2
+      nontext = "#a09cac", -- lotusViolet1
+    }
+    local light_hl = {
+      Normal                       = { bg = lotus.bg, fg = lotus.fg },
+      NormalFloat                  = { bg = lotus.float, fg = lotus.fg_dim },
+      SignColumn                   = { bg = lotus.bg },
+      LineNr                       = { bg = lotus.bg, fg = lotus.nontext },
+      CursorLine                   = { bg = lotus.gutter },
+      CursorLineNr                 = { bg = lotus.gutter },
+      StatusLine                   = { bg = lotus.gutter },
+      TabLineFill                  = { bg = lotus.bg },
+      Pmenu                        = { bg = lotus.float },
+      PmenuBorder                  = { bg = lotus.float },
+      TelescopeNormal              = { bg = lotus.bg },
+      TelescopeBorder              = { bg = lotus.bg, fg = lotus.nontext },
+      TelescopeResultsNormal       = { bg = lotus.bg },
+      TelescopeResultsBorder       = { bg = lotus.bg },
+      TelescopePreviewNormal       = { bg = lotus.bg },
+      TelescopePreviewBorder       = { bg = lotus.bg },
+      TelescopePromptNormal        = { bg = lotus.bg },
+      TelescopePromptBorder        = { bg = lotus.bg },
+      NoiceCmdlinePopup            = { bg = lotus.float },
+      NoiceCmdlinePopupBorder      = { bg = lotus.float },
+      NoicePopup                   = { bg = lotus.float },
+      NoicePopupBorder             = { bg = lotus.float },
+      NoiceConfirm                 = { bg = lotus.float },
+      NoiceConfirmBorder           = { bg = lotus.float },
+      TreesitterContext            = { bg = lotus.bg_dim },
+      TreesitterContextLineNumber  = { bg = lotus.bg_dim },
+    }
+    for group, opts in pairs(light_hl) do
+      vim.api.nvim_set_hl(0, group, opts)
+    end
+  else
+    -- Dark theme: apply custom background highlights
+    local bg_highlights = {
+      Normal = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      NormalFloat = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      SignColumn = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      LineNr = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      CursorLine = mode.opacity and { bg = "NONE" } or { bg = mode.cursorline },
+      CursorLineNr = mode.opacity and { bg = "NONE" } or { bg = mode.cursorline },
+      StatusLine = mode.opacity and { bg = "NONE" } or { bg = mode.cursorline },
+      TabLineFill = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      Pmenu = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      PmenuBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      TelescopeNormal = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      TelescopeBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      TelescopeResultsNormal = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      TelescopeResultsBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      TelescopePreviewNormal = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      TelescopePreviewBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      TelescopePromptNormal = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      TelescopePromptBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      NoiceCmdlinePopup = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      NoiceCmdlinePopupBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      NoicePopup = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      NoicePopupBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      NoiceConfirm = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      NoiceConfirmBorder = mode.opacity and { bg = "NONE" } or { bg = mode.bg },
+      TreesitterContext = mode.opacity and { bg = "NONE" } or { bg = mode.secondary },
+      TreesitterContextLineNumber = mode.opacity and { bg = "NONE" } or { bg = mode.secondary },
+    }
+
+    for group, opts in pairs(bg_highlights) do
+      local current_hl = vim.api.nvim_get_hl(0, { name = group })
+      vim.api.nvim_set_hl(0, group, vim.tbl_extend("force", current_hl, opts))
+    end
+  end
+
+  -- Step 3: Refresh lualine + bufferline to match
+  _G.refresh_bars()
 
   _G.save_background_preference()
   local opacity_text = mode.opacity and (" (" .. mode.opacity_value .. "% opacity)") or ""
   vim.notify("Background mode: " .. mode.name .. opacity_text, vim.log.levels.INFO)
+
+  _G._setting_bg = false
 end
 
 -- Function to cycle through background modes
@@ -103,11 +283,15 @@ function _G.load_theme_preference()
   end
 end
 
+_G._applying_theme = false
 function _G.apply_theme(theme_name)
   _G.current_theme = theme_name
   _G.save_theme_preference()
 
   local is_light = (theme_name == "kanagawa_lotus")
+
+  -- Guard colorscheme commands so ColorScheme autocmd doesn't re-enter
+  _G._applying_theme = true
 
   if theme_name == "zenwritten" then
     vim.opt.background = "dark"
@@ -145,6 +329,8 @@ function _G.apply_theme(theme_name)
     vim.cmd.colorscheme("bearded")
   end
 
+  _G._applying_theme = false
+
   -- If switching to a dark theme while Daylight bg is active, reset to default
   if not is_light and _G.background_modes[_G.current_bg_index].name == "Daylight" then
     _G.current_bg_index = 1
@@ -169,14 +355,19 @@ function _G.apply_theme(theme_name)
 
   -- Cursor — adapt to light/dark theme
   if is_light then
-    vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f5efdc", bg = "#3b4252" })
-    vim.api.nvim_set_hl(0, "lCursor", { fg = "#f5efdc", bg = "#3b4252" })
+    vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f2ecbc", bg = "#545464" })
+    vim.api.nvim_set_hl(0, "lCursor", { fg = "#f2ecbc", bg = "#545464" })
   else
     vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
     vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
   end
 
-  -- Reapply background mode on top of the new theme
+  -- Remember last dark theme for background picker switching
+  if not is_light then
+    _G.last_dark_theme = theme_name
+  end
+
+  -- Reapply background mode on top of the new theme + refresh bars
   _G.set_background_mode(_G.current_bg_index)
 end
 
@@ -527,8 +718,8 @@ return {
 
       -- Cursor — adapt to light/dark theme
       if _G.current_theme == "kanagawa_lotus" then
-        vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f5efdc", bg = "#3b4252" })
-        vim.api.nvim_set_hl(0, "lCursor", { fg = "#f5efdc", bg = "#3b4252" })
+        vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f2ecbc", bg = "#545464" })
+        vim.api.nvim_set_hl(0, "lCursor", { fg = "#f2ecbc", bg = "#545464" })
       else
         vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
         vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
@@ -536,18 +727,25 @@ return {
 
       -- Create autocmd to reapply background highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
-        pattern = { "bearded", "zenwritten", "modus_vivendi", "kanagawa-lotus", "github_dark_default", "ayu", "ayu-dark", "ayu-mirage", "dracula" },
+        pattern = { "bearded", "zenwritten", "modus_vivendi", "kanagawa-lotus", "kanagawa", "github_dark_default", "ayu", "ayu-dark", "ayu-mirage", "dracula" },
         group = vim.api.nvim_create_augroup("AyuBackground", { clear = true }),
         callback = function()
-          -- Reapply current background mode
+          -- Skip if the change was triggered by our own apply_theme/set_background_mode
+          if _G._applying_theme or _G._setting_bg then return end
+          -- Reapply current background mode (handles highlights + bars)
           _G.set_background_mode(_G.current_bg_index)
           -- Re-override LSP reference highlights after colorscheme resets them
           vim.api.nvim_set_hl(0, "LspReferenceText",  { underline = true, bg = "NONE" })
           vim.api.nvim_set_hl(0, "LspReferenceRead",  { underline = true, bg = "NONE" })
           vim.api.nvim_set_hl(0, "LspReferenceWrite", { underline = true, bg = "NONE" })
-          -- White block cursor
-          vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
-          vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
+          -- Cursor — adapt to light/dark
+          if _G.current_theme == "kanagawa_lotus" then
+            vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f2ecbc", bg = "#545464" })
+            vim.api.nvim_set_hl(0, "lCursor", { fg = "#f2ecbc", bg = "#545464" })
+          else
+            vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
+            vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
+          end
         end,
       })
 
@@ -597,16 +795,56 @@ return {
   {
     "rebelot/kanagawa.nvim",
     lazy = true,
-    opts = {
-      compile = false,
-      undercurl = true,
-      commentStyle = { italic = true },
-      functionStyle = { bold = true },
-      keywordStyle = { bold = true },
-      statementStyle = { bold = true },
-      transparent = false,
-      theme = "lotus",
-    },
+    config = function()
+      require("kanagawa").setup({
+        compile = false,
+        undercurl = true,
+        commentStyle = { italic = true },
+        functionStyle = { bold = true },
+        keywordStyle = { bold = true },
+        statementStyle = { bold = true },
+        transparent = false,
+        theme = "lotus",
+        background = {
+          dark = "wave",
+          light = "lotus",
+        },
+        colors = {
+          theme = {
+            lotus = {
+              ui = {
+                -- Use our Daylight palette values so bg overrides stay consistent
+                bg       = "#f2ecbc", -- lotusWhite3
+                bg_dim   = "#dcd5ac", -- lotusWhite1
+                bg_gutter = "#e7dba0", -- lotusWhite4
+              },
+            },
+          },
+        },
+        overrides = function(colors)
+          local theme = colors.theme
+          return {
+            -- Telescope integration with proper light background
+            TelescopeNormal       = { bg = theme.ui.bg },
+            TelescopeBorder       = { bg = theme.ui.bg, fg = theme.ui.nontext },
+            TelescopeResultsNormal = { bg = theme.ui.bg },
+            TelescopePromptNormal = { bg = theme.ui.bg },
+            TelescopePreviewNormal = { bg = theme.ui.bg },
+            -- Noice / floating UI
+            NoiceCmdlinePopup     = { bg = theme.ui.float.bg },
+            NoiceCmdlinePopupBorder = { bg = theme.ui.float.bg },
+            NoicePopup            = { bg = theme.ui.float.bg },
+            NoicePopupBorder      = { bg = theme.ui.float.bg },
+            NoiceConfirm          = { bg = theme.ui.float.bg },
+            NoiceConfirmBorder    = { bg = theme.ui.float.bg },
+            -- LSP reference underline only
+            LspReferenceText      = { underline = true, bg = "NONE" },
+            LspReferenceRead      = { underline = true, bg = "NONE" },
+            LspReferenceWrite     = { underline = true, bg = "NONE" },
+          }
+        end,
+      })
+    end,
   },
   -- GitHub Theme: official GitHub color schemes
   {
@@ -682,7 +920,7 @@ return {
           priority = 10,
           use_treesitter = false, -- Keep false for better performance
           chars = { "│" }, -- Simple vertical line character
-          style = { { fg = "#3a3a3a" } }, -- Dark subtle color for indent guides
+          style = { { fg = (_G.current_theme == "kanagawa_lotus") and "#d5cea3" or "#3a3a3a" } },
           ahead_lines = 5, -- Preview range
           delay = 100, -- Throttle delay for smooth scrolling
           exclude_filetypes = {
