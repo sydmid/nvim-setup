@@ -1,6 +1,7 @@
 -- Global variables to track current background mode
 _G.background_modes = {
 <<<<<<< HEAD
+<<<<<<< HEAD
   { name = "Light", background = "light", colorscheme = "kanagawa-lotus" },
   { name = "Dark", background = "dark", colorscheme = "kanagawa" },
 }
@@ -11,12 +12,18 @@ _G.current_bg_index = 2
 _G.current_bg_index = 2
 
 =======
+=======
+>>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
   { bg = "#282c34", secondary = "#373c47", cursorline = "#303640", name = "Light",    opacity = false },
   { bg = "#1f1f19", secondary = "#34342a", cursorline = "#333227", name = "Warm",     opacity = false },
   { bg = "#0f1419", secondary = "#1c262f", cursorline = "#1a1f29", name = "Bluish",   opacity = false },
   { bg = "#121212", secondary = "#313131", cursorline = "#272727", name = "Dark",     opacity = false },
   { bg = "#121212", secondary = "#313131", cursorline = "#272727", name = "Glass",    opacity = true, opacity_value = 0 }, -- (opacity_value is not working for some reason)
+<<<<<<< HEAD
   { bg = "#f2ecbc", secondary = "#d5cea3", cursorline = "#e7dba0", name = "Daylight", opacity = false },
+=======
+  { bg = "#f5efdc", secondary = "#e8e2cf", cursorline = "#ece6d4", name = "Daylight", opacity = false },
+>>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
 }
 _G.current_bg_index = 1
 _G.last_dark_theme = "bearded" -- remember the last dark theme for switching back
@@ -314,9 +321,12 @@ function _G.apply_theme(theme_name)
 
   local is_light = (theme_name == "kanagawa_lotus")
 
+<<<<<<< HEAD
   -- Guard colorscheme commands so ColorScheme autocmd doesn't re-enter
   _G._applying_theme = true
 
+=======
+>>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
   if theme_name == "zenwritten" then
     vim.opt.background = "dark"
     vim.cmd.colorscheme("zenwritten")
@@ -353,8 +363,11 @@ function _G.apply_theme(theme_name)
     vim.cmd.colorscheme("bearded")
   end
 
+<<<<<<< HEAD
   _G._applying_theme = false
 
+=======
+>>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
   -- If switching to a dark theme while Daylight bg is active, reset to default
   if not is_light and _G.background_modes[_G.current_bg_index].name == "Daylight" then
     _G.current_bg_index = 1
@@ -379,8 +392,13 @@ function _G.apply_theme(theme_name)
 
   -- Cursor — adapt to light/dark theme
   if is_light then
+<<<<<<< HEAD
     vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f2ecbc", bg = "#545464" })
     vim.api.nvim_set_hl(0, "lCursor", { fg = "#f2ecbc", bg = "#545464" })
+=======
+    vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f5efdc", bg = "#3b4252" })
+    vim.api.nvim_set_hl(0, "lCursor", { fg = "#f5efdc", bg = "#3b4252" })
+>>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
   else
     vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
     vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
@@ -683,7 +701,59 @@ return {
         },
       })
 
+<<<<<<< HEAD
       _G.load_background_preference()
+=======
+      -- Apply saved theme
+      if _G.current_theme == "zenwritten" then
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("zenwritten")
+      elseif _G.current_theme == "modus_vivendi" then
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("modus_vivendi")
+      elseif _G.current_theme == "github_dark_default" then
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("github_dark_default")
+      elseif _G.current_theme == "ayu_dark" then
+        require("ayu").setup({ mirage = false })
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("ayu-dark")
+      elseif _G.current_theme == "ayu_mirage" then
+        require("ayu").setup({ mirage = true })
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("ayu-mirage")
+      elseif _G.current_theme == "dracula" then
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("dracula")
+      elseif _G.current_theme == "kanagawa_lotus" then
+        vim.opt.background = "light"
+        vim.cmd.colorscheme("kanagawa-lotus")
+        -- Auto-select warm Daylight background for light theme
+        for i, mode in ipairs(_G.background_modes) do
+          if mode.name == "Daylight" then
+            _G.current_bg_index = i
+            break
+          end
+        end
+      else
+        vim.opt.background = "dark"
+        vim.cmd.colorscheme("bearded")
+      end
+
+      -- Apply Dracula-specific grey comments and strings at startup
+      if _G.current_theme == "dracula" then
+        vim.api.nvim_set_hl(0, "Comment", { fg = "#857a7b", italic = false })
+        vim.api.nvim_set_hl(0, "@comment", { fg = "#857a7b", italic = false })
+        vim.api.nvim_set_hl(0, "String", { fg = "#A19A5E" })
+        vim.api.nvim_set_hl(0, "@string", { fg = "#A19A5E" })
+        vim.api.nvim_set_hl(0, "@string.escape", { fg = "#A19A5E" })
+        vim.api.nvim_set_hl(0, "@string.special", { fg = "#A19A5E" })
+        vim.api.nvim_set_hl(0, "Character", { fg = "#A19A5E" })
+        vim.api.nvim_set_hl(0, "@character", { fg = "#A19A5E" })
+      end
+
+      -- Apply the current background mode
+>>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
       _G.set_background_mode(_G.current_bg_index)
 
 <<<<<<< HEAD
@@ -695,8 +765,13 @@ return {
 
       -- Cursor — adapt to light/dark theme
       if _G.current_theme == "kanagawa_lotus" then
+<<<<<<< HEAD
         vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f2ecbc", bg = "#545464" })
         vim.api.nvim_set_hl(0, "lCursor", { fg = "#f2ecbc", bg = "#545464" })
+=======
+        vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f5efdc", bg = "#3b4252" })
+        vim.api.nvim_set_hl(0, "lCursor", { fg = "#f5efdc", bg = "#3b4252" })
+>>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
       else
         vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
         vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
@@ -704,7 +779,11 @@ return {
 
       -- Create autocmd to reapply background highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
+<<<<<<< HEAD
         pattern = { "bearded", "zenwritten", "modus_vivendi", "kanagawa-lotus", "kanagawa", "github_dark_default", "ayu", "ayu-dark", "ayu-mirage", "dracula" },
+=======
+        pattern = { "bearded", "zenwritten", "modus_vivendi", "kanagawa-lotus", "github_dark_default", "ayu", "ayu-dark", "ayu-mirage", "dracula" },
+>>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
         group = vim.api.nvim_create_augroup("AyuBackground", { clear = true }),
         callback = function()
           -- Skip if the change was triggered by our own apply_theme/set_background_mode
@@ -747,7 +826,10 @@ return {
         end,
       })
 
+<<<<<<< HEAD
 >>>>>>> 0e9ff36 (feat: enhance theme support and color configurations for light/dark modes)
+=======
+>>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
       vim.keymap.set("n", "<leader>tb", function()
         _G.telescope_background_picker()
       end, { desc = "Change Background", silent = true })
@@ -779,6 +861,7 @@ return {
   {
     "rebelot/kanagawa.nvim",
     lazy = true,
+<<<<<<< HEAD
     config = function()
       require("kanagawa").setup({
         compile = false,
@@ -829,6 +912,18 @@ return {
         end,
       })
     end,
+=======
+    opts = {
+      compile = false,
+      undercurl = true,
+      commentStyle = { italic = true },
+      functionStyle = { bold = true },
+      keywordStyle = { bold = true },
+      statementStyle = { bold = true },
+      transparent = false,
+      theme = "lotus",
+    },
+>>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
   },
   -- GitHub Theme: official GitHub color schemes
   {

@@ -380,6 +380,80 @@ return {
     },
   },
 
+<<<<<<< HEAD
+=======
+  -- Harpoon for quick file navigation
+  {
+    "ThePrimeagen/harpoon",
+    dependencies = { "nvim-lua/plenary.nvim" },
+  },
+
+  -- Cybu - VSCode-like buffer switching
+  {
+    "ghillb/cybu.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons", "nvim-lua/plenary.nvim" },
+    config = function()
+      require("cybu").setup({
+        position = {
+          relative_to = "editor",   -- win, editor, cursor
+          anchor = "topcenter",     -- topleft, topcenter, topright, centerleft, center, centerright, bottomleft, bottomcenter, bottomright
+          vertical_offset = 0,   -- vertical offset from anchor in lines
+          horizontal_offset = 0, -- vertical offset from anchor in columns
+          max_win_height = 5,    -- height of cybu window in lines
+          max_win_width = 1.5,   -- integer for absolute in columns, float for relative to win/editor width
+        },
+        style = {
+          path = "tail", -- absolute, relative, tail (filename only)
+          path_abbreviation = "none", -- none, shortened
+          border = "none", -- single, double, rounded, none
+          separator = " ", -- string used as separator
+          prefix = "…", -- string used as prefix for truncated paths
+          padding = 1, -- left & right padding in columns
+          hide_buffer_id = true, -- hide buffer IDs in window
+          devicons = {
+            enabled = true, -- enable or disable web dev icons
+            colored = true, -- color devicons
+            truncate = true, -- truncate wide icons
+          },
+          highlights = { -- see highlights via :highlight
+            current_buffer = "CybuFocus",
+            adjacent_buffers = "CybuAdjacent",
+            background = "CybuBackground",
+            border = "CybuBorder",
+          },
+        },
+        behavior = { -- set behavior for different modes
+          mode = {
+            default = {
+              switch = "immediate", -- immediate, on_close
+              view = "rolling",     -- paging, rolling
+            },
+            last_used = {
+              switch = "immediate", -- immediate, on_close
+              view = "paging",      -- paging, rolling
+            },
+            auto = {
+              view = "rolling", -- paging, rolling
+            },
+          },
+          show_on_autocmd = false, -- event to trigger cybu (eg. "BufEnter")
+        },
+        display_time = 700,        -- time the cybu window is displayed
+        exclude = {                -- filetypes, buftypes to exclude
+          "neo-tree",
+          "fugitive",
+          "qf",
+        },
+        fallback = function() end, -- arbitrary fallback function used in excluded filetypes
+      })
+
+      -- VSCode-like keybindings for buffer switching
+      vim.keymap.set("n", "<C-Tab>", "<Plug>(CybuNext)", { desc = "Next buffer (VSCode-like)" })
+      vim.keymap.set("n", "<C-S-Tab>", "<Plug>(CybuPrev)", { desc = "Previous buffer (VSCode-like)" })
+    end,
+  },
+
+>>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
   -- Buffer manager - Enhanced buffer management with UI
   {
     "j-morano/buffer_manager.nvim",
