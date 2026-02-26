@@ -32,7 +32,6 @@ function _G.toggle_background_mode()
   _G.set_background_mode(next_index)
 end
 
-
 -- Function to save background preference
 function _G.save_background_preference()
   local bg_file = vim.fn.stdpath("data") .. "/background_preference.lua"
@@ -278,7 +277,7 @@ return {
       require("hlchunk").setup({
         -- Chunk highlighting with beautiful animations
         chunk = {
-          enable = true,
+          enable = false,
           priority = 15,
           use_treesitter = true,
           chars = {
@@ -316,7 +315,7 @@ return {
         },
         -- Indent line highlighting
         indent = {
-          enable = true,
+          enable = false,
           priority = 10,
           use_treesitter = false, -- Keep false for better performance
           chars = { "│" }, -- Simple vertical line character
