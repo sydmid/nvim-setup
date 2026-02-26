@@ -4,6 +4,10 @@ _G.background_modes = {
   { name = "Dark", background = "dark", colorscheme = "kanagawa" },
 }
 _G.current_bg_index = 2
+  { name = "Light", background = "light", colorscheme = "kanagawa-lotus" },
+  { name = "Dark", background = "dark", colorscheme = "kanagawa" },
+}
+_G.current_bg_index = 2
 
 -- Function to set background mode (with re-entry guard)
 _G._setting_bg = false
@@ -17,6 +21,8 @@ function _G.set_background_mode(mode_index)
 
   _G.current_bg_index = mode_index
   local mode = _G.background_modes[mode_index]
+  vim.opt.background = mode.background
+  vim.cmd.colorscheme(mode.colorscheme)
   vim.opt.background = mode.background
   vim.cmd.colorscheme(mode.colorscheme)
 
@@ -67,6 +73,8 @@ function _G.telescope_background_picker()
     table.insert(mode_info, {
       index = i,
       name = mode.name,
+      display = mode.name,
+      description = string.format("Kanagawa %s", mode.name:lower())
       display = mode.name,
       description = string.format("Kanagawa %s", mode.name:lower())
     })
@@ -235,9 +243,12 @@ end
 
 return {
   -- Kanagawa (only theme)
+  -- Kanagawa (only theme)
   {
     "rebelot/kanagawa.nvim",
+    "rebelot/kanagawa.nvim",
     lazy = false,
+    priority = 1000,
     priority = 1000,
     config = function()
       require("kanagawa").setup({
@@ -249,6 +260,14 @@ return {
           dark = "wave",
           light = "lotus",
         },
+      })
+
+      _G.load_background_preference()
+      _G.set_background_mode(_G.current_bg_index)
+
+      vim.keymap.set("n", "<leader>tb", function()
+        _G.telescope_background_picker()
+      end, { desc = "Change Background", silent = true })
       })
 
       _G.load_background_preference()
