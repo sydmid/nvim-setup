@@ -1070,14 +1070,6 @@ return {
 		},
 		config = function(_, opts)
 			require("copilot").setup(opts)
-
-			-- Custom highlight groups for better visibility
-			local suggestion_fg = (_G.current_theme == "kanagawa_lotus") and "#a09cac" or "#555555"
-			vim.api.nvim_set_hl(0, "CopilotSuggestion", {
-				fg = suggestion_fg,
-				ctermfg = 8,
-				italic = true
-			})
 		end,
 	},
 
