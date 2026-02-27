@@ -410,80 +410,7 @@ map("n", "<D-S-t>", "<cmd>edit #<CR>", { desc = "Reopen last closed tab/buffer",
 map("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
 map("i", "kj", "<ESC>", { desc = "Exit insert mode with kj" })
 -- map("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
--- map("n", "<esc>", ":noh<return><esc>", { desc = "Clear search highlight" })
-vim.keymap.set("n", "<Esc>", function()
-  -- Get current buffer details
-  local current = vim.api.nvim_get_current_buf()
-
-  -- Get current buffer filetype safely
-  local ft_ok, current_ft = pcall(function()
-    return vim.bo[current].filetype
-  end)
-
-  -- Special handling: Let telescope handle its own Esc mappings
-  -- Don't intercept Esc for telescope buffers
-  if ft_ok and (current_ft == "TelescopePrompt" or current_ft == "TelescopeResults") then
-    -- Do nothing - let telescope's attach_mappings handle Esc
-    return
-  end
-
-  -- Only redirect focus if we're in an auxiliary buffer in normal mode
-  if not is_main_buffer(current) then
-    -- If in auxiliary buffer, go back to last main buffer if exists
-    if vim.g.last_main_win and vim.api.nvim_win_is_valid(vim.g.last_main_win) then
-      vim.g.last_aux_win = vim.api.nvim_get_current_win()
-      vim.api.nvim_set_current_win(vim.g.last_main_win)
-      return
-    end
-
-    -- Otherwise find any main buffer
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
-      local buf = vim.api.nvim_win_get_buf(win)
-      if is_main_buffer(buf) then
-        vim.g.last_aux_win = vim.api.nvim_get_current_win()
-        vim.g.last_main_win = win
-        vim.api.nvim_set_current_win(win)
-        return
-      end
-    end
-  else
-    -- Check if there are any LSP hover windows that should be closed first
-    local hover_windows_closed = false
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
-      local ok, config = pcall(vim.api.nvim_win_get_config, win)
-      if ok and config.relative ~= "" then
-        -- Check if this is an LSP hover window by checking window title or buffer name
-        local buf = vim.api.nvim_win_get_buf(win)
-        local buf_name = vim.api.nvim_buf_get_name(buf)
-        local buf_lines = vim.api.nvim_buf_get_lines(buf, 0, 1, false)
-
-        -- Skip treesitter-context windows (they have zindex >= 20)
-        if not (config.zindex and config.zindex >= 20) then
-          -- Check if it's likely an LSP hover window
-          local is_hover_window = config.title and (
-            config.title:match("Documentation") or
-            config.title:match("Signature") or
-            config.title:match("Hover")
-          )
-
-          if is_hover_window or (buf_lines[1] and buf_lines[1]:match("^#")) then
-            pcall(vim.api.nvim_win_close, win, true)
-            hover_windows_closed = true
-          else
-            -- Close other floating windows (signature help, etc.)
-            pcall(vim.api.nvim_win_close, win, true)
-          end
-        end
-      end
-    end
-
-    -- If we closed any hover windows, don't clear search highlight
-    if not hover_windows_closed then
-      -- Clear search highlight
-      vim.cmd("nohlsearch")
-    end
-  end
-end, { desc = "Clear highlights or focus main buffer from auxiliary", silent = true })
+map("n", "<esc>", ":noh<return><esc>", { desc = "Clear search highlight" })
 
 -- Flash.nvim (EasyMotion replacement)
 map("n", "<leader>k", ":lua require('flash').jump()<CR>", { desc = "Flash jump", silent = true })
@@ -494,7 +421,7 @@ map(
   { desc = "Flash forward" }
 )
 
--- File Explorer (NERDTree replacement)
+-- File Explorer ( NvimTree )
 map({ "n", "v" }, "<D-s>", ":NvimTreeFindFileToggle<CR>", {
   desc = "Toggle NvimTree and reveal current file",
   silent = true,
@@ -738,7 +665,7 @@ vim.keymap.set({ "n", "v" }, "<S-k>", "<Nop>", { noremap = true, silent = true }
 vim.keymap.set("n", "<BS>", "<CMD>Oil<CR>", { desc = "Open parent directory with Oil" })
 
 -- Open workspace root in Oil
-vim.keymap.set("n", "<S-BS>", function()
+vim.keymap.set("n", "<D-BS>", function()
   -- Use Neovim's LSP workspaceFolders or fallback to current working dir
   local clients = vim.lsp.get_clients({ bufnr = 0 })
   local root = nil
