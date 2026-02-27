@@ -59,7 +59,6 @@ end, { noremap = true, silent = true })
 
 
 --------------------------------------------- Buffer management commands (which-key compatible)
-map("n", "<leader>bD", "<cmd>%bd|e#|bd#<CR>", { desc = "Delete other buffers" })
 -- Reset current buffer (reload from disk, discard changes)
 map("n", "<leader>br", function()
   local bufname = vim.api.nvim_buf_get_name(0)
@@ -234,79 +233,6 @@ local function is_window_visible(win)
   return vim.tbl_contains(all_wins, win)
 end
 
--- -- Tab key toggles between main buffer and auxiliary buffers (excluding terminal mode for autocomplete)
-map("n", "<Tab>", function()
-  local current = vim.api.nvim_get_current_buf()
-  local current_win = vim.api.nvim_get_current_win()
-
-  -- Track the last known main and auxiliary buffers/windows
-  if not vim.g.last_main_win then
-    vim.g.last_main_win = nil
-    vim.g.last_aux_win = nil
-  end
-
-  -- If in a main buffer, focus on last auxiliary buffer if it's visible
-  if is_main_buffer(current) then
-    if vim.g.last_aux_win and is_window_visible(vim.g.last_aux_win) then
-      local aux_buf = vim.api.nvim_win_get_buf(vim.g.last_aux_win)
-      -- Double-check that the auxiliary window still contains a non-main buffer
-      if not is_main_buffer(aux_buf) then
-        vim.g.last_main_win = current_win
-        vim.api.nvim_set_current_win(vim.g.last_aux_win)
-        return
-      end
-    end
-
-    -- Find any visible auxiliary buffer to focus
-    local visible_aux_windows = {}
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
-      if is_window_visible(win) and win ~= current_win then
-        local buf = vim.api.nvim_win_get_buf(win)
-        if not is_main_buffer(buf) then
-          table.insert(visible_aux_windows, win)
-        end
-      end
-    end
-
-    -- Focus on the first visible auxiliary window found
-    if #visible_aux_windows > 0 then
-      vim.g.last_main_win = current_win
-      vim.g.last_aux_win = visible_aux_windows[1]
-      vim.api.nvim_set_current_win(visible_aux_windows[1])
-      return
-    end
-    -- No auxiliary windows visible, provide feedback
-    vim.notify("No auxiliary windows open", vim.log.levels.INFO, { timeout = 1000 })
-  else
-    -- If in auxiliary buffer, go back to last main buffer if it's visible
-    if vim.g.last_main_win and is_window_visible(vim.g.last_main_win) then
-      local main_buf = vim.api.nvim_win_get_buf(vim.g.last_main_win)
-      -- Double-check that the main window still contains a main buffer
-      if is_main_buffer(main_buf) then
-        vim.g.last_aux_win = current_win
-        vim.api.nvim_set_current_win(vim.g.last_main_win)
-        return
-      end
-    end
-
-    -- Find any visible main buffer
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
-      if is_window_visible(win) and win ~= current_win then
-        local buf = vim.api.nvim_win_get_buf(win)
-        if is_main_buffer(buf) then
-          vim.g.last_aux_win = current_win
-          vim.g.last_main_win = win
-          vim.api.nvim_set_current_win(win)
-          return
-        end
-      end
-    end
-
-    -- No main windows found, provide feedback
-    vim.notify("No main windows available", vim.log.levels.INFO, { timeout = 1000 })
-  end
-end, { desc = "Toggle between main and auxiliary buffers", silent = true })
-
 vim.keymap.set({ "n", "t" }, "<D-b>", function()
   local current_win = vim.api.nvim_get_current_win()
   local current_buf = vim.api.nvim_win_get_buf(current_win)
@@ -404,6 +330,8 @@ map("n", "<C-Tab>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next tab", silent 
 map("n", "<C-S-Tab>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Previous tab", silent = true })
 map("n", "<D-]>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next tab", silent = true })
 map("n", "<D-[>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Previous tab", silent = true })
+map("n", "<D-S-]>", "<cmd>BufferLineMoveNext<CR>", { desc = "Move tab right", silent = true })
+map("n", "<D-S-[>", "<cmd>BufferLineMovePrev<CR>", { desc = "Move tab left", silent = true })
 
 map("n", "<D-S-t>", "<cmd>edit #<CR>", { desc = "Reopen last closed tab/buffer", silent = true })
 
@@ -426,39 +354,6 @@ map({ "n", "v" }, "<D-s>", ":NvimTreeFindFileToggle<CR>", {
   desc = "Toggle NvimTree and reveal current file",
   silent = true,
 })
-
--- Diagnostics with Telescope
-map({ "n", "t" }, "<D-6>", function()
-  require("helpers.telescope_pickers").builtin("diagnostics", {
-    layout = "ivy",
-    mode = "normal",
-    height = 0.5,
-    bufnr = 0,
-    layout_config = { preview_cutoff = 120 },
-    severity_sort = true,
-    no_sign = false,
-    line_width = "full",
-    previewer = true,
-    show_line = true,
-  })
-end, { desc = "Show buffer diagnostics in telescope", silent = true })
-
--- Buffer-only Git Navigation (]c,) -- Remember [c is for jump to context
--- Function to navigate git changes only within current buffer
-local function buffer_git_navigation(direction)
-  local gitsigns = package.loaded.gitsigns
-  if not gitsigns then
-    vim.notify("Gitsigns not loaded", vim.log.levels.WARN)
-    return
-  end
-
-  -- Simple navigation within current buffer only
-  if direction == "next" then
-    gitsigns.next_hunk()
-  else
-    gitsigns.prev_hunk()
-  end
-end
 
 -- Normal + Visual mode
 map({ "n", "v" }, "<D-S-j>", function()
@@ -646,17 +541,6 @@ end, { desc = "Toggle whitespace display", silent = true })
 map("n", "<leader>cr", "<cmd>RunCode<CR>", { desc = "Run code in current buffer" })
 map("v", "<leader>cr", "<cmd>RunCode<CR>", { desc = "Run selected code" })
 
--- command + enter combinations for insert blank line top and bottom
--- Insert a blank line below (Cmd + Enter) in insert mode
-vim.keymap.set("i", "<D-CR>", function()
-  return "<Esc>o" -- exit insert, open line below, stay in insert
-end, { expr = true, silent = true })
-
--- Insert a blank line above (Cmd + Shift + Enter) in insert mode
-vim.keymap.set("i", "<D-S-CR>", function()
-  return "<Esc>O" -- exit insert, open line above, stay in insert
-end, { expr = true, silent = true })
-
 -- Disable Shift+j and Shift+k in normal mode
 vim.keymap.set({ "n", "v" }, "<S-j>", "<Nop>", { noremap = true, silent = true })
 vim.keymap.set({ "n", "v" }, "<S-k>", "<Nop>", { noremap = true, silent = true })
@@ -680,6 +564,7 @@ vim.keymap.set("n", "<D-BS>", function()
   end
   require("oil").open(root)
 end, { desc = "Open workspace root with Oil" })
+
 -- Spectre
 vim.keymap.set('n', '<leader>R', '<cmd>lua require("spectre").toggle()<CR>', {
   desc = "Toggle Spectre"

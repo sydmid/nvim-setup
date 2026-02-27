@@ -22,9 +22,6 @@ return {
 				end
 
 				-- Navigation
-				-- Git hunks navigation with [ and ] were causing navigation delays
-				-- Original: map("n", "]h", gs.next_hunk, "Next Hunk")
-				-- Original: map("n", "[h", gs.prev_hunk, "Prev Hunk")
 				map("n", "<leader>hj", gs.next_hunk, "Next Hunk")
 				map("n", "<leader>hk", gs.prev_hunk, "Prev Hunk")
 
