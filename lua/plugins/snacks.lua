@@ -8,7 +8,7 @@ return {
   opts = {
     bigfile = { enabled = true },
     dashboard = { enabled = false },
-    explorer = { enabled = true },
+    explorer = { enabled = false },
     indent = { enabled = false }, -- Using existing indent configuration
     input = { enabled = true },
     notifier = {
@@ -39,6 +39,71 @@ return {
     },
     picker = {
       enabled = true,
+      layout = {
+        -- presets options : "default" , "ivy" , "ivy-split" , "telescope" , "vscode", "select" , "sidebar"
+        -- override picker layout in keymaps function as a param below
+        preset = "telescope", -- defaults to this layout unless overidden
+        cycle = false,
+      },
+      layouts = {
+        select = {
+          preview = false,
+          layout = {
+            backdrop = false,
+            width = 0.6,
+            min_width = 80,
+            height = 0.4,
+            min_height = 10,
+            box = "vertical",
+            border = "rounded",
+            title = "{title}",
+            title_pos = "center",
+            { win = "input",   height = 1,          border = "bottom" },
+            { win = "preview", title = "{preview}", width = 0.6,      height = 0.4, border = "top" },
+            { win = "list",    border = "none" },
+          }
+        },
+        telescope = {
+          reverse = false, -- set to false for search bar to be on top
+          layout = {
+            box = "horizontal",
+            backdrop = false,
+            width = 0.8,
+            height = 0.9,
+            border = "none",
+            {
+              box = "vertical",
+              { win = "input", height = 1,          border = "rounded",   title = "{title} {live} {flags}", title_pos = "center" },
+              { win = "list",  title = " Results ", title_pos = "center", border = "rounded" },
+            },
+            {
+              win = "preview",
+              title = "{preview:Preview}",
+              width = 0.50,
+              border = "rounded",
+              title_pos = "center",
+            },
+          },
+        },
+        ivy = {
+          layout = {
+            box = "vertical",
+            backdrop = false,
+            width = 0,
+            height = 0.4,
+            position = "bottom",
+            border = "top",
+            title = " {title} {live} {flags}",
+            title_pos = "left",
+            { win = "input", height = 1, border = "bottom" },
+            {
+              box = "horizontal",
+              { win = "list",    border = "none" },
+              { win = "preview", title = "{preview}", width = 0.5, border = "left" },
+            },
+          },
+        },
+      },
       exclude = { -- add folder names here to exclude
         ".DS_STORE",
         "node_modules",
@@ -69,21 +134,20 @@ return {
       end,
       desc = "Find Files",
     },
-    -- {
-    --   "<D-p>",
-    --   function()
-    --     Snacks.picker.files({
-    --       exclude = {
-    --         ".git",
-    --         "node_modules",
-    --         ".DS_STORE",
-    --         "*.meta",
-    --       },
-    --       ignored = false,
-    --     })
-    --   end,
-    --   desc = "Smart File Picker (git-aware)",
-    -- },
+    {
+      "<D-p>",
+      function()
+        Snacks.picker.recent({
+          layout = "vscode",
+          exclude = {
+            ".git",
+            "*.meta",
+          },
+          ignored = false,
+        })
+      end,
+      desc = "Smart File Picker (git-aware)",
+    },
     {
       "<leader>fc",
       function()
@@ -184,6 +248,7 @@ return {
       end,
       desc = "Registers",
     },
+    { "<c-/>", function() Snacks.terminal() end, desc = "Toggle Terminal" },
     {
       "<leader>sa",
       function()
@@ -301,14 +366,14 @@ return {
     {
       "<leader>gl",
       function()
-        Snacks.picker.git_log()
+        Snacks.lazygit.log()
       end,
       desc = "Git Log",
     },
     {
       "<leader>gL",
       function()
-        Snacks.picker.git_log_line()
+        Snacks.picker.git_log()
       end,
       desc = "Git Log Line",
     },

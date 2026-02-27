@@ -21,7 +21,6 @@ function _G.set_background_mode(mode_index)
   vim.cmd.colorscheme(mode.colorscheme)
 
   _G.save_background_preference()
-  vim.notify("Background: " .. mode.name, vim.log.levels.INFO)
 
   _G._setting_bg = false
 end

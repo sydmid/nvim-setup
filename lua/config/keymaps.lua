@@ -1,3 +1,5 @@
+-- Make :W behave like :w (handle accidental capitalization)
+vim.api.nvim_create_user_command('W', 'w', {})
 local map = vim.keymap.set
 -- System clipboard keymaps (macOS style)
 map({ "n", "v" }, "<D-c>", '"+y', { desc = "Copy to system clipboard", silent = true })
@@ -41,6 +43,9 @@ vim.keymap.set("x", "/", function()
   -- Start search
   vim.fn.feedkeys("/" .. text .. "\n", "n")
 end, { noremap = true, silent = true })
+
+vim.keymap.set("n", "<D-f>", "/", { desc = "Search (/) in normal mode", noremap = true, silent = true })
+
 
 vim.keymap.set("x", "<D-f>", function()
   -- Yank the selected text

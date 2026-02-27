@@ -115,10 +115,10 @@ return {
             only_cwd = true,
             ignore_patterns = {
               -- "temp", -- matches "temp" anywhere
-              "%.git", -- dot must be escaped
+              "%.git",        -- dot must be escaped
               "node_modules", -- matches "node_modules" anywhere
-              "%.DS_STORE", -- escape the dot
-              ".*%.meta", -- match anything ending with ".meta"
+              "%.DS_STORE",   -- escape the dot
+              ".*%.meta",     -- match anything ending with ".meta"
             }
           }
         },
@@ -132,116 +132,6 @@ return {
 
       -- Add a mapping
       vim.keymap.set("n", "<leader>cd", telescope.extensions.zoxide.list)
-
-      -- Smart file picker: shows ALL files (git-aware), recent files sorted to top
-      -- <CR> = open in current tab (smart save prompt if modified)
-      -- <C-CR> = open in new tab
-      vim.keymap.set("n", "<D-p>", function()
-        local action_state = require("telescope.actions.state")
-        local builtin = require("telescope.builtin")
-
-        -- Smart open in current buffer: prompt save if modified, replace current tab
-        local function smart_open(prompt_bufnr)
-          local entry = action_state.get_selected_entry()
-          if not entry then return end
-          actions.close(prompt_bufnr)
-
-          local old_buf = vim.api.nvim_get_current_buf()
-          local old_buf_name = vim.api.nvim_buf_get_name(old_buf)
-
-          if vim.bo[old_buf].modified then
-            local choice = vim.fn.confirm(
-              "Buffer has unsaved changes. Save before switching?",
-              "&Save\n&Discard\n&Cancel",
-              3
-            )
-            if choice == 1 then
-              vim.cmd("write")
-            elseif choice == 2 then
-              vim.bo[old_buf].modified = false
-            else
-              return -- cancel
-            end
-          end
-
-          local filename = entry.path or entry.filename or entry.value
-          if filename then
-            vim.cmd("edit " .. vim.fn.fnameescape(filename))
-            local new_buf = vim.api.nvim_get_current_buf()
-            -- Close the old buffer if it's different and not showing in another window
-            if old_buf ~= new_buf and vim.api.nvim_buf_is_valid(old_buf) then
-              -- Check if old buffer is visible in any other window
-              local old_visible = false
-              for _, win in ipairs(vim.api.nvim_list_wins()) do
-                if vim.api.nvim_win_get_buf(win) == old_buf then
-                  old_visible = true
-                  break
-                end
-              end
-              -- Check if old buffer is pinned in bufferline
-              local old_pinned = false
-              local ok_groups, bl_groups = pcall(require, "bufferline.groups")
-              if ok_groups and bl_groups and bl_groups._is_pinned then
-                old_pinned = bl_groups._is_pinned({ id = old_buf })
-              end
-              -- Only close if not visible elsewhere and not pinned
-              if not old_visible and not old_pinned then
-                pcall(vim.api.nvim_buf_delete, old_buf, { force = false })
-              end
-            end
-          end
-        end
-
-        -- Open in new buffer (new tab in bufferline)
-        local function open_in_new_tab(prompt_bufnr)
-          local entry = action_state.get_selected_entry()
-          if not entry then return end
-          actions.close(prompt_bufnr)
-
-          local filename = entry.path or entry.filename or entry.value
-          if filename then
-            vim.cmd("enew")
-            vim.cmd("edit " .. vim.fn.fnameescape(filename))
-          end
-        end
-
-        -- Try git_files first, fallback to find_files
-        local cwd = vim.fn.getcwd()
-        local is_git = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --is-inside-work-tree 2>/dev/null")[1] == "true"
-
-        local picker_fn = is_git and "git_files" or "find_files"
-        local picker_opts = {
-          prompt_title = is_git and "  Files (git)" or "  Files",
-          show_untracked = true,
-          attach_mappings = function(_, map)
-            map("i", "<CR>", smart_open)
-            map("n", "<CR>", smart_open)
-            map("i", "<C-CR>", open_in_new_tab)
-            map("n", "<C-CR>", open_in_new_tab)
-            return true
-          end,
-        }
-
-        -- Sort with recent files at top using tiebreak_index from frecency
-        local ok_frecency, frecency = pcall(require, "frecency")
-        if ok_frecency and frecency then
-          -- Use frecency picker which shows all files with recent ones ranked higher
-          telescope.extensions.frecency.frecency({
-            prompt_title = "  Files (recent priority)",
-            workspace = "CWD",
-            show_unindexed = true,
-            attach_mappings = function(_, map)
-              map("i", "<CR>", smart_open)
-              map("n", "<CR>", smart_open)
-              map("i", "<C-CR>", open_in_new_tab)
-              map("n", "<C-CR>", open_in_new_tab)
-              return true
-            end,
-          })
-        else
-          builtin[picker_fn](picker_opts)
-        end
-      end, { desc = "Smart file picker (all files, recent priority)" })
 
       -- Load todo-comments telescope extension if available
       local has_todo_comments = pcall(require, "todo-comments")
@@ -392,40 +282,6 @@ return {
 
         tp.builtin("live_grep", config)
       end
-
-      -- Separate normal and visual mode mappings for D-S-f
-      -- local multi_ripgrep = require("helpers.multi-ripgrep")
-      -- vim.keymap.set("n", "<D-S-f>", multi_ripgrep,
-      --   { desc = "search word under cursor in current file", silent = true })
-
-      -- vim.keymap.set("v", "<D-S-f>", function()
-      --   -- Yank the selected text to the unnamed register
-      --   vim.cmd("normal! y")
-      --   -- Get the yanked text
-      --   local selected_text = vim.fn.getreg('"')
-      --   -- No need to escape special characters since we're using literal search
-      --   pcall(multi_ripgrep, { default_text = selected_text, initial_mode = "normal" })
-      -- end, { desc = "telescope find selected text in all files (literal search)", silent = true })
-
-      -- Enhanced search function that searches for word under cursor
-      local function search_word_under_cursor()
-        local word = vim.fn.expand("<cword>")
-        if word == "" then
-          -- If no word under cursor, fall back to regular search
-          vim.api.nvim_feedkeys("/", "n", false)
-        else
-          -- Search for the word using vim's search functionality
-          -- Use \< and \> for whole word matching (vim best practice)
-          local search_pattern = "\\<" .. vim.fn.escape(word, "\\") .. "\\>"
-          vim.fn.setreg("/", search_pattern)
-          vim.cmd("normal! n")
-          -- Enable search highlighting
-          vim.opt.hlsearch = true
-        end
-      end
-
-      vim.keymap.set("n", "<D-f>", search_word_under_cursor,
-        { desc = "search word under cursor in current file", silent = true })
 
       -- set keymaps
       local keymap = vim.keymap -- for conciseness
