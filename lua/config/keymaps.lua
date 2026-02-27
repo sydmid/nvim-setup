@@ -98,8 +98,6 @@ map({ "n", "x" }, "<leader>fd", function()
   require("conform").format { lsp_fallback = true }
 end, { desc = "general format file" })
 
-map("n", "<leader>hh", ":lua require('harpoon.mark').add_file()<CR>", { desc = "Add to harpoon" })
-
 map("n", "<leader>r", ":lua vim.lsp.buf.rename()<CR>", { desc = "Rename symbol" })
 
 -- Implements VS Code's gotoNextPreviousMember.nextMember and previousMember functionality
@@ -402,7 +400,13 @@ vim.keymap.set({ "n", "t" }, "<D-b>", function()
   end
 end, { desc = "Close non-main buffers", silent = true })
 
-map({ "n", "v" }, "<D-m>", ":MaximizerToggle<CR>", { desc = "Toggle Maximize/minimize", silent = true })
+map("n", "<C-Tab>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next tab", silent = true })
+map("n", "<C-S-Tab>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Previous tab", silent = true })
+map("n", "<D-]>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next tab", silent = true })
+map("n", "<D-[>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Previous tab", silent = true })
+
+map("n", "<D-S-t>", "<cmd>edit #<CR>", { desc = "Reopen last closed tab/buffer", silent = true })
+
 map("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
 map("i", "kj", "<ESC>", { desc = "Exit insert mode with kj" })
 -- map("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
@@ -511,11 +515,6 @@ map({ "n", "t" }, "<D-6>", function()
     show_line = true,
   })
 end, { desc = "Show buffer diagnostics in telescope", silent = true })
-
--- Harpoon quick menu
-map({ "n", "v" }, "<D-3>", function()
-  require("harpoon.ui").toggle_quick_menu()
-end, { desc = "Toggle Harpoon menu", silent = true })
 
 -- Buffer-only Git Navigation (]c,) -- Remember [c is for jump to context
 -- Function to navigate git changes only within current buffer
