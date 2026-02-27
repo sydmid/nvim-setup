@@ -160,55 +160,11 @@ return {
 			-- Git pull
 			vim.keymap.set("n", "<leader>gP", "<cmd>Git pull<cr>", { desc = "Git pull " })
 
-			-- Git log
-			-- vim.keymap.set("n", "<leader>gl", "<cmd>Git log --oneline --graph --decorate --all<cr>", { desc = "Git log " })
-
 			-- Enhanced Telescope Git pickers with Fugitive backend
 			local tp = require("helpers.telescope_pickers")
 
-			-- Git blame in telescope-style interface
-			vim.keymap.set("n", "<leader>gb", function()
-				-- Get current file and line
-				local current_file = vim.fn.expand("%")
-				if current_file == "" then
-					vim.notify("No file open for blame", vim.log.levels.WARN)
-					return
-				end
-
-				-- Use fugitive's blame with better UI
-				vim.cmd("Git blame")
-
-				-- Add keymaps for the blame buffer with improved detection
-				vim.defer_fn(function()
-					local buf = vim.api.nvim_get_current_buf()
-					local buf_name = vim.api.nvim_buf_get_name(buf)
-					local filetype = vim.bo[buf].filetype
-
-					-- Check for fugitive blame buffer by name pattern or filetype
-					if buf_name:match("fugitive://") or filetype == "fugitiveblame" then
-						-- Function to properly close blame buffer
-						local function close_blame()
-							-- Try multiple methods to close the blame buffer
-							local success = pcall(vim.cmd, "close")
-							if not success then
-								pcall(vim.cmd, "bdelete")
-							end
-						end
-
-						-- Add convenient keymaps for blame navigation
-						vim.keymap.set("n", "<CR>", "<CR>", { buffer = buf, silent = true, desc = "Show commit" })
-						vim.keymap.set("n", "q", close_blame, { buffer = buf, silent = true, desc = "Close blame" })
-						vim.keymap.set("n", "<Esc>", close_blame, { buffer = buf, silent = true, desc = "Close blame" })
-						vim.keymap.set("n", "o", function()
-							-- Open commit in new split
-							vim.cmd("normal! o")
-						end, { buffer = buf, silent = true, desc = "Open commit in split" })
-					end
-				end, 150) -- Slightly longer delay to ensure buffer is fully loaded
-			end, { desc = "Git blame " })
-
 			-- Git branches picker with fugitive backend
-			vim.keymap.set("n", "<leader>gB", function()
+			vim.keymap.set("n", "<leader>gb", function()
 				-- Get current project root for scoping
 				local cwd = vim.fn.getcwd()
 				local git_root = vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]

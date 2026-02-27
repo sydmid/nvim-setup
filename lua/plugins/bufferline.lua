@@ -34,7 +34,7 @@ return {
 
     -- Smart close all: close every buffer except current and pinned
     {
-      "<leader>tr",
+      "<leader>tc",
       function()
         local current_buf = vim.api.nvim_get_current_buf()
         -- Use bufferline.groups to check pinned state
@@ -191,7 +191,7 @@ return {
 
       -- Show buffer close button
       show_close_icon = false,
-      show_buffer_close_icons = true,
+      show_buffer_close_icons = false,
 
       -- Separator style
       separator_style = "slant",
