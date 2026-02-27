@@ -263,20 +263,20 @@ return {
       end,
       desc = "Commands",
     },
-    {
-      "<leader>sd",
-      function()
-        Snacks.picker.diagnostics()
-      end,
-      desc = "Diagnostics",
-    },
-    {
-      "<leader>sD",
-      function()
-        Snacks.picker.diagnostics_buffer()
-      end,
-      desc = "Buffer Diagnostics",
-    },
+    -- {
+    --   "<leader>sd",
+    --   function()
+    --     Snacks.picker.diagnostics()
+    --   end,
+    --   desc = "Diagnostics",
+    -- },
+    -- {
+    --   "<leader>sD",
+    --   function()
+    --     Snacks.picker.diagnostics_buffer()
+    --   end,
+    --   desc = "Buffer Diagnostics",
+    -- },
     {
       "<leader>sh",
       function()
