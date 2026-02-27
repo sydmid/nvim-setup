@@ -19,7 +19,7 @@ map({ "n", "v" }, "<D-l>", "$", { desc = "End of line", silent = true })
 map("i", "<D-h>", "<C-o>_", { desc = "Start of line", silent = true })
 map("i", "<D-l>", "<C-o>$", { desc = "End of line", silent = true })
 
-map("n", "c", '"_c', { desc = "c: Change without yanking" })
+map({ "n", "v" }, "c", '"_c', { desc = "c: Change without yanking" })
 map("n", "x", '"_x', { desc = "x: Delete char without yanking" })
 map({ "n", "v" }, "d", '"_d', { desc = "d: Delete without yanking" })
 map("n", "D", '"_D', { desc = "D: Delete to EOL without yanking" })
