@@ -681,7 +681,7 @@ return {
             { buffer = ev.buf, desc = "[p]eek [t]ype definition" })
 
           -- Signature help: <D-S-i> in both normal and insert mode
-          keymap({ "n", "i" }, "<D-S-i>", function()
+          keymap({ "n", "i" }, "<D-i>", function()
             show_signature_help()
           end, { buffer = ev.buf, desc = "Show signature help", silent = true })
 
@@ -747,25 +747,7 @@ return {
             end
           end, { buffer = ev.buf, desc = "Next signature overload or completion", silent = true })
 
-          -- Auto-trigger signature help when typing function parameters (DISABLED)
-          -- local function auto_signature_help()
-          -- 	if vim.fn.pumvisible() == 0 then
-          -- 		show_signature_help()
-          -- 	end
-          -- end
-
-          -- Auto-trigger on opening parentheses and commas (DISABLED - use manual trigger <D-S-i> instead)
-          -- keymap("i", "(", function()
-          -- 	vim.api.nvim_feedkeys("(", "n", false)
-          -- 	vim.defer_fn(auto_signature_help, 100)
-          -- end, { buffer = ev.buf, desc = "Auto-trigger signature help", silent = true })
-
-          -- keymap("i", ",", function()
-          -- 	vim.api.nvim_feedkeys(",", "n", false)
-          -- 	vim.defer_fn(auto_signature_help, 100)
-          -- end, { buffer = ev.buf, desc = "Auto-trigger signature help", silent = true })
-
-          keymap("n", "<D-i>", function()
+          keymap("n", "gh", function()
             local clients = vim.lsp.get_clients({ bufnr = 0 })
             if #clients == 0 then
               vim.notify("No LSP client attached to current buffer", vim.log.levels.WARN)
