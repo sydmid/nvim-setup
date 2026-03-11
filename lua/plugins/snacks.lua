@@ -200,31 +200,20 @@ return {
       end,
       desc = "Find Files",
     },
-    -- {
-    --   "<D-p>",
-    --   function()
-    --     Snacks.picker.recent({
-    --       layout = "vscode",
-    --       exclude = {
-    --         ".git",
-    --         "*.meta",
-    --       },
-    --       ignored = false,
-    --     })
-    --   end,
-    --   desc = "Smart File Picker (git-aware)",
-    -- },
     {
       "<D-p>",
       function()
-        require("telescope").extensions.smart_open.smart_open {
-          cwd_only = true,
-          filename_first = false,
-        }
+        Snacks.picker.recent({
+          layout = "vscode",
+          exclude = {
+            ".git",
+            "*.meta",
+          },
+          ignored = false,
+        })
       end,
       desc = "Smart File Picker (git-aware)",
     },
-
     {
       "<leader>fc",
       function()
