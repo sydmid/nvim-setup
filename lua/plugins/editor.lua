@@ -270,20 +270,22 @@ return {
 
           -- === CUSTOM KEYMAPS ===
           -- Custom Enter behavior: Open file and close nvim-tree
-          vim.keymap.set("n", "<CR>", function()
+          -- Define a single function to open file and close tree
+          local function open_file_and_close_tree()
             local node = api.tree.get_node_under_cursor()
             if node and node.type == "file" then
-              -- Open the file
               api.node.open.edit()
-              -- Close nvim-tree
               api.tree.close()
             else
-              -- For directories, use default behavior (expand/collapse)
               api.node.open.edit()
             end
-          end, opts("Open file and close tree"))
+          end
+
+          -- Map both Enter and 'o' keys to the function
+          vim.keymap.set("n", "<CR>", open_file_and_close_tree, opts("Open file and close tree"))
+          vim.keymap.set("n", "o", open_file_and_close_tree, opts("Open file and close tree"))
           -- Custom 'o' behavior: Open file, keep tree open and focused on tree
-          vim.keymap.set("n", "o", function()
+          vim.keymap.set("n", "l", function()
             local node = api.tree.get_node_under_cursor()
             if node and node.type == "file" then
               -- Open the file
