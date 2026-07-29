@@ -1,0 +1,117 @@
+-- Global variables to track current background mode
+_G.background_modes = {
+  { bg = "#282c34", secondary = "#373c47", cursorline = "#303640", name = "Light",    opacity = false },
+  { bg = "#1f1f19", secondary = "#34342a", cursorline = "#333227", name = "Warm",     opacity = false },
+  { bg = "#0f1419", secondary = "#1c262f", cursorline = "#1a1f29", name = "Bluish",   opacity = false },
+  { bg = "#121212", secondary = "#313131", cursorline = "#272727", name = "Dark",     opacity = false },
+  { bg = "#121212", secondary = "#313131", cursorline = "#272727", name = "Glass",    opacity = true, opacity_value = 0 }, -- (opacity_value is not working for some reason)
+  { bg = "#f2ecbc", secondary = "#d5cea3", cursorline = "#e7dba0", name = "Daylight", opacity = false },
+}
+_G.current_bg_index = 1
+_G.last_dark_theme = "bearded" -- remember the last dark theme for switching back
+
+-- Central function to refresh lualine + bufferline for light/dark
+function _G.refresh_bars()
+  local is_light = (_G.current_theme == "kanagawa_lotus")
+
+  -- Refresh lualine (reuse stored config, just swap theme)
+  local ok_lualine, lualine = pcall(require, "lualine")
+  if ok_lualine and _G._lualine_config then
+    local lualine_theme
+    if is_light then
+      lualine_theme = "auto"
+    else
+      lualine_theme = require("lualine.themes.moonfly")
+      lualine_theme.normal.b.fg = "#cad3f5"
+      lualine_theme.insert.b.fg = "#cad3f5"
+      lualine_theme.visual.b.fg = "#cad3f5"
+      lualine_theme.replace.b.fg = "#cad3f5"
+      lualine_theme.inactive.b.fg = "#cad3f5"
+      lualine_theme.normal.c.fg = "#6e738d"
+      lualine_theme.normal.c.bg = "#1e2030"
+    end
+    _G._lualine_config.options.theme = lualine_theme
+    lualine.setup(_G._lualine_config)
+  end
+
+  -- Refresh bufferline highlights via raw highlight groups (preserves existing config)
+  local ok_bl = pcall(require, "bufferline")
+  if ok_bl then
+    local mode = _G.background_modes[_G.current_bg_index]
+    local bg, bg_sel, fg, fg_sel, fg_dim, sep_fg
+    if is_light then
+      -- Kanagawa Lotus palette
+      bg      = "#d5cea3" -- lotusWhite0 (inactive tab bg)
+      bg_sel  = "#f2ecbc" -- lotusWhite3 (active tab bg = main bg)
+      fg      = "#8a8980" -- lotusGray3  (inactive tab fg)
+      fg_sel  = "#545464" -- lotusInk1   (active tab fg)
+      fg_dim  = "#a09cac" -- lotusViolet1
+      sep_fg  = "#e7dba0" -- lotusWhite4 (separator)
+    else
+      bg      = mode.opacity and "NONE" or mode.secondary
+      bg_sel  = mode.opacity and "NONE" or mode.cursorline
+      fg      = "#6e738d"
+      fg_sel  = "#cad3f5"
+      fg_dim  = "#545c7e"
+      sep_fg  = mode.opacity and "NONE" or mode.bg
+    end
+    local fill_bg = is_light and "#e7dba0" or (mode.opacity and "NONE" or mode.bg)
+
+    -- Map: { HighlightGroupName = { opts } }
+    local bl_hls = {
+      BufferLineFill                     = { bg = fill_bg },
+      BufferLineBackground               = { fg = fg, bg = bg },
+      BufferLineBufferSelected           = { fg = fg_sel, bg = bg_sel, bold = true },
+      BufferLineBufferVisible            = { fg = fg_dim, bg = bg },
+      BufferLineCloseButton              = { fg = fg, bg = bg },
+      BufferLineCloseButtonSelected      = { fg = fg_sel, bg = bg_sel },
+      BufferLineCloseButtonVisible       = { fg = fg_dim, bg = bg },
+      BufferLineSeparator                = { fg = sep_fg, bg = bg },
+      BufferLineSeparatorSelected        = { fg = sep_fg, bg = bg_sel },
+      BufferLineSeparatorVisible         = { fg = sep_fg, bg = bg },
+      BufferLineTab                      = { fg = fg, bg = bg },
+      BufferLineTabSelected              = { fg = fg_sel, bg = bg_sel, bold = true },
+      BufferLineTabSeparator             = { fg = sep_fg, bg = bg },
+      BufferLineTabSeparatorSelected     = { fg = sep_fg, bg = bg_sel },
+      BufferLineModified                 = { fg = "#e6c384", bg = bg },
+      BufferLineModifiedSelected         = { fg = "#e6c384", bg = bg_sel },
+      BufferLineModifiedVisible          = { fg = "#e6c384", bg = bg },
+      BufferLineDuplicate                = { fg = fg_dim, bg = bg, italic = true },
+      BufferLineDuplicateSelected        = { fg = fg_sel, bg = bg_sel, italic = true },
+      BufferLineDuplicateVisible         = { fg = fg_dim, bg = bg, italic = true },
+      BufferLineDiagnostic               = { fg = fg_dim, bg = bg },
+      BufferLineDiagnosticSelected       = { fg = fg_sel, bg = bg_sel },
+      BufferLineDiagnosticVisible        = { fg = fg_dim, bg = bg },
+      BufferLineIndicatorSelected        = { fg = is_light and "#6f894e" or "#7aa89f", bg = bg_sel },
+      BufferLineIndicatorVisible         = { fg = fg_dim, bg = bg },
+      BufferLinePick                     = { fg = is_light and "#b35b79" or "#ff5d62", bg = bg, bold = true },
+      BufferLinePickSelected             = { fg = is_light and "#b35b79" or "#ff5d62", bg = bg_sel, bold = true },
+      BufferLinePickVisible              = { fg = is_light and "#b35b79" or "#ff5d62", bg = bg, bold = true },
+      BufferLineOffsetSeparator          = { fg = sep_fg, bg = fill_bg },
+    }
+
+    for group, opts in pairs(bl_hls) do
+      vim.api.nvim_set_hl(0, group, opts)
+    end
+
+    -- Force tabline redraw
+    vim.cmd("redrawtabline")
+  end
+end
+
+-- Function to set background mode (with re-entry guard)
+_G._setting_bg = false
+function _G.set_background_mode(mode_index)
+  if _G._setting_bg then return end
+  _G._setting_bg = true
+
+  if mode_index < 1 or mode_index > #_G.background_modes then
+    mode_index = 1
+  end
+
+  _G.current_bg_index = mode_index
+  local mode = _G.background_modes[mode_index]
+  vim.opt.background = mode.background
+  vim.cmd.colorscheme(mode.colorscheme)
+  vim.opt.background = mode.background
+  vim.cmd.colorscheme(mode.colorscheme)

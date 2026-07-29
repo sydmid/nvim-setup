@@ -13,8 +13,7 @@ return {
       "windwp/nvim-ts-autotag",
     },
     config = function()
-      require("nvim-treesitter.configs").setup({
-        modules = {},
+      require("nvim-treesitter.config").setup({
         sync_install = false,
         ignore_install = {},
         auto_install = true,

@@ -1,29 +1,11 @@
 -- Global variables to track current background mode
 _G.background_modes = {
-<<<<<<< HEAD
-<<<<<<< HEAD
-  { name = "Light", background = "light", colorscheme = "kanagawa-lotus" },
-  { name = "Dark", background = "dark", colorscheme = "kanagawa" },
-}
-_G.current_bg_index = 2
-  { name = "Light", background = "light", colorscheme = "kanagawa-lotus" },
-  { name = "Dark", background = "dark", colorscheme = "kanagawa" },
-}
-_G.current_bg_index = 2
-
-=======
-=======
->>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
   { bg = "#282c34", secondary = "#373c47", cursorline = "#303640", name = "Light",    opacity = false },
   { bg = "#1f1f19", secondary = "#34342a", cursorline = "#333227", name = "Warm",     opacity = false },
   { bg = "#0f1419", secondary = "#1c262f", cursorline = "#1a1f29", name = "Bluish",   opacity = false },
   { bg = "#121212", secondary = "#313131", cursorline = "#272727", name = "Dark",     opacity = false },
   { bg = "#121212", secondary = "#313131", cursorline = "#272727", name = "Glass",    opacity = true, opacity_value = 0 }, -- (opacity_value is not working for some reason)
-<<<<<<< HEAD
   { bg = "#f2ecbc", secondary = "#d5cea3", cursorline = "#e7dba0", name = "Daylight", opacity = false },
-=======
-  { bg = "#f5efdc", secondary = "#e8e2cf", cursorline = "#ece6d4", name = "Daylight", opacity = false },
->>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
 }
 _G.current_bg_index = 1
 _G.last_dark_theme = "bearded" -- remember the last dark theme for switching back
@@ -117,7 +99,6 @@ function _G.refresh_bars()
   end
 end
 
->>>>>>> 0e9ff36 (feat: enhance theme support and color configurations for light/dark modes)
 -- Function to set background mode (with re-entry guard)
 _G._setting_bg = false
 function _G.set_background_mode(mode_index)
@@ -130,12 +111,10 @@ function _G.set_background_mode(mode_index)
 
   _G.current_bg_index = mode_index
   local mode = _G.background_modes[mode_index]
-<<<<<<< HEAD
   vim.opt.background = mode.background
   vim.cmd.colorscheme(mode.colorscheme)
   vim.opt.background = mode.background
   vim.cmd.colorscheme(mode.colorscheme)
-=======
 
   -- Handle opacity settings
   if mode.opacity then
@@ -185,7 +164,6 @@ function _G.set_background_mode(mode_index)
       vim.cmd.colorscheme("bearded")
     end
   end
->>>>>>> 0e9ff36 (feat: enhance theme support and color configurations for light/dark modes)
 
   -- Step 2: Apply highlight overrides (is_light now reflects the actual current theme)
   local is_light = (_G.current_theme == "kanagawa_lotus")
@@ -273,11 +251,8 @@ function _G.set_background_mode(mode_index)
   _G.refresh_bars()
 
   _G.save_background_preference()
-<<<<<<< HEAD
-=======
   local opacity_text = mode.opacity and (" (" .. mode.opacity_value .. "% opacity)") or ""
   vim.notify("Background mode: " .. mode.name .. opacity_text, vim.log.levels.INFO)
->>>>>>> 0e9ff36 (feat: enhance theme support and color configurations for light/dark modes)
 
   _G._setting_bg = false
 end
@@ -288,8 +263,6 @@ function _G.toggle_background_mode()
   _G.set_background_mode(next_index)
 end
 
-<<<<<<< HEAD
-=======
 -- Theme preference persistence
 _G.current_theme = "bearded" -- default theme
 
@@ -321,12 +294,9 @@ function _G.apply_theme(theme_name)
 
   local is_light = (theme_name == "kanagawa_lotus")
 
-<<<<<<< HEAD
   -- Guard colorscheme commands so ColorScheme autocmd doesn't re-enter
   _G._applying_theme = true
 
-=======
->>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
   if theme_name == "zenwritten" then
     vim.opt.background = "dark"
     vim.cmd.colorscheme("zenwritten")
@@ -363,11 +333,8 @@ function _G.apply_theme(theme_name)
     vim.cmd.colorscheme("bearded")
   end
 
-<<<<<<< HEAD
   _G._applying_theme = false
 
-=======
->>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
   -- If switching to a dark theme while Daylight bg is active, reset to default
   if not is_light and _G.background_modes[_G.current_bg_index].name == "Daylight" then
     _G.current_bg_index = 1
@@ -390,17 +357,12 @@ function _G.apply_theme(theme_name)
   vim.api.nvim_set_hl(0, "LspReferenceRead",  { underline = true, bg = "NONE" })
   vim.api.nvim_set_hl(0, "LspReferenceWrite", { underline = true, bg = "NONE" })
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   -- Cursor — adapt to light/dark theme
   if is_light then
-<<<<<<< HEAD
     vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f2ecbc", bg = "#545464" })
     vim.api.nvim_set_hl(0, "lCursor", { fg = "#f2ecbc", bg = "#545464" })
-=======
     vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f5efdc", bg = "#3b4252" })
     vim.api.nvim_set_hl(0, "lCursor", { fg = "#f5efdc", bg = "#3b4252" })
->>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
   else
     vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
     vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
@@ -412,15 +374,11 @@ function _G.apply_theme(theme_name)
   end
 
   -- Reapply background mode on top of the new theme + refresh bars
-=======
   -- White block cursor
   vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
   vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
 
-=======
->>>>>>> 602812f (feat: override LSP reference highlights to show only underline without color change)
   -- Reapply background mode on top of the new theme
->>>>>>> 0e4d1ab (feat: add white block cursor styling for improved visibility)
   _G.set_background_mode(_G.current_bg_index)
 end
 
@@ -486,7 +444,6 @@ function _G.telescope_theme_picker()
   })
 end
 
->>>>>>> 0e9ff36 (feat: enhance theme support and color configurations for light/dark modes)
 -- Function to save background preference
 function _G.save_background_preference()
   local bg_file = vim.fn.stdpath("data") .. "/background_preference.lua"
@@ -524,9 +481,7 @@ function _G.telescope_background_picker()
       index = i,
       name = mode.name,
       display = mode.name,
-      description = string.format("Kanagawa %s", mode.name:lower())
-      display = mode.name,
-      description = string.format("Kanagawa %s", mode.name:lower())
+      description = string.format("Kanagawa %s", mode.name:lower()),
     })
   end
 
@@ -712,9 +667,7 @@ return {
         },
       })
 
-<<<<<<< HEAD
       _G.load_background_preference()
-=======
       -- Apply saved theme
       if _G.current_theme == "zenwritten" then
         vim.opt.background = "dark"
@@ -764,49 +717,31 @@ return {
       end
 
       -- Apply the current background mode
->>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
       _G.set_background_mode(_G.current_bg_index)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 602812f (feat: override LSP reference highlights to show only underline without color change)
       -- Override LSP reference highlights to only underline (no color change)
       vim.api.nvim_set_hl(0, "LspReferenceText",  { underline = true, bg = "NONE" })
       vim.api.nvim_set_hl(0, "LspReferenceRead",  { underline = true, bg = "NONE" })
       vim.api.nvim_set_hl(0, "LspReferenceWrite", { underline = true, bg = "NONE" })
 
-<<<<<<< HEAD
-<<<<<<< HEAD
       -- Cursor — adapt to light/dark theme
       if _G.current_theme == "kanagawa_lotus" then
-<<<<<<< HEAD
         vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f2ecbc", bg = "#545464" })
         vim.api.nvim_set_hl(0, "lCursor", { fg = "#f2ecbc", bg = "#545464" })
-=======
         vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f5efdc", bg = "#3b4252" })
         vim.api.nvim_set_hl(0, "lCursor", { fg = "#f5efdc", bg = "#3b4252" })
->>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
       else
         vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
         vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
       end
-=======
       -- White block cursor
       vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
       vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
->>>>>>> 0e4d1ab (feat: add white block cursor styling for improved visibility)
 
-=======
->>>>>>> 602812f (feat: override LSP reference highlights to show only underline without color change)
       -- Create autocmd to reapply background highlights when colorscheme changes
       vim.api.nvim_create_autocmd("ColorScheme", {
-<<<<<<< HEAD
         pattern = { "bearded", "zenwritten", "modus_vivendi", "kanagawa-lotus", "kanagawa", "github_dark_default", "ayu", "ayu-dark", "ayu-mirage", "dracula" },
-=======
         pattern = { "bearded", "zenwritten", "modus_vivendi", "kanagawa-lotus", "github_dark_default", "ayu", "ayu-dark", "ayu-mirage", "dracula" },
->>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
         group = vim.api.nvim_create_augroup("AyuBackground", { clear = true }),
         callback = function()
           -- Skip if the change was triggered by our own apply_theme/set_background_mode
@@ -817,8 +752,6 @@ return {
           vim.api.nvim_set_hl(0, "LspReferenceText",  { underline = true, bg = "NONE" })
           vim.api.nvim_set_hl(0, "LspReferenceRead",  { underline = true, bg = "NONE" })
           vim.api.nvim_set_hl(0, "LspReferenceWrite", { underline = true, bg = "NONE" })
-<<<<<<< HEAD
-<<<<<<< HEAD
           -- Cursor — adapt to light/dark
           if _G.current_theme == "kanagawa_lotus" then
             vim.api.nvim_set_hl(0, "Cursor",  { fg = "#f2ecbc", bg = "#545464" })
@@ -827,13 +760,9 @@ return {
             vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
             vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
           end
-=======
           -- White block cursor
           vim.api.nvim_set_hl(0, "Cursor",  { fg = "#000000", bg = "#ffffff" })
           vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#ffffff" })
->>>>>>> 0e4d1ab (feat: add white block cursor styling for improved visibility)
-=======
->>>>>>> 602812f (feat: override LSP reference highlights to show only underline without color change)
         end,
       })
 
@@ -858,24 +787,13 @@ return {
         end,
       })
 
-<<<<<<< HEAD
->>>>>>> 0e9ff36 (feat: enhance theme support and color configurations for light/dark modes)
-=======
->>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
       vim.keymap.set("n", "<leader>tb", function()
         _G.telescope_background_picker()
       end, { desc = "Change Background", silent = true })
-      })
 
       _G.load_background_preference()
       _G.set_background_mode(_G.current_bg_index)
-
-      vim.keymap.set("n", "<leader>tb", function()
-        _G.telescope_background_picker()
-      end, { desc = "Change Background", silent = true })
     end,
-<<<<<<< HEAD
-=======
     lazy = false
   },
   -- Zenbones: elegant monochrome theme family (zenwritten flavor)
@@ -893,7 +811,6 @@ return {
   {
     "rebelot/kanagawa.nvim",
     lazy = true,
-<<<<<<< HEAD
     config = function()
       require("kanagawa").setup({
         compile = false,
@@ -944,7 +861,6 @@ return {
         end,
       })
     end,
-=======
     opts = {
       compile = false,
       undercurl = true,
@@ -955,7 +871,6 @@ return {
       transparent = false,
       theme = "lotus",
     },
->>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
   },
   -- GitHub Theme: official GitHub color schemes
   {
@@ -971,7 +886,6 @@ return {
   {
     "Mofiqul/dracula.nvim",
     lazy = true,
->>>>>>> 0e9ff36 (feat: enhance theme support and color configurations for light/dark modes)
   },
   -- Highlight yanked text with enhanced styling
   {
@@ -1032,10 +946,7 @@ return {
           priority = 10,
           use_treesitter = false, -- Keep false for better performance
           chars = { "│" }, -- Simple vertical line character
-<<<<<<< HEAD
-=======
           style = { { fg = (_G.current_theme == "kanagawa_lotus") and "#d5cea3" or "#3a3a3a" } },
->>>>>>> 0e9ff36 (feat: enhance theme support and color configurations for light/dark modes)
           ahead_lines = 5, -- Preview range
           delay = 100, -- Throttle delay for smooth scrolling
           exclude_filetypes = {

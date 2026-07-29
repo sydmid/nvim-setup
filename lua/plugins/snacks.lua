@@ -215,7 +215,6 @@ return {
     --   desc = "Smart File Picker (git-aware)",
     -- },
     {
-<<<<<<< HEAD
       "<D-p>",
       function()
         require("telescope").extensions.smart_open.smart_open {
@@ -227,8 +226,6 @@ return {
     },
 
     {
-=======
->>>>>>> a7c4c6b (feat: update keybinding for Git files picker and toggle Diffview functionality)
       "<leader>fc",
       function()
         Snacks.picker.files({ cwd = vim.fn.stdpath("config") })

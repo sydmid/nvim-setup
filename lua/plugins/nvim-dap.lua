@@ -9,6 +9,8 @@ return {
     },
     config = function()
       local dap = require("dap")
+      local map = vim.keymap.set
+      local dapui = require("dapui")
 
       local mason_path = vim.fn.stdpath("data") .. "/mason/packages/netcoredbg/netcoredbg"
 
@@ -32,13 +34,13 @@ return {
         },
       }
 
-      map("n", "<F5>", dap.continue, "DAP: Continue/Start")
-      map("n", "<F9>", dap.toggle_breakpoint, "DAP: Toggle breakpoint")
-      map("n", "<F10>", dap.step_over, "DAP: Step over")
-      map("n", "<F11>", dap.step_into, "DAP: Step into")
-      map("n", "<F8>", dap.step_out, "DAP: Step out")
-      map("n", "<leader>dr", dap.repl.open, "DAP: REPL open")
-      map("n", "<leader>dl", dap.run_last, "DAP: Run last")
+      vim.keymap.set("n", "<F5>", dap.continue, { desc = "DAP: Continue/Start" })
+      vim.keymap.set("n", "<F9>", dap.toggle_breakpoint, { desc = "DAP: Toggle breakpoint" })
+      vim.keymap.set("n", "<F10>", dap.step_over, { desc = "DAP: Step over" })
+      vim.keymap.set("n", "<F11>", dap.step_into, { desc = "DAP: Step into" })
+      vim.keymap.set("n", "<F8>", dap.step_out, { desc = "DAP: Step out" })
+      vim.keymap.set("n", "<leader>dr", dap.repl.open, { desc = "DAP: REPL open" })
+      vim.keymap.set("n", "<leader>dl", dap.run_last, { desc = "DAP: Run last" })
 
       -- *************************      dap-ui configurations
       -- open the ui as soon as we are debugging
@@ -95,11 +97,11 @@ return {
       })
 
 
-      map("n", "<leader>du", dapui.toggle, "DAP UI toggle")
+      vim.keymap.set("n", "<leader>du", dapui.toggle, { desc = "DAP UI toggle" })
 
-      map({ "n", "v" }, "<leader>dw", function() dapui.eval(nil, { enter = true }) end,
-        "DAP Add word under cursor to Watches")
-      map({ "n", "v" }, "Q", function() dapui.eval() end, "DAP Peek")
+      vim.keymap.set({ "n", "v" }, "<leader>dw", function() dapui.eval(nil, { enter = true }) end,
+        { desc = "DAP Add word under cursor to Watches" })
+      vim.keymap.set({ "n", "v" }, "Q", function() dapui.eval() end, { desc = "DAP Peek" })
 
     end,
   },
@@ -116,6 +118,8 @@ return {
       "stevearc/overseer.nvim", -- For task integration
     },
     config = function()
+      local map = vim.keymap.set
+      local neotest = require("neotest")
       require("neotest").setup({
         adapters = {
           require("neotest-dotnet")({
@@ -158,17 +162,16 @@ return {
       })
 
       -- Neotest keymaps
-      map("n", "<leader>dt", function() neotest.run.run({ strategy = "dap" }) end, "Debug nearest test")
-      map("n", "<F6>", function() neotest.run.run({ strategy = "dap" }) end, "Debug nearest test")
+      vim.keymap.set("n", "<leader>dt", function() neotest.run.run({ strategy = "dap" }) end, { desc = "Debug nearest test" })
+      vim.keymap.set("n", "<F6>", function() neotest.run.run({ strategy = "dap" }) end, { desc = "Debug nearest test" })
       
       -- TODO: badan checkeshun kon ye ghaede keybinding e khub bara function bedard bokhora bezar
-      local map = vim.keymap.set
-      map("n", "<leader>ut", "<cmd>lua require('neotest').run.run()<cr>", { desc = "Run nearest test" })
-      map("n", "<leader>uf", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", { desc = "Run file tests" })
-      map("n", "<leader>ud", "<cmd>lua require('neotest').run.run({strategy = 'dap'})<cr>",
+      vim.keymap.set("n", "<leader>ut", "<cmd>lua require('neotest').run.run()<cr>", { desc = "Run nearest test" })
+      vim.keymap.set("n", "<leader>uf", "<cmd>lua require('neotest').run.run(vim.fn.expand('%'))<cr>", { desc = "Run file tests" })
+      vim.keymap.set("n", "<leader>ud", "<cmd>lua require('neotest').run.run({strategy = 'dap'})<cr>",
         { desc = "Debug nearest test" })
-      map("n", "<leader>um", "<cmd>lua require('neotest').summary.toggle()<cr>", { desc = "Toggle test summary" })
-      map("n", "<leader>uo", "<cmd>lua require('neotest').output.open({ enter = true })<cr>",
+      vim.keymap.set("n", "<leader>um", "<cmd>lua require('neotest').summary.toggle()<cr>", { desc = "Toggle test summary" })
+      vim.keymap.set("n", "<leader>uo", "<cmd>lua require('neotest').output.open({ enter = true })<cr>",
         { desc = "Show test output" })
     end,
   },

@@ -34,11 +34,7 @@ return {
 
     -- Smart close all: close every buffer except current and pinned
     {
-<<<<<<< HEAD
       "<leader>tc",
-=======
-      "<leader>tr",
->>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
       function()
         local current_buf = vim.api.nvim_get_current_buf()
         -- Use bufferline.groups to check pinned state
@@ -195,11 +191,7 @@ return {
 
       -- Show buffer close button
       show_close_icon = false,
-<<<<<<< HEAD
       show_buffer_close_icons = false,
-=======
-      show_buffer_close_icons = true,
->>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
 
       -- Separator style
       separator_style = "slant",
@@ -225,17 +217,7 @@ return {
       },
     },
   },
-<<<<<<< HEAD
   config = function(_, opts)
     require("bufferline").setup(opts)
-<<<<<<< HEAD
-=======
-    -- Apply light/dark bar highlights now that bufferline is loaded
-    if _G.refresh_bars then
-      _G.refresh_bars()
-    end
->>>>>>> 0e9ff36 (feat: enhance theme support and color configurations for light/dark modes)
   end,
-=======
->>>>>>> a438cfe (feat: enhance Neovim configuration with new plugins and keybindings)
 }
