@@ -55,8 +55,8 @@ opt.termguicolors = true     -- True color support
 opt.background = "dark"
 opt.signcolumn = "yes:1"     -- Always show sign column with fixed width of 2
 opt.updatetime = 200
-opt.scrolloff = 8            -- Keep lines visible around cursor
-opt.sidescrolloff = 8        -- Keep columns visible around cursor
+opt.scrolloff = 0            -- Keep lines visible around cursor
+opt.sidescrolloff = 0        -- Keep columns visible around cursor
 opt.wrap = true              -- Wrap long lines
 opt.mouse = "a"              -- Enable mouse in all modes
 

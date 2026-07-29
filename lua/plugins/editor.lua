@@ -324,7 +324,7 @@ return {
   {
     "szw/vim-maximizer",
     keys = { {
-      "<D-m>", "<cmd>MaximizerToggle<CR>", desc = "Maximize/minimize a split"
+      "<M-m>", "<cmd>MaximizerToggle<CR>", desc = "Maximize/minimize a split"
     }, }
   },
   -- Flash (EasyMotion replacement)
@@ -378,7 +378,7 @@ return {
       })
 
       -- Set keymaps for buffer_manager
-      vim.keymap.set("n", "<D-2>", ui.toggle_quick_menu, opts)
+      vim.keymap.set("n", "<M-2>", ui.toggle_quick_menu, opts)
       vim.keymap.set("n", "<M-h>", ui.nav_prev, opts)
       vim.keymap.set("n", "<M-l>", ui.nav_next, opts)
     end,

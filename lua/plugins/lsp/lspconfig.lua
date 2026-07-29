@@ -680,8 +680,8 @@ return {
           keymap("n", "<leader>pt", "<cmd>Lspsaga peek_type_definition<CR>",
             { buffer = ev.buf, desc = "[p]eek [t]ype definition" })
 
-          -- Signature help: <D-S-i> in both normal and insert mode
-          keymap({ "n", "i" }, "<D-S-i>", function()
+          -- Signature help: <M-S-i> in both normal and insert mode
+          keymap({ "n", "i" }, "<M-S-i>", function()
             show_signature_help()
           end, { buffer = ev.buf, desc = "Show signature help", silent = true })
 
@@ -754,7 +754,7 @@ return {
           -- 	end
           -- end
 
-          -- Auto-trigger on opening parentheses and commas (DISABLED - use manual trigger <D-S-i> instead)
+          -- Auto-trigger on opening parentheses and commas (DISABLED - use manual trigger <M-S-i> instead)
           -- keymap("i", "(", function()
           -- 	vim.api.nvim_feedkeys("(", "n", false)
           -- 	vim.defer_fn(auto_signature_help, 100)
@@ -765,7 +765,7 @@ return {
           -- 	vim.defer_fn(auto_signature_help, 100)
           -- end, { buffer = ev.buf, desc = "Auto-trigger signature help", silent = true })
 
-          keymap("n", "<D-i>", function()
+          keymap("n", "<M-i>", function()
             local clients = vim.lsp.get_clients({ bufnr = 0 })
             if #clients == 0 then
               vim.notify("No LSP client attached to current buffer", vim.log.levels.WARN)

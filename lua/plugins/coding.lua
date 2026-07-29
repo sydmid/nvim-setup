@@ -120,7 +120,7 @@ return {
           end,
         },
         mapping = cmp.mapping.preset.insert({
-          ["<D-CR>"] = cmp.mapping.complete(), -- show completion suggestions
+          ["<M-CR>"] = cmp.mapping.complete(), -- show completion suggestions
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
           ["<Tab>"] = cmp.mapping.confirm({ select = true }),
           -- ["<Tab>"] = cmp.mapping.select_next_item(),

@@ -2,9 +2,9 @@
 vim.api.nvim_create_user_command('W', 'w', {})
 local map = vim.keymap.set
 -- System clipboard keymaps (macOS style)
-map({ "n", "v" }, "<D-c>", '"+y', { desc = "Copy to system clipboard", silent = true })
-map({ "n", "v" }, "<D-x>", '"+x', { desc = "Cut to system clipboard", silent = true })
-map({ "n", "v", "i" }, "<D-v>", function()
+map({ "n", "v" }, "<M-c>", '"+y', { desc = "Copy to system clipboard", silent = true })
+map({ "n", "v" }, "<M-x>", '"+x', { desc = "Cut to system clipboard", silent = true })
+map({ "n", "v", "i" }, "<M-v>", function()
   if vim.fn.mode() == "i" then
     return '<C-r>+'
   else
@@ -14,10 +14,10 @@ end, { desc = "Paste from system clipboard", expr = true, silent = true })
 --------------------------------------------- Handy Motions
 map({ "n", "v" }, "H", "b", { desc = "Previous word", silent = true })
 map({ "n", "v" }, "L", "e", { desc = "Next word", silent = true })
-map({ "n", "v" }, "<D-h>", "_", { desc = "Start of line", silent = true })
-map({ "n", "v" }, "<D-l>", "$", { desc = "End of line", silent = true })
-map("i", "<D-h>", "<C-o>_", { desc = "Start of line", silent = true })
-map("i", "<D-l>", "<C-o>$", { desc = "End of line", silent = true })
+map({ "n", "v" }, "<M-h>", "_", { desc = "Start of line", silent = true })
+map({ "n", "v" }, "<M-l>", "$", { desc = "End of line", silent = true })
+map("i", "<M-h>", "<C-o>_", { desc = "Start of line", silent = true })
+map("i", "<M-l>", "<C-o>$", { desc = "End of line", silent = true })
 
 map({ "n", "v" }, "c", '"_c', { desc = "c: Change without yanking" })
 map("n", "x", '"_x', { desc = "x: Delete char without yanking" })
@@ -25,12 +25,12 @@ map({ "n", "v" }, "d", '"_d', { desc = "d: Delete without yanking" })
 map("n", "D", '"_D', { desc = "D: Delete to EOL without yanking" })
 map("n", "Y", "y$", { desc = "Y: Yank to EOL" })
 --------------------------------------------- Comments Impls
-map("n", "<D-/>", function()
+map("n", "<M-/>", function()
   require("Comment.api").toggle.linewise.current()
   vim.cmd("normal! j") -- move down a line
 end, { silent = true, desc = "Toggle comment line and move down" })
 
-map("v", "<D-/>", "<ESC><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<CR>",
+map("v", "<M-/>", "<ESC><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<CR>",
   { silent = true, desc = "Toggle comment (visual)" })
 
 --------------------------------------------- Finding Impls
@@ -44,10 +44,10 @@ vim.keymap.set("x", "/", function()
   vim.fn.feedkeys("/" .. text .. "\n", "n")
 end, { noremap = true, silent = true })
 
-vim.keymap.set("n", "<D-f>", "/", { desc = "Search (/) in normal mode", noremap = true, silent = true })
+vim.keymap.set("n", "<M-f>", "/", { desc = "Search (/) in normal mode", noremap = true, silent = true })
 
 
-vim.keymap.set("x", "<D-f>", function()
+vim.keymap.set("x", "<M-f>", function()
   -- Yank the selected text
   vim.cmd("normal! y")
   -- Escape any special characters in the yanked text for the search
@@ -85,7 +85,7 @@ end, { desc = "Reset buffer (reload from disk)" })
 map("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Delete current buffer" })
 
 -- Terminal Impls
-map({ "n", "i", "v", "t" }, "<D-`>", function()
+map({ "n", "i", "v", "t" }, "<M-`>", function()
   require("snacks").terminal.toggle()
 end, { desc = "Toggle terminal" })
 
@@ -233,7 +233,7 @@ local function is_window_visible(win)
   return vim.tbl_contains(all_wins, win)
 end
 
-vim.keymap.set({ "n", "t" }, "<D-b>", function()
+vim.keymap.set({ "n", "t" }, "<M-b>", function()
   local current_win = vim.api.nvim_get_current_win()
   local current_buf = vim.api.nvim_win_get_buf(current_win)
 
@@ -328,12 +328,12 @@ end, { desc = "Close non-main buffers", silent = true })
 
 map("n", "<C-Tab>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next tab", silent = true })
 map("n", "<C-S-Tab>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Previous tab", silent = true })
-map("n", "<D-]>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next tab", silent = true })
-map("n", "<D-[>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Previous tab", silent = true })
-map("n", "<D-S-]>", "<cmd>BufferLineMoveNext<CR>", { desc = "Move tab right", silent = true })
-map("n", "<D-S-[>", "<cmd>BufferLineMovePrev<CR>", { desc = "Move tab left", silent = true })
+map("n", "<M-]>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next tab", silent = true })
+map("n", "<M-[>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Previous tab", silent = true })
+map("n", "<M-S-]>", "<cmd>BufferLineMoveNext<CR>", { desc = "Move tab right", silent = true })
+map("n", "<M-S-[>", "<cmd>BufferLineMovePrev<CR>", { desc = "Move tab left", silent = true })
 
-map("n", "<D-S-t>", "<cmd>edit #<CR>", { desc = "Reopen last closed tab/buffer", silent = true })
+map("n", "<M-S-t>", "<cmd>edit #<CR>", { desc = "Reopen last closed tab/buffer", silent = true })
 
 map("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
 map("i", "kj", "<ESC>", { desc = "Exit insert mode with kj" })
@@ -350,13 +350,13 @@ map(
 )
 
 -- File Explorer ( NvimTree )
-map({ "n", "v" }, "<D-s>", ":NvimTreeFindFileToggle<CR>", {
+map({ "n", "v" }, "<M-s>", ":NvimTreeFindFileToggle<CR>", {
   desc = "Toggle NvimTree and reveal current file",
   silent = true,
 })
 
 -- Normal + Visual mode
-map({ "n", "v" }, "<D-S-j>", function()
+map({ "n", "v" }, "<M-S-j>", function()
   -- If in visual mode, move the entire selected block
   if vim.fn.mode() == 'v' or vim.fn.mode() == 'V' or vim.fn.mode() == '\22' then
     -- Get the line numbers of the selection
@@ -380,7 +380,7 @@ map({ "n", "v" }, "<D-S-j>", function()
   end
 end, { desc = "Move line/block down", expr = true, silent = true })
 
-map({ "n", "v" }, "<D-S-k>", function()
+map({ "n", "v" }, "<M-S-k>", function()
   -- If in visual mode, move the entire selected block
   if vim.fn.mode() == 'v' or vim.fn.mode() == 'V' or vim.fn.mode() == '\22' then
     -- Get the line numbers of the selection
@@ -403,8 +403,8 @@ map({ "n", "v" }, "<D-S-k>", function()
 end, { desc = "Move line/block up", expr = true, silent = true })
 
 -- In insert mode (preserve cursor)
-map("i", "<D-S-j>", "<Esc>:m .+1<CR>==gi", { desc = "Move line down", silent = true }) -- Move line down
-map("i", "<D-S-k>", "<Esc>:m .-2<CR>==gi", { desc = "Move line up", silent = true })   -- Move line up
+map("i", "<M-S-j>", "<Esc>:m .+1<CR>==gi", { desc = "Move line down", silent = true }) -- Move line down
+map("i", "<M-S-k>", "<Esc>:m .-2<CR>==gi", { desc = "Move line up", silent = true })   -- Move line up
 
 -- window management
 map("n", "|", "<C-w>v", { desc = "Split window vertically" })         -- split window vertically
@@ -456,9 +456,11 @@ local function get_visual_selection()
 
   return string.sub(line, start_col, end_col)
 end
+vim.keymap.set('n', '<S-j>', '5gj', { noremap = true, silent = true, desc = "Move cursor down 5 lines" })
+vim.keymap.set('n', '<S-k>', '5gk', { noremap = true, silent = true, desc = "Move cursor up 5 lines" })
 
 -- Smart find and replace mapping
-vim.keymap.set("x", "<D-r>", function()
+vim.keymap.set("x", "<M-r>", function()
   local selection = get_visual_selection()
   if selection and selection ~= "" then
     vim.api.nvim_input("<Esc>:%s/" .. vim.fn.escape(selection, "/\\[]^$.*") .. "//gc<Left><Left><Left>")
@@ -466,7 +468,7 @@ vim.keymap.set("x", "<D-r>", function()
 end, { desc = "Find and replace selected text", silent = true })
 
 -- Find and replace in normal mode (opens dialog when nothing is selected)
-vim.keymap.set("n", "<D-r>", function()
+vim.keymap.set("n", "<M-r>", function()
   vim.ui.input({ prompt = "Search pattern: " }, function(search_pattern)
     if search_pattern and search_pattern ~= "" then
       vim.ui.input({ prompt = "Replace with: " }, function(replace_with)
@@ -523,7 +525,7 @@ local function save_all_modified()
   end
 end
 
-map({ "n", "i", "v" }, "<D-S-s>", save_all_modified,
+map({ "n", "i", "v" }, "<M-S-s>", save_all_modified,
   { desc = "Save all modified buffers", noremap = true, silent = true })
 
 -- Toggle whitespace display
@@ -541,15 +543,11 @@ end, { desc = "Toggle whitespace display", silent = true })
 map("n", "<leader>cr", "<cmd>RunCode<CR>", { desc = "Run code in current buffer" })
 map("v", "<leader>cr", "<cmd>RunCode<CR>", { desc = "Run selected code" })
 
--- Disable Shift+j and Shift+k in normal mode
-vim.keymap.set({ "n", "v" }, "<S-j>", "<Nop>", { noremap = true, silent = true })
-vim.keymap.set({ "n", "v" }, "<S-k>", "<Nop>", { noremap = true, silent = true })
-
 -- Oil.nvim keymaps
 vim.keymap.set("n", "<BS>", "<CMD>Oil<CR>", { desc = "Open parent directory with Oil" })
 
 -- Open workspace root in Oil
-vim.keymap.set("n", "<D-BS>", function()
+vim.keymap.set("n", "<M-BS>", function()
   -- Use Neovim's LSP workspaceFolders or fallback to current working dir
   local clients = vim.lsp.get_clients({ bufnr = 0 })
   local root = nil

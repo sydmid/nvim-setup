@@ -201,7 +201,7 @@ return {
       desc = "Find Files",
     },
     -- {
-    --   "<D-p>",
+    --   "<M-p>",
     --   function()
     --     Snacks.picker.recent({
     --       layout = "vscode",
@@ -215,7 +215,7 @@ return {
     --   desc = "Smart File Picker (git-aware)",
     -- },
     {
-      "<D-p>",
+      "<M-p>",
       function()
         require("telescope").extensions.smart_open.smart_open {
           cwd_only = true,
@@ -233,7 +233,7 @@ return {
       desc = "Find Config File",
     },
     {
-      "<D-P>",
+      "<M-P>",
       function()
         Snacks.picker.projects()
       end,
@@ -278,7 +278,7 @@ return {
       desc = "Delete Buffer",
     },
     {
-      "<D-S-f>",
+      "<M-S-f>",
       function()
         Snacks.picker.grep_word({
           on_show = function(picker)
@@ -297,7 +297,7 @@ return {
       mode = { "x" },
     },
     {
-      "<D-S-f>",
+      "<M-S-f>",
       function()
         Snacks.picker.grep()
       end,

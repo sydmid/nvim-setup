@@ -216,7 +216,7 @@ return {
 			local map = vim.keymap.set
 
 			-- Main overseer menu on "-" key
-			map("n", "<D-S-c>", function()
+			map("n", "<M-S-c>", function()
 				vim.cmd("OverseerRun")
 			end, { desc = "Run Scratch or Dev Command", noremap = true, silent = true })
 		end,

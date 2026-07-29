@@ -543,7 +543,7 @@ return {
 			{ "<leader>gH", "<cmd>DiffviewFileHistory<cr>", desc = "Diffview: repo history" },
 			{ "<leader>gm", "<cmd>DiffviewOpen<cr>", desc = "Diffview: merge tool" },
 			{
-				"<D-S-d>",
+				"<M-S-d>",
 				function()
 					local lib = require("diffview.lib")
 					local view = lib.get_current_view()
