@@ -33,7 +33,6 @@ return {
           "json",
           "dockerfile",
           "gitignore",
-          "query",
           "html",
           "css",
           "markdown",
@@ -217,6 +216,18 @@ return {
         pre_hook = ts_context_commentstring.create_pre_hook(),
         post_hook = function() end, -- empty function instead of nil
       })
+
+      vim.keymap.set("n", "<D-/>", function()
+        require("Comment.api").toggle.linewise.current()
+        vim.cmd("normal! j")
+      end, { silent = true, desc = "Toggle comment line and move down" })
+
+      vim.keymap.set(
+        "v",
+        "<D-/>",
+        "<ESC><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<CR>",
+        { silent = true, desc = "Toggle comment (visual)" }
+      )
     end,
   },
   -- Auto pairs

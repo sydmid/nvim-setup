@@ -135,29 +135,23 @@ return {
 		},
 		ft = "python",
 		config = function()
-			require("neotest").setup({
-				adapters = {
-					require("neotest-python")({
-						-- Extra arguments for pytest
-						args = { "--log-level", "DEBUG", "--verbose" },
-						-- Runner to use (pytest, unittest, etc.)
-						runner = "pytest",
-						-- Custom python path
-						python = function()
-							-- Try to find venv python first
-							local venv_python = vim.fn.getcwd() .. "/.venv/bin/python"
-							if vim.fn.executable(venv_python) == 1 then
-								return venv_python
-							end
-							-- Fallback to system python
-							return "python3"
-						end,
-						-- pytest discovery
-						pytest_discover_instances = true,
-					}),
-				},
+			require("core.utils.neotest").register_adapter("python", require("neotest-python")({
+				-- Extra arguments for pytest
+				args = { "--log-level", "DEBUG", "--verbose" },
+				-- Runner to use (pytest, unittest, etc.)
+				runner = "pytest",
+				-- Custom python path
+				python = function()
+					local venv_python = vim.fn.getcwd() .. "/.venv/bin/python"
+					if vim.fn.executable(venv_python) == 1 then
+						return venv_python
+					end
+					return "python3"
+				end,
+				pytest_discover_instances = true,
+			}), {
 				discovery = {
-					enabled = false, -- Disable auto-discovery for performance
+					enabled = false,
 					concurrent = 1,
 				},
 				running = {
@@ -168,7 +162,7 @@ return {
 					expand_errors = true,
 					follow = true,
 				},
-			})
+		})
 
 			-- Python testing keymaps
 			local keymap = vim.keymap.set

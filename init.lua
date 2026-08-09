@@ -1,6 +1,3 @@
--- Load configuration modules
-require("config.options")
-require("config.keymaps")
-require("config.autocmds")
-
+-- Core startup must run before lazy.nvim so leaders and defaults are ready.
+require("core").setup()
 require("config.lazy")
