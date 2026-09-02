@@ -101,7 +101,7 @@ return {
               ["<C-f>"] = {
                 keepinsert = true,
                 action = function(selection)
-                  require("helpers.telescope_pickers").builtin("find_files", { cwd = selection.path })
+                  require("core.utils.telescope_pickers").builtin("find_files", { cwd = selection.path })
                 end,
               },
               ["<C-t>"] = {
@@ -145,7 +145,7 @@ return {
         telescope.load_extension("csharpls_definition")
       end
 
-      local tp = require("helpers.telescope_pickers")
+      local tp = require("core.utils.telescope_pickers")
 
       local function live_grep_with_dynamic_title(opts)
         local previewers = require("telescope.previewers")

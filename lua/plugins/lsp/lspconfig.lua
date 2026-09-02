@@ -52,7 +52,7 @@ return {
 
       -- Telescope picker: toggle diagnostic severity visibility
       local function open_diagnostic_severity_picker(initial_idx)
-        local tp = require("helpers.telescope_pickers")
+        local tp = require("core.utils.telescope_pickers")
         local finders = require("telescope.finders")
         local conf = require("telescope.config").values
         local actions = require("telescope.actions")

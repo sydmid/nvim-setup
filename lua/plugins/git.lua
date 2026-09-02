@@ -161,7 +161,7 @@ return {
 			vim.keymap.set("n", "<leader>gP", "<cmd>Git pull<cr>", { desc = "Git pull " })
 
 			-- Enhanced Telescope Git pickers with Fugitive backend
-			local tp = require("helpers.telescope_pickers")
+			local tp = require("core.utils.telescope_pickers")
 
 			-- Git branches picker with fugitive backend
 			vim.keymap.set("n", "<leader>gb", function()

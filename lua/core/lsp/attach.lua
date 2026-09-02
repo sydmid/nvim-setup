@@ -25,7 +25,7 @@ function M.setup(border)
       keymap("n", "ga", "<cmd>lua require('fzf-lua').lsp_finder()<CR>",
         { desc = "[g]o [a]ll usages" })
       keymap("n", "gr", function()
-        require("helpers.telescope_pickers").builtin("lsp_references", {
+        require("core.utils.telescope_pickers").builtin("lsp_references", {
           mode = "normal",
           path_display = { "smart" },
           include_declaration = false,
@@ -172,7 +172,7 @@ function M.setup(border)
       end, { buffer = ev.buf, desc = "[g]o [r]eferences" })
 
       keymap("n", "gi", function()
-        require("helpers.telescope_pickers").builtin("lsp_implementations", { mode = "normal" })
+        require("core.utils.telescope_pickers").builtin("lsp_implementations", { mode = "normal" })
       end, { buffer = ev.buf, desc = "[g]o [I]mplementation" })
       keymap("n", "gt", function()
         vim.cmd("Lspsaga goto_type_definition")
@@ -302,7 +302,7 @@ function M.setup(border)
       end, { buffer = ev.buf, desc = "Line diagnostics (enhanced native)" })
 
       keymap("n", "<leader>xf", function()
-        require("helpers.telescope_pickers").builtin("diagnostics", { bufnr = 0 })
+        require("core.utils.telescope_pickers").builtin("diagnostics", { bufnr = 0 })
       end, { buffer = ev.buf, desc = "Buffer diagnostics" })
 
       keymap("n", "]x", function()
