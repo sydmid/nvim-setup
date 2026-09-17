@@ -14,32 +14,32 @@ return {
 
       -- "csharp-language-server",
       -- "omnisharp",
-      "prettier",                   -- prettier formatter
-      "stylua",                     -- lua formatter
-      "isort",                      -- python formatter
-      "black",                      -- python formatter
-      "ruff",                       -- python linting and formatting (replaces flake8, pylint, etc.)
-      "mypy",                       -- python type checker
-      "debugpy",                    -- python debugger
-      "pylint",                     -- python linter (legacy support)
+      "prettier", -- prettier formatter
+      "stylua", -- lua formatter
+      "isort", -- python formatter
+      "black", -- python formatter
+      "ruff", -- python linting and formatting (replaces flake8, pylint, etc.)
+      "mypy", -- python type checker
+      "debugpy", -- python debugger
+      "pylint", -- python linter (legacy support)
       "eslint_d",
-      "prettier",                   -- TypeScript/JavaScript formatter
+      "prettier", -- TypeScript/JavaScript formatter
       "typescript-language-server", -- Alternative TypeScript LSP (backup)
-      "js-debug-adapter",           -- JavaScript/TypeScript debugger
-      "shfmt",                      -- shell script formatter
-      "shellcheck",                 -- shell script linter
-      "csharpier",                  -- C# formatter
-      "xmlformatter",               -- XML formatter for C# projects
+      "js-debug-adapter", -- JavaScript/TypeScript debugger
+      "shfmt", -- shell script formatter
+      "shellcheck", -- shell script linter
+      "csharpier", -- C# formatter
+      "xmlformatter", -- XML formatter for C# projects
       -- Go development tools
-      "gopls",                      -- Go language server
-      "gofumpt",                    -- Go formatter (stricter than gofmt)
-      "golangci-lint",              -- Go linter
-      "delve",                      -- Go debugger
+      "gopls", -- Go language server
+      "gofumpt", -- Go formatter (stricter than gofmt)
+      "golangci-lint", -- Go linter
+      "delve", -- Go debugger
       -- Rust development tools
-      "rustfmt",                    -- Rust formatter (standard)
-      "rust-analyzer",              -- Rust LSP server
-      "codelldb",                   -- LLDB-based debugger for Rust
-      "taplo",                      -- TOML formatter and language server
+      "rustfmt", -- Rust formatter (standard)
+      "rust-analyzer", -- Rust LSP server
+      "codelldb", -- LLDB-based debugger for Rust
+      "taplo", -- TOML formatter and language server
     },
   },
 }

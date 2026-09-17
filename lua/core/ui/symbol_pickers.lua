@@ -59,7 +59,7 @@ function M.open_ordered_symbols_picker()
     return
   end
 
-  local tp = require("helpers.telescope_pickers")
+  local tp = require("core.utils.telescope_pickers")
   tp.custom({
     prompt_title = "󰘦 Document Symbols (Document Order)",
     finder = finders.new_table({
@@ -169,7 +169,7 @@ function M.open_symbol_type_filter_picker()
       end, document_symbols)
     end
 
-local tp = require("core.utils.telescope_pickers")
+    local tp = require("core.utils.telescope_pickers")
     tp.custom({
       prompt_title = "󰘦 Filtered Symbols - " .. filter_type .. " (" .. #filtered_symbols .. ")",
       finder = finders.new_table({
@@ -190,7 +190,7 @@ local tp = require("core.utils.telescope_pickers")
     })
   end
 
-  local tp = require("helpers.telescope_pickers")
+  local tp = require("core.utils.telescope_pickers")
   tp.custom({
     prompt_title = "󰈺 Filter by Symbol Type",
     finder = finders.new_table({

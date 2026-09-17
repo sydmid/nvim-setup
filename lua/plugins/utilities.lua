@@ -42,8 +42,8 @@ return {
           next_class_start = "]m",
           prev_class_end = "[M",
           next_class_end = "]M",
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 }

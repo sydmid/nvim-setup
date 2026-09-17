@@ -87,7 +87,7 @@ return {
         end)
       end
 
-      require("oil").setup {
+      require("oil").setup({
         columns = { "icon" },
         keymaps = {
           ["g?"] = { "actions.show_help", mode = "n" },
@@ -115,7 +115,6 @@ return {
           ["ee"] = "actions.open_external",
           ["th"] = { "actions.toggle_hidden", mode = "n" },
           ["<C-w>"] = { change_workspace_to_selection, mode = "n", desc = "Change workspace to selection" },
-
         },
         float = {
           padding = 2,
@@ -158,8 +157,9 @@ return {
             end
 
             return false
-          end, },
-      }
+          end,
+        },
+      })
 
       -- Set custom highlight for directories (folders)
       vim.api.nvim_set_hl(0, "OilDir", { fg = "#84dc85" })

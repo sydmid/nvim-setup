@@ -104,7 +104,10 @@ function M.jump_to_symbol(selection)
     end, 150)
   end
 
-  vim.notify(string.format("Jumped to %s: %s (line %d)", selection.type_name, selection.value.name, line), vim.log.levels.INFO)
+  vim.notify(
+    string.format("Jumped to %s: %s (line %d)", selection.type_name, selection.value.name, line),
+    vim.log.levels.INFO
+  )
 end
 
 function M.fetch_lsp_symbols()

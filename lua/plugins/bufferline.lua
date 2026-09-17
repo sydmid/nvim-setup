@@ -13,11 +13,8 @@ return {
       function()
         local bufnr = vim.api.nvim_get_current_buf()
         if vim.bo[bufnr].modified then
-          local choice = vim.fn.confirm(
-            "Buffer has unsaved changes. Save before closing?",
-            "&Save\n&Discard\n&Cancel",
-            3
-          )
+          local choice =
+            vim.fn.confirm("Buffer has unsaved changes. Save before closing?", "&Save\n&Discard\n&Cancel", 3)
           if choice == 1 then
             vim.cmd("write")
             Snacks.bufdelete(bufnr)
@@ -50,7 +47,8 @@ return {
         local to_close = {}
         local modified_bufs = {}
         for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-          if vim.api.nvim_buf_is_valid(bufnr)
+          if
+            vim.api.nvim_buf_is_valid(bufnr)
             and vim.bo[bufnr].buflisted
             and bufnr ~= current_buf
             and not is_pinned(bufnr)
@@ -68,7 +66,9 @@ return {
           local names = {}
           for _, bufnr in ipairs(modified_bufs) do
             local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t")
-            if name == "" then name = "[No Name]" end
+            if name == "" then
+              name = "[No Name]"
+            end
             table.insert(names, name)
           end
           local choice = vim.fn.confirm(
@@ -78,7 +78,9 @@ return {
           )
           if choice == 1 then
             for _, bufnr in ipairs(modified_bufs) do
-              vim.api.nvim_buf_call(bufnr, function() vim.cmd("write") end)
+              vim.api.nvim_buf_call(bufnr, function()
+                vim.cmd("write")
+              end)
               table.insert(to_close, bufnr)
             end
           elseif choice == 2 then
@@ -112,7 +114,9 @@ return {
       function()
         -- Helper to set up scratch buffer with :w support
         local function setup_scratch(buf)
-          if not vim.api.nvim_buf_is_valid(buf) then return end
+          if not vim.api.nvim_buf_is_valid(buf) then
+            return
+          end
           vim.api.nvim_set_current_buf(buf)
           vim.bo[buf].buflisted = true
           vim.bo[buf].swapfile = false
@@ -180,8 +184,12 @@ return {
   opts = {
     options = {
       -- Use snacks.bufdelete for proper buffer closing
-      close_command = function(n) Snacks.bufdelete(n) end,
-      right_mouse_command = function(n) Snacks.bufdelete(n) end,
+      close_command = function(n)
+        Snacks.bufdelete(n)
+      end,
+      right_mouse_command = function(n)
+        Snacks.bufdelete(n)
+      end,
 
       diagnostics = "nvim_lsp",
       diagnostics_indicator = function(count, level)

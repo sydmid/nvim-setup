@@ -1,0 +1,1 @@
+# Neovim Config Refactor Progress\n\n- Migrated UI monolith to separate files.\n- Migrated Coding monolith to separate files.\n- Extracted inline functions from specs to core/utils.\n- Removed config and helpers compat layers.\n- Enabled CI testing suite.

@@ -1,1 +1,0 @@
-return require("core.utils.telescope_pickers")

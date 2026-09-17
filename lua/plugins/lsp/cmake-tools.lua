@@ -1,24 +1,24 @@
 return {
   {
-    'Civitasv/cmake-tools.nvim',
+    "Civitasv/cmake-tools.nvim",
     dependencies = {
-      'nvim-lua/plenary.nvim',
+      "nvim-lua/plenary.nvim",
     },
     config = function()
-      require('cmake-tools').setup {
+      require("cmake-tools").setup({
         cmake_runner = { -- runner to use
-          name = 'terminal', -- name of the runner
+          name = "terminal", -- name of the runner
           opts = {}, -- the options the runner will get, possible values depend on the runner type. See `default_opts` for possible values.
           default_opts = { -- a list of default and possible values for runners
             quickfix = {
-              show = 'always', -- "always", "only_on_error"
-              position = 'belowright', -- "bottom", "top"
+              show = "always", -- "always", "only_on_error"
+              position = "belowright", -- "bottom", "top"
               size = 10,
-              encoding = 'utf-8',
+              encoding = "utf-8",
               auto_close_when_success = true, -- typically, you can use it with the "always" option; it will auto-close the quickfix buffer if the execution is successful.
             },
             toggleterm = {
-              direction = 'float', -- 'vertical' | 'horizontal' | 'tab' | 'float'
+              direction = "float", -- 'vertical' | 'horizontal' | 'tab' | 'float'
               close_on_exit = false, -- whether close the terminal when exit
               auto_scroll = true, -- whether auto scroll to the bottom
               singleton = true, -- single instance, autocloses the opened one, if present
@@ -26,18 +26,18 @@ return {
             overseer = {
               new_task_opts = {
                 strategy = {
-                  'toggleterm',
-                  direction = 'horizontal',
+                  "toggleterm",
+                  direction = "horizontal",
                   autos_croll = true,
-                  quit_on_exit = 'success',
+                  quit_on_exit = "success",
                 },
               }, -- options to pass into the `overseer.new_task` command
               on_new_task = function(task) end, -- a function that gets overseer.Task when it is created, before calling `task:start`
             },
             terminal = {
-              name = 'Main Terminal',
-              prefix_name = '[CMakeTools]: ', -- This must be included and must be unique, otherwise the terminals will not work. Do not use a simple spacebar " ", or any generic name
-              split_direction = 'horizontal', -- "horizontal", "vertical"
+              name = "Main Terminal",
+              prefix_name = "[CMakeTools]: ", -- This must be included and must be unique, otherwise the terminals will not work. Do not use a simple spacebar " ", or any generic name
+              split_direction = "horizontal", -- "horizontal", "vertical"
               split_size = 11,
 
               -- Window handling
@@ -53,7 +53,7 @@ return {
             },
           },
         },
-      }
+      })
     end,
   },
 }

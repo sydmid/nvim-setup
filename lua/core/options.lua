@@ -69,7 +69,7 @@ function M.setup()
   opt.cmdheight = 1
   opt.cmdwinheight = 5
   opt.complete = ".,w,b,k,kspell"
-  opt.completeopt = "fuzzy,menuone,noselect,popup"
+  opt.completeopt = "menuone,noselect"
   opt.concealcursor = "niv"
   opt.conceallevel = 0
   opt.cursorcolumn = false
@@ -105,7 +105,9 @@ function M.setup()
   opt.showcmd = false
   opt.showtabline = 2
   opt.smarttab = true
-  opt.smoothscroll = true
+  pcall(function()
+    opt.smoothscroll = true
+  end)
   opt.splitkeep = "screen"
   opt.startofline = false
   opt.switchbuf = "usetab,uselast"
@@ -116,7 +118,8 @@ function M.setup()
   opt.viewoptions = "cursor,curdir,slash,unix"
   opt.virtualedit = "block"
   opt.whichwrap = "h,l,<,>,[,],~"
-  opt.wildignore = ".git,.hg,.svn,*.pyc,*.o,*.out,*.jpg,*.jpeg,*.png,*.gif,*.zip,**/tmp/**,*.DS_Store,**/node_modules/**,**/bower_modules/**"
+  opt.wildignore =
+    ".git,.hg,.svn,*.pyc,*.o,*.out,*.jpg,*.jpeg,*.png,*.gif,*.zip,**/tmp/**,*.DS_Store,**/node_modules/**,**/bower_modules/**"
   opt.wildignorecase = true
   opt.winblend = 0
   opt.winminwidth = 10

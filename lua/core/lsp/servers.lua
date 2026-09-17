@@ -1,9 +1,24 @@
 local M = {}
 
 local server_names = {
-  "ts_ls", "html", "cssls", "tailwindcss", "svelte", "lua_ls", "graphql",
-  "emmet_ls", "prismals", "pyright", "ruff", "eslint", "bashls", "roslyn",
-  "gopls", "rust_analyzer", "taplo", "clangd",
+  "ts_ls",
+  "html",
+  "cssls",
+  "tailwindcss",
+  "svelte",
+  "lua_ls",
+  "graphql",
+  "emmet_ls",
+  "prismals",
+  "pyright",
+  "ruff",
+  "eslint",
+  "bashls",
+  "roslyn",
+  "gopls",
+  "rust_analyzer",
+  "taplo",
+  "clangd",
 }
 
 local function setup_lua(lspconfig, capabilities)
@@ -149,23 +164,32 @@ local function setup_typescript(lspconfig, capabilities)
 
       local keymap = vim.keymap.set
       keymap("n", "<leader>to", function()
-        vim.lsp.buf.execute_command({ command = "_typescript.organizeImports", arguments = { vim.api.nvim_buf_get_name(0) } })
+        vim.lsp.buf.execute_command({
+          command = "_typescript.organizeImports",
+          arguments = { vim.api.nvim_buf_get_name(0) },
+        })
       end, { buffer = bufnr, desc = "Organize imports" })
       keymap("n", "<leader>ti", function()
         vim.lsp.buf.code_action({
-          filter = function(action) return action.title == "Add missing imports" end,
+          filter = function(action)
+            return action.title == "Add missing imports"
+          end,
           apply = true,
         })
       end, { buffer = bufnr, desc = "Add missing imports" })
       keymap("n", "<leader>tf", function()
         vim.lsp.buf.code_action({
-          filter = function(action) return action.title:match("Fix all") end,
+          filter = function(action)
+            return action.title:match("Fix all")
+          end,
           apply = true,
         })
       end, { buffer = bufnr, desc = "Fix all" })
       keymap("n", "<leader>tu", function()
         vim.lsp.buf.code_action({
-          filter = function(action) return action.title:match("Remove unused") end,
+          filter = function(action)
+            return action.title:match("Remove unused")
+          end,
           apply = true,
         })
       end, { buffer = bufnr, desc = "Remove unused" })
@@ -180,15 +204,26 @@ local function setup_clang(lspconfig)
     },
     root_dir = function(fname)
       return lspconfig.util.root_pattern(
-        "Makefile", "configure.ac", "configure.in", "config.h.in", "meson.build", "meson_options.txt", "build.ninja"
-      )(fname)
-        or lspconfig.util.root_pattern("compile_commands.json", "compile_flags.txt")(fname)
-        or lspconfig.util.find_git_ancestor(fname)
+        "Makefile",
+        "configure.ac",
+        "configure.in",
+        "config.h.in",
+        "meson.build",
+        "meson_options.txt",
+        "build.ninja"
+      )(fname) or lspconfig.util.root_pattern("compile_commands.json", "compile_flags.txt")(fname) or lspconfig.util.find_git_ancestor(
+        fname
+      )
     end,
     capabilities = { offsetEncoding = { "utf-16" } },
     cmd = {
-      "clangd", "--background-index", "--clang-tidy", "--header-insertion=iwyu",
-      "--completion-style=detailed", "--function-arg-placeholders", "--fallback-style=llvm",
+      "clangd",
+      "--background-index",
+      "--clang-tidy",
+      "--header-insertion=iwyu",
+      "--completion-style=detailed",
+      "--function-arg-placeholders",
+      "--fallback-style=llvm",
     },
     init_options = { usePlaceholders = true, completeUnimported = true, clangdFileStatus = true },
   })
