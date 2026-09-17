@@ -30,6 +30,20 @@ function M.setup()
   })
 
   vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+    pattern = { "*.cshtml", "*.razor" },
+    callback = function(ev)
+      vim.bo[ev.buf].filetype = "razor"
+    end,
+  })
+
+  vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+    pattern = { "*.cs" },
+    callback = function(ev)
+      vim.bo[ev.buf].filetype = "cs"
+    end,
+  })
+
+  vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     pattern = { "*.go", "go.mod", "go.sum", "go.work", "go.work.sum", "*.gotmpl" },
     callback = function(ev)
       local filename = vim.fn.expand("%:t")
