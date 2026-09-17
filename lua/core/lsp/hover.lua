@@ -78,7 +78,8 @@ function M.request_hover(border)
     local bufnr, winnr
     local client = vim.lsp.get_client_by_id(ctx.client_id)
     if client and (client.name == "roslyn" or client.name == "gopls") then
-      bufnr, winnr = vim.lsp.handlers["textDocument/hover"](err, { contents = normalize_hover(result.contents) }, ctx, opts)
+      bufnr, winnr =
+        vim.lsp.handlers["textDocument/hover"](err, { contents = normalize_hover(result.contents) }, ctx, opts)
     else
       bufnr, winnr = vim.lsp.handlers["textDocument/hover"](err, result, ctx, opts)
     end

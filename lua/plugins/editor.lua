@@ -39,7 +39,7 @@ return {
       -- Set keymap for cheatsheet
       vim.keymap.set("n", "<leader>cc", "<cmd>Cheatsheet<CR>", {
         desc = "Open cheatsheet",
-        silent = true
+        silent = true,
       })
     end,
   },
@@ -137,10 +137,10 @@ return {
         filters = {
           dotfiles = false, -- don't show dotfiles unless toggled
           custom = {
-            ".DS_Store",    -- file
-            ".gitignore",   -- file
-            "._build",      -- folder
-            "*.meta",       -- file pattern
+            ".DS_Store", -- file
+            ".gitignore", -- file
+            "._build", -- folder
+            "*.meta", -- file pattern
           },
         },
         git = {
@@ -322,8 +322,10 @@ return {
   {
     "szw/vim-maximizer",
     keys = { {
-      "<D-m>", "<cmd>MaximizerToggle<CR>", desc = "Maximize/minimize a split"
-    }, }
+      "<D-m>",
+      "<cmd>MaximizerToggle<CR>",
+      desc = "Maximize/minimize a split",
+    } },
   },
   -- Flash (EasyMotion replacement)
   {
@@ -361,12 +363,12 @@ return {
         select_menu_item_commands = {
           v = {
             key = "<C-v>",
-            command = "vsplit"
+            command = "vsplit",
           },
           h = {
             key = "<C-h>",
-            command = "split"
-          }
+            command = "split",
+          },
         },
         focus_alternate_buffer = false,
         short_file_names = true,
@@ -405,7 +407,7 @@ return {
         "<cmd>Trouble diagnostics toggle filter.buf=0<CR>",
         desc = "Open trouble document diagnostics",
       },
-      { "<leader>xt", "<cmd>Trouble todo toggle<CR>",        desc = "Open todos in trouble" },
+      { "<leader>xt", "<cmd>Trouble todo toggle<CR>", desc = "Open todos in trouble" },
     },
   },
   -- TODO Comments
@@ -413,7 +415,7 @@ return {
     "folke/todo-comments.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
     opts = {
-      signs = true,      -- show icons in the signs column
+      signs = true, -- show icons in the signs column
       sign_priority = 8, -- sign priority
       -- keywords recognized as todo comments
       keywords = {
@@ -431,8 +433,8 @@ return {
         TEST = { icon = "⏲ ", color = "test", alt = { "TESTING", "PASSED", "FAILED" } },
       },
       gui_style = {
-        fg = "NONE",         -- The gui style to use for the fg highlight group.
-        bg = "BOLD",         -- The gui style to use for the bg highlight group.
+        fg = "NONE", -- The gui style to use for the fg highlight group.
+        bg = "BOLD", -- The gui style to use for the bg highlight group.
       },
       merge_keywords = true, -- when true, custom keywords will be merged with the defaults
       -- highlighting of the line containing the todo comment
@@ -440,16 +442,16 @@ return {
       -- * keyword: highlights of the keyword
       -- * after: highlights after the keyword (todo text)
       highlight = {
-        multiline = true,                -- enable multine todo comments
-        multiline_pattern = "^.",        -- lua pattern to match the next multiline from the start of the matched keyword
-        multiline_context = 10,          -- extra lines that will be re-evaluated when changing a line
-        before = "",                     -- "fg" or "bg" or empty
-        keyword = "wide",                -- "fg", "bg", "wide", "wide_bg", "wide_fg" or empty. (wide and wide_bg is the same as bg, but will also highlight surrounding characters, wide_fg acts accordingly but with fg)
-        after = "fg",                    -- "fg" or "bg" or empty
+        multiline = true, -- enable multine todo comments
+        multiline_pattern = "^.", -- lua pattern to match the next multiline from the start of the matched keyword
+        multiline_context = 10, -- extra lines that will be re-evaluated when changing a line
+        before = "", -- "fg" or "bg" or empty
+        keyword = "wide", -- "fg", "bg", "wide", "wide_bg", "wide_fg" or empty. (wide and wide_bg is the same as bg, but will also highlight surrounding characters, wide_fg acts accordingly but with fg)
+        after = "fg", -- "fg" or "bg" or empty
         pattern = [[.*<(KEYWORDS)\s*:]], -- pattern or table of patterns, used for highlighting (vim regex)
-        comments_only = true,            -- uses treesitter to match keywords in comments only
-        max_line_len = 400,              -- ignore lines longer than this
-        exclude = {},                    -- list of file types to exclude highlighting
+        comments_only = true, -- uses treesitter to match keywords in comments only
+        max_line_len = 400, -- ignore lines longer than this
+        exclude = {}, -- list of file types to exclude highlighting
       },
       -- list of named colors where we try to extract the guifg from the
       -- list of highlight groups or use the hex color if hl not found as a fallback
@@ -459,7 +461,7 @@ return {
         info = { "DiagnosticInfo", "#2563EB" },
         hint = { "DiagnosticHint", "#10B981" },
         default = { "Identifier", "#7C3AED" },
-        test = { "Identifier", "#FF00FF" }
+        test = { "Identifier", "#FF00FF" },
       },
       search = {
         command = "rg",
@@ -475,94 +477,93 @@ return {
         pattern = [[\b(KEYWORDS):]], -- ripgrep regex
         -- pattern = [[\b(KEYWORDS)\b]], -- match without the extra colon. You'll likely get false positives
       },
-    }
+    },
   },
   -- Render Markdown
   {
-    'MeanderingProgrammer/render-markdown.nvim',
-    dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
+    "MeanderingProgrammer/render-markdown.nvim",
+    dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.nvim" }, -- if you use the mini.nvim suite
     opts = {},
-  }
-  -- vim cool
-  , { "romainl/vim-cool" }
--- modes nvim
-, {
-  'mvllow/modes.nvim',
-  config = function()
-    require('modes').setup({
-      colors = {
-        bg = "", -- Optional bg param, defaults to Normal hl group
-        copy = "#f5c359",
-        delete = "#c75c6a",
-        change = "#c75c6a", -- Optional param, defaults to delete
-        format = "#c79585",
-        insert = "#78ccc5",
-        replace = "#245361",
-        select = "#9745be", -- Optional param, defaults to visual
-        visual = "#9745be",
+  }, -- vim cool
+  { "romainl/vim-cool" }, -- modes nvim
+  {
+    "mvllow/modes.nvim",
+    config = function()
+      require("modes").setup({
+        colors = {
+          bg = "", -- Optional bg param, defaults to Normal hl group
+          copy = "#f5c359",
+          delete = "#c75c6a",
+          change = "#c75c6a", -- Optional param, defaults to delete
+          format = "#c79585",
+          insert = "#78ccc5",
+          replace = "#245361",
+          select = "#9745be", -- Optional param, defaults to visual
+          visual = "#9745be",
+        },
+
+        -- Set opacity for cursorline and number background
+        line_opacity = 0.25,
+
+        -- Enable cursor highlights
+        set_cursor = true,
+
+        -- Enable cursorline initially, and disable cursorline for inactive windows
+        -- or ignored filetypes
+        set_cursorline = true,
+
+        -- Enable line number highlights to match cursorline
+        set_number = false,
+
+        -- Enable sign column highlights to match cursorline
+        set_signcolumn = true,
+
+        -- Disable modes highlights for specified filetypes
+        -- or enable with prefix "!" if otherwise disabled (please PR common patterns)
+        -- Can also be a function fun():boolean that disables modes highlights when true
+        ignore = { "NvimTree", "TelescopePrompt", "!minifiles" },
+      })
+    end,
+  },
+  {
+    {
+      "sphamba/smear-cursor.nvim",
+      opts = {
+        -- Smear cursor when switching buffers or windows.
+        smear_between_buffers = true,
+
+        -- Smear cursor when moving within line or to neighbor lines.
+        -- Use `min_horizontal_distance_smear` and `min_vertical_distance_smear` for finer control
+        smear_between_neighbor_lines = true,
+
+        -- Draw the smear in buffer space instead of screen space when scrolling
+        scroll_buffer_space = true,
+
+        -- Set to `true` if your font supports legacy computing symbols (block unicode symbols).
+        -- Smears will blend better on all backgrounds.
+        -- legacy_computing_symbols_support = true,
+
+        -- Smear cursor in insert mode.
+        -- See also `vertical_bar_cursor_insert_mode` and `distance_stop_animating_vertical_bar`.
+        smear_insert_mode = true,
+
+        -- vertical_bar_cursor = true,
+        min_horizontal_distance_smear = 50,
+        min_vertical_distance_smear = 5,
       },
-
-      -- Set opacity for cursorline and number background
-      line_opacity = 0.25,
-
-      -- Enable cursor highlights
-      set_cursor = true,
-
-      -- Enable cursorline initially, and disable cursorline for inactive windows
-      -- or ignored filetypes
-      set_cursorline = true,
-
-      -- Enable line number highlights to match cursorline
-      set_number = false,
-
-      -- Enable sign column highlights to match cursorline
-      set_signcolumn = true,
-
-      -- Disable modes highlights for specified filetypes
-      -- or enable with prefix "!" if otherwise disabled (please PR common patterns)
-      -- Can also be a function fun():boolean that disables modes highlights when true
-      ignore = { 'NvimTree', 'TelescopePrompt', '!minifiles' }
-    })
-  end
-},
-  { {
-    "sphamba/smear-cursor.nvim",
-    opts = {
-      -- Smear cursor when switching buffers or windows.
-      smear_between_buffers = true,
-
-      -- Smear cursor when moving within line or to neighbor lines.
-      -- Use `min_horizontal_distance_smear` and `min_vertical_distance_smear` for finer control
-      smear_between_neighbor_lines = true,
-
-      -- Draw the smear in buffer space instead of screen space when scrolling
-      scroll_buffer_space = true,
-
-      -- Set to `true` if your font supports legacy computing symbols (block unicode symbols).
-      -- Smears will blend better on all backgrounds.
-      -- legacy_computing_symbols_support = true,
-
-      -- Smear cursor in insert mode.
-      -- See also `vertical_bar_cursor_insert_mode` and `distance_stop_animating_vertical_bar`.
-      smear_insert_mode = true,
-
-      -- vertical_bar_cursor = true,
-      min_horizontal_distance_smear = 50,
-      min_vertical_distance_smear = 5,
     },
-  }
   },
   -- outline
   {
-    'hedyhli/outline.nvim',
+    "hedyhli/outline.nvim",
     enabled = true,
     config = function()
       -- Example mapping to toggle outline
-      vim.keymap.set('n', '<leader>o', '<cmd>Outline<CR>', { desc = 'Toggle Outline' })
+      vim.keymap.set("n", "<leader>o", "<cmd>Outline<CR>", { desc = "Toggle Outline" })
 
-      require('outline').setup {
+      require("outline").setup({
         outline_window = {
-          position = 'right',
+          position = "right",
           width = 25,
           relative_width = true,
           auto_jump = false,
@@ -574,7 +575,7 @@ return {
           -- override the mapping for Tab for resolving the conflict with default behaviour of it
           fold_toggle = "<C-n>",
         },
-      }
+      })
     end,
   },
   -- origami
@@ -605,7 +606,7 @@ return {
   },
   -- sesible
   {
-    "tpope/vim-sensible"
+    "tpope/vim-sensible",
   },
   -- auto session
   {
@@ -622,9 +623,9 @@ return {
       cwd_change_handling = true,
       -- Filtering
       suppressed_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
-      allowed_dirs = nil,                                  -- Allow session restore/create in certain directories
+      allowed_dirs = nil, -- Allow session restore/create in certain directories
       auto_session_enable_last_session = false,
-      session_options = { "buffers", "curdir", "winsize" } -- <--- important
+      session_options = { "buffers", "curdir", "winsize" }, -- <--- important
       -- log_level = 'debug',
     },
   },
@@ -639,5 +640,5 @@ return {
     "nvim-pack/nvim-spectre",
     event = "VeryLazy",
     opts = {},
-  }
+  },
 }

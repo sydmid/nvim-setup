@@ -9,4 +9,4 @@ check:
 	stylua . --check
 
 test:
-	nvim --headless '+lua local ok, err = pcall(require, "core.init"); if not ok then vim.notify(err, vim.log.levels.ERROR); vim.cmd("cquit") end; if ok then vim.cmd("q") end' +q
+	LUA_PATH="lua/?.lua;lua/?/init.lua;;" nvim --headless '+lua for _, m in ipairs({"core.init","core.options","core.commands","core.keymaps","core.autocmds"}) do local ok, err = pcall(require, m); if not ok then vim.notify(err, vim.log.levels.ERROR); os.exit(1) end end; os.exit(0)'

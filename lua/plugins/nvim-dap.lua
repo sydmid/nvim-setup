@@ -28,7 +28,7 @@ return {
       }
 
       dap.adapters.netcoredbg = netcoredbg_adapter -- needed for normal debugging
-      dap.adapters.coreclr = netcoredbg_adapter  -- needed for unit test debugging
+      dap.adapters.coreclr = netcoredbg_adapter -- needed for unit test debugging
 
       dap.configurations.cs = {
         {
@@ -37,7 +37,7 @@ return {
           request = "launch",
           program = function()
             return require("dap-dll-autopicker").build_dll_path()
-          end
+          end,
         },
       }
 
@@ -58,33 +58,36 @@ return {
 
       -- *************************      dap-ui configurations
       -- open the ui as soon as we are debugging
-      dap.listeners.after.event_initialized["dapui_config"] = function() dapui.open() end
-      dap.listeners.before.event_terminated["dapui_config"] = function() dapui.close() end
-      dap.listeners.before.event_exited["dapui_config"] = function() dapui.close() end
+      dap.listeners.after.event_initialized["dapui_config"] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated["dapui_config"] = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited["dapui_config"] = function()
+        dapui.close()
+      end
 
       -- https://emojipedia.org/en/stickers/search?q=circle
-      vim.fn.sign_define('DapBreakpoint',
-        {
-          text = '⚪',
-          texthl = 'DapBreakpointSymbol',
-          linehl = 'DapBreakpoint',
-          numhl = 'DapBreakpoint'
-        })
+      vim.fn.sign_define("DapBreakpoint", {
+        text = "⚪",
+        texthl = "DapBreakpointSymbol",
+        linehl = "DapBreakpoint",
+        numhl = "DapBreakpoint",
+      })
 
-      vim.fn.sign_define('DapStopped',
-        {
-          text = '🔴',
-          texthl = 'yellow',
-          linehl = 'DapBreakpoint',
-          numhl = 'DapBreakpoint'
-        })
-      vim.fn.sign_define('DapBreakpointRejected',
-        {
-          text = '⭕',
-          texthl = 'DapStoppedSymbol',
-          linehl = 'DapBreakpoint',
-          numhl = 'DapBreakpoint'
-        })
+      vim.fn.sign_define("DapStopped", {
+        text = "🔴",
+        texthl = "yellow",
+        linehl = "DapBreakpoint",
+        numhl = "DapBreakpoint",
+      })
+      vim.fn.sign_define("DapBreakpointRejected", {
+        text = "⭕",
+        texthl = "DapStoppedSymbol",
+        linehl = "DapBreakpoint",
+        numhl = "DapBreakpoint",
+      })
 
       -- more minimal ui
       dapui.setup({
@@ -104,17 +107,20 @@ return {
             elements = {
               { id = "scopes", size = 1.0 }, -- 100% of this panel is scopes
             },
-            size = 15,                     -- height in lines (adjust to taste)
-            position = "bottom",           -- "left", "right", "top", "bottom"
+            size = 15, -- height in lines (adjust to taste)
+            position = "bottom", -- "left", "right", "top", "bottom"
           },
         },
       })
 
       map("n", "<D-d>", dapui.toggle, "DAP UI toggle")
 
-      map({ "n", "v" }, "<leader>dw", function() dapui.eval(nil, { enter = true }) end,
-        "DAP Add word under cursor to Watches")
-      map({ "n", "v" }, "Q", function() dapui.eval() end, "DAP Peek")
+      map({ "n", "v" }, "<leader>dw", function()
+        dapui.eval(nil, { enter = true })
+      end, "DAP Add word under cursor to Watches")
+      map({ "n", "v" }, "Q", function()
+        dapui.eval()
+      end, "DAP Peek")
     end,
   },
 
@@ -136,47 +142,55 @@ return {
         vim.keymap.set(mode, lhs, rhs, { desc = desc, silent = true })
       end
 
-      neotest_registry.register_adapter("dotnet", require("neotest-dotnet")({
-        dap = { justMyCode = false },
-      }), {
-        consumers = {
-          overseer = require("neotest.consumers.overseer"),
-        },
-        discovery = {
-          enabled = false,
-        },
-        running = {
-          concurrent = true,
-        },
-        summary = {
-          enabled = true,
-          expand_errors = true,
-          follow = true,
-          mappings = {
-            attach = "a",
-            clear_marked = "M",
-            clear_target = "T",
-            debug = "d",
-            debug_marked = "D",
-            expand = { "<CR>", "<2-LeftMouse>" },
-            expand_all = "e",
-            jumpto = "i",
-            mark = "m",
-            next_failed = "J",
-            output = "o",
-            prev_failed = "K",
-            run = "r",
-            run_marked = "R",
-            short = "O",
-            stop = "u",
-            target = "t",
+      neotest_registry.register_adapter(
+        "dotnet",
+        require("neotest-dotnet")({
+          dap = { justMyCode = false },
+        }),
+        {
+          consumers = {
+            overseer = require("neotest.consumers.overseer"),
           },
-        },
-      })
+          discovery = {
+            enabled = false,
+          },
+          running = {
+            concurrent = true,
+          },
+          summary = {
+            enabled = true,
+            expand_errors = true,
+            follow = true,
+            mappings = {
+              attach = "a",
+              clear_marked = "M",
+              clear_target = "T",
+              debug = "d",
+              debug_marked = "D",
+              expand = { "<CR>", "<2-LeftMouse>" },
+              expand_all = "e",
+              jumpto = "i",
+              mark = "m",
+              next_failed = "J",
+              output = "o",
+              prev_failed = "K",
+              run = "r",
+              run_marked = "R",
+              short = "O",
+              stop = "u",
+              target = "t",
+            },
+          },
+        }
+      )
 
       -- Neotest keymaps
-      map("n", "<leader>dt", function() neotest.run.run({ strategy = "dap" }) end, "Debug nearest test")
-      map("n", "<F6>", function() neotest.run.run({ strategy = "dap" }) end, "Debug nearest test")
+      map("n", "<leader>dt", function()
+        neotest.run.run({ strategy = "dap" })
+      end, "Debug nearest test")
+      map("n", "<F6>", function()
+        neotest.run.run({ strategy = "dap" })
+      end, "Debug nearest test")
 
       -- TODO: badan checkeshun kon ye ghaede keybinding e khub bara function bedard bokhora bezar
       map("n", "<leader>ut", "<cmd>lua require('neotest').run.run()<cr>", "Run nearest test")
@@ -192,8 +206,7 @@ return {
     "Issafalcon/neotest-dotnet",
     lazy = false,
     dependencies = {
-      "nvim-neotest/neotest"
-    }
+      "nvim-neotest/neotest",
+    },
   },
-
 }

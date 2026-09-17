@@ -9,69 +9,69 @@ return {
     },
     opts = {
       enable = true,
-      max_lines = 0,           -- 0 means no limit, dynamically resize based on content
-      min_window_height = 0,   -- Always show context (set to higher value like 10 to only show in larger windows)
+      max_lines = 0, -- 0 means no limit, dynamically resize based on content
+      min_window_height = 0, -- Always show context (set to higher value like 10 to only show in larger windows)
       line_numbers = true,
       multiline_threshold = 1, -- Show context even for single-line functions
-      trim_scope = 'outer',    -- Which context lines to trim: 'outer' (default) or 'inner'
-      mode = 'cursor',         -- How to calculate context: 'cursor' (default), 'topline'
-      separator = nil,         -- Separator between context and content. Use '─' or '▁' or nil to disable
-      zindex = 20,             -- Z-index for the floating window
-      on_attach = nil,         -- Optional callback to run when attached
+      trim_scope = "outer", -- Which context lines to trim: 'outer' (default) or 'inner'
+      mode = "cursor", -- How to calculate context: 'cursor' (default), 'topline'
+      separator = nil, -- Separator between context and content. Use '─' or '▁' or nil to disable
+      zindex = 20, -- Z-index for the floating window
+      on_attach = nil, -- Optional callback to run when attached
 
       patterns = {
         html = {
-          'element',
-          'start_tag',
-          'self_closing_tag',
-          'script_element',
-          'style_element',
-          'attribute',
+          "element",
+          "start_tag",
+          "self_closing_tag",
+          "script_element",
+          "style_element",
+          "attribute",
         },
         -- Angular TypeScript files
         typescript = {
-          'class_declaration',
-          'method_definition',
-          'function_declaration',
-          'arrow_function',
-          'if_statement',
-          'for_statement',
-          'while_statement',
-          'try_statement',
-          'object_pattern',
+          "class_declaration",
+          "method_definition",
+          "function_declaration",
+          "arrow_function",
+          "if_statement",
+          "for_statement",
+          "while_statement",
+          "try_statement",
+          "object_pattern",
         },
         -- JavaScript files
         javascript = {
-          'function_declaration',
-          'arrow_function',
-          'method_definition',
-          'if_statement',
-          'for_statement',
-          'while_statement',
-          'try_statement',
-          'object_pattern',
+          "function_declaration",
+          "arrow_function",
+          "method_definition",
+          "if_statement",
+          "for_statement",
+          "while_statement",
+          "try_statement",
+          "object_pattern",
         },
         -- Lua files (for nvim config)
         lua = {
-          'function_declaration',
-          'local_function',
-          'method_index',
-          'if_statement',
-          'for_statement',
-          'while_statement',
-          'repeat_statement',
+          "function_declaration",
+          "local_function",
+          "method_index",
+          "if_statement",
+          "for_statement",
+          "while_statement",
+          "repeat_statement",
         },
         -- Make sure other languages work well too
         default = {
-          'class',
-          'function',
-          'method',
-          'for',
-          'while',
-          'if',
-          'switch',
-          'case',
-          'try',
+          "class",
+          "function",
+          "method",
+          "for",
+          "while",
+          "if",
+          "switch",
+          "case",
+          "try",
         },
       },
     },
@@ -83,18 +83,15 @@ return {
         require("treesitter-context").go_to_context(vim.v.count1)
       end, {
         silent = true,
-        desc = "Jump to context (breadcrumb)"
+        desc = "Jump to context (breadcrumb)",
       })
 
       vim.keymap.set("n", "<leader>th", function()
         local tsc = require("treesitter-context")
         tsc.toggle()
-        vim.notify(
-          tsc.enabled() and "Context enabled" or "Context disabled",
-          vim.log.levels.INFO
-        )
+        vim.notify(tsc.enabled() and "Context enabled" or "Context disabled", vim.log.levels.INFO)
       end, {
-        desc = "[t]oggle treesitter context [h]eader"
+        desc = "[t]oggle treesitter context [h]eader",
       })
     end,
   },
@@ -112,7 +109,7 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     opts = {
       -- Show breadcrumbs in the winbar (top of each window)
-      attach_navic = false,  -- We'll handle navic attachment ourselves
+      attach_navic = false, -- We'll handle navic attachment ourselves
       create_autocmd = true, -- We'll create our own autocmd
       show_dirname = true,
       show_basename = true, -- Show file basename

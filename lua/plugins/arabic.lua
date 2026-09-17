@@ -39,7 +39,7 @@ return {
           vim.o.rightleft = true
           vim.o.rightleftcmd = "search"
           vim.o.delcombine = true
-          vim.keymap.set('i', '<C-^>', function()
+          vim.keymap.set("i", "<C-^>", function()
             if vim.b.keymap_name == "arabic" then
               vim.b.keymap_name = nil
               vim.notify("Arabic keymap disabled", vim.log.levels.INFO)
@@ -102,5 +102,5 @@ return {
         end,
       })
     end,
-  }
+  },
 }

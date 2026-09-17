@@ -13,7 +13,7 @@ return {
         dependencies = { "kkharji/sqlite.lua" },
       },
       { "jvgrootveld/telescope-zoxide" },
-      { "smartpde/telescope-recent-files" }
+      { "smartpde/telescope-recent-files" },
     },
     config = function()
       local telescope = require("telescope")
@@ -38,7 +38,7 @@ return {
             width = 0.98,
             height = 0.8,
             -- preview_width = 0.5,
-            prompt_position = "top"
+            prompt_position = "top",
           },
           sorting_strategy = "ascending",
           borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
@@ -54,7 +54,7 @@ return {
             },
             n = {
               ["<Esc>"] = actions.close, -- Single Esc to close telescope in normal mode
-              ["q"] = actions.close,     -- q to close telescope in normal mode
+              ["q"] = actions.close, -- q to close telescope in normal mode
             },
           },
         },
@@ -109,18 +109,18 @@ return {
                   vim.cmd.tcd(selection.path)
                 end,
               },
-            }
+            },
           },
           recent_files = {
             only_cwd = true,
             ignore_patterns = {
               -- "temp", -- matches "temp" anywhere
-              "%.git",        -- dot must be escaped
+              "%.git", -- dot must be escaped
               "node_modules", -- matches "node_modules" anywhere
-              "%.DS_STORE",   -- escape the dot
-              ".*%.meta",     -- match anything ending with ".meta"
-            }
-          }
+              "%.DS_STORE", -- escape the dot
+              ".*%.meta", -- match anything ending with ".meta"
+            },
+          },
         },
       })
 
@@ -154,8 +154,8 @@ return {
 
         -- Get current project root
         local cwd = vim.fn.getcwd()
-        local git_root = vim.fn.systemlist("git -C " ..
-          vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
+        local git_root =
+          vim.fn.systemlist("git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel 2>/dev/null")[1]
         local project_root = (vim.v.shell_error == 0 and git_root) or cwd
 
         -- Clear telescope cache to prevent cross-project results
@@ -234,8 +234,8 @@ return {
                       -- For live_grep, the search term is what was found in the file
                       -- We can extract it from the entry, but it's better to use the actual search term
                       -- This is a fallback - try to get it from the entry's text
-                      local line_text = vim.api.nvim_buf_get_lines(self.state.bufnr, entry.lnum - 1, entry.lnum, false)
-                          [1] or ""
+                      local line_text = vim.api.nvim_buf_get_lines(self.state.bufnr, entry.lnum - 1, entry.lnum, false)[1]
+                        or ""
                       -- This is imperfect but better than no highlighting
                       local words = vim.split(entry.text, "%s+")
                       for _, word in ipairs(words) do
@@ -248,12 +248,13 @@ return {
 
                     -- Highlight the search term in the preview
                     if search_query and search_query ~= "" then
-                      local line_text = vim.api.nvim_buf_get_lines(self.state.bufnr, entry.lnum - 1, entry.lnum, false)
-                          [1] or ""
+                      local line_text = vim.api.nvim_buf_get_lines(self.state.bufnr, entry.lnum - 1, entry.lnum, false)[1]
+                        or ""
                       local escaped_query = vim.pesc(search_query)
                       local start_col = string.find(line_text:lower(), escaped_query:lower())
                       if start_col then
-                        pcall(vim.api.nvim_buf_add_highlight,
+                        pcall(
+                          vim.api.nvim_buf_add_highlight,
                           self.state.bufnr,
                           -1,
                           "TelescopeMatching",
@@ -276,8 +277,8 @@ return {
                   end)
                 end)
               end
-            end
-          })
+            end,
+          }),
         })
 
         tp.builtin("live_grep", config)
@@ -298,16 +299,21 @@ return {
           --Fallback: use live_grep with the exact keywords from your todo-comments config
           tp.builtin("live_grep", {
             prompt_title = "🔍 Find TODOs",
-            default_text =
-            "\\b(FIX|FIXME|BUG|FIXIT|ISSUE|TODO|HACK|WARN|WARNING|XXX|PERF|OPTIM|PERFORMANCE|OPTIMIZE|NOTE|INFO|TEST|TESTING|PASSED|FAILED):",
+            default_text = "\\b(FIX|FIXME|BUG|FIXIT|ISSUE|TODO|HACK|WARN|WARNING|XXX|PERF|OPTIM|PERFORMANCE|OPTIMIZE|NOTE|INFO|TEST|TESTING|PASSED|FAILED):",
             additional_args = { "--regex" },
           })
         end
       end, { desc = "Find todos" })
 
-      keymap.set("n", "<leader>fh", function() tp.builtin("help_tags") end, { desc = "Find help tags" })
-      keymap.set("n", "<leader>fj", function() tp.builtin("jumplist", { mode = "normal" }) end, { desc = "Find jumps" })
-      keymap.set("n", "<leader>fc", function() tp.builtin("command_history") end, { desc = "Find command history" })
+      keymap.set("n", "<leader>fh", function()
+        tp.builtin("help_tags")
+      end, { desc = "Find help tags" })
+      keymap.set("n", "<leader>fj", function()
+        tp.builtin("jumplist", { mode = "normal" })
+      end, { desc = "Find jumps" })
+      keymap.set("n", "<leader>fc", function()
+        tp.builtin("command_history")
+      end, { desc = "Find command history" })
       keymap.set("n", "<leader>cd", require("telescope").extensions.zoxide.list, { desc = "cd using zoxide" })
 
       -- Enable line numbers in telescope preview windows
@@ -332,5 +338,5 @@ return {
       -- Optional.  If installed, native fzy will be used when match_algorithm is fzy
       { "nvim-telescope/telescope-fzy-native.nvim" },
     },
-  }
+  },
 }

@@ -39,9 +39,7 @@ local function is_main_buffer(bufnr)
   local name_ok, name = pcall(vim.api.nvim_buf_get_name, bufnr)
   local buf_name = name_ok and name or ""
 
-  return not vim.tbl_contains(ignored_filetypes, ft)
-    and not vim.tbl_contains(ignored_buftypes, bt)
-    and buf_name ~= ""
+  return not vim.tbl_contains(ignored_filetypes, ft) and not vim.tbl_contains(ignored_buftypes, bt) and buf_name ~= ""
 end
 
 local function save_all_modified()

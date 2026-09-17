@@ -59,10 +59,10 @@ return {
             border = "rounded",
             title = "{title}",
             title_pos = "center",
-            { win = "input",   height = 1,          border = "bottom" },
-            { win = "preview", title = "{preview}", width = 0.6,      height = 0.4, border = "top" },
-            { win = "list",    border = "none" },
-          }
+            { win = "input", height = 1, border = "bottom" },
+            { win = "preview", title = "{preview}", width = 0.6, height = 0.4, border = "top" },
+            { win = "list", border = "none" },
+          },
         },
         telescope = {
           reverse = false, -- set to false for search bar to be on top
@@ -74,8 +74,14 @@ return {
             border = "none",
             {
               box = "vertical",
-              { win = "input", height = 1,          border = "rounded",   title = "{title} {live} {flags}", title_pos = "center" },
-              { win = "list",  title = " Results ", title_pos = "center", border = "rounded" },
+              {
+                win = "input",
+                height = 1,
+                border = "rounded",
+                title = "{title} {live} {flags}",
+                title_pos = "center",
+              },
+              { win = "list", title = " Results ", title_pos = "center", border = "rounded" },
             },
             {
               win = "preview",
@@ -99,7 +105,7 @@ return {
             { win = "input", height = 1, border = "bottom" },
             {
               box = "horizontal",
-              { win = "list",    border = "none" },
+              { win = "list", border = "none" },
               { win = "preview", title = "{preview}", width = 0.5, border = "left" },
             },
           },
@@ -124,10 +130,10 @@ return {
             border = "rounded",
             title = "{title}",
             title_pos = "center",
-            { win = "input",   height = 1,          border = "bottom" },
-            { win = "preview", title = "{preview}", width = 0.6,      height = 0.4, border = "top" },
-            { win = "list",    border = "none" },
-          }
+            { win = "input", height = 1, border = "bottom" },
+            { win = "preview", title = "{preview}", width = 0.6, height = 0.4, border = "top" },
+            { win = "list", border = "none" },
+          },
         },
         telescope = {
           reverse = false, -- set to false for search bar to be on top
@@ -139,8 +145,14 @@ return {
             border = "none",
             {
               box = "vertical",
-              { win = "input", height = 1,          border = "rounded",   title = "{title} {live} {flags}", title_pos = "center" },
-              { win = "list",  title = " Results ", title_pos = "center", border = "rounded" },
+              {
+                win = "input",
+                height = 1,
+                border = "rounded",
+                title = "{title} {live} {flags}",
+                title_pos = "center",
+              },
+              { win = "list", title = " Results ", title_pos = "center", border = "rounded" },
             },
             {
               win = "preview",
@@ -164,7 +176,7 @@ return {
             { win = "input", height = 1, border = "bottom" },
             {
               box = "horizontal",
-              { win = "list",    border = "none" },
+              { win = "list", border = "none" },
               { win = "preview", title = "{preview}", width = 0.5, border = "left" },
             },
           },
@@ -248,11 +260,7 @@ return {
           on_show = function(picker)
             -- force normal mode right after opening
             vim.schedule(function()
-              vim.api.nvim_feedkeys(
-                vim.api.nvim_replace_termcodes("<Esc>", true, false, true),
-                "n",
-                false
-              )
+              vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
             end)
           end,
         })
@@ -273,11 +281,7 @@ return {
           on_show = function(picker)
             -- force normal mode right after opening
             vim.schedule(function()
-              vim.api.nvim_feedkeys(
-                vim.api.nvim_replace_termcodes("<Esc>", true, false, true),
-                "n",
-                false
-              )
+              vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
             end)
           end,
         })
@@ -308,14 +312,26 @@ return {
       desc = "Search History",
     },
     {
-      "<leader>s\"",
+      '<leader>s"',
       function()
         Snacks.picker.registers()
       end,
       desc = "Registers",
     },
-    { "<c-/>", function() Snacks.terminal() end, desc = "Toggle Terminal" },
-    { "<c-/>", function() Snacks.terminal() end, desc = "Toggle Terminal" },
+    {
+      "<c-/>",
+      function()
+        Snacks.terminal()
+      end,
+      desc = "Toggle Terminal",
+    },
+    {
+      "<c-/>",
+      function()
+        Snacks.terminal()
+      end,
+      desc = "Toggle Terminal",
+    },
     {
       "<leader>sa",
       function()

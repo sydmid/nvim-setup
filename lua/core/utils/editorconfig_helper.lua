@@ -92,13 +92,17 @@ function M.write_editorconfig(lang)
 end
 
 -- Default keymaps (leader + eX where X = language)
-vim.keymap.set("n", "<leader>ec", function() M.write_editorconfig("csharp") end,
-  { desc = "Write C# .editorconfig" })
-vim.keymap.set("n", "<leader>ej", function() M.write_editorconfig("javascript") end,
-  { desc = "Write JS/TS .editorconfig" })
-vim.keymap.set("n", "<leader>ep", function() M.write_editorconfig("python") end,
-  { desc = "Write Python .editorconfig" })
-vim.keymap.set("n", "<leader>eg", function() M.write_editorconfig("go") end,
-  { desc = "Write Go .editorconfig" })
+vim.keymap.set("n", "<leader>ec", function()
+  M.write_editorconfig("csharp")
+end, { desc = "Write C# .editorconfig" })
+vim.keymap.set("n", "<leader>ej", function()
+  M.write_editorconfig("javascript")
+end, { desc = "Write JS/TS .editorconfig" })
+vim.keymap.set("n", "<leader>ep", function()
+  M.write_editorconfig("python")
+end, { desc = "Write Python .editorconfig" })
+vim.keymap.set("n", "<leader>eg", function()
+  M.write_editorconfig("go")
+end, { desc = "Write Go .editorconfig" })
 
 return M

@@ -20,10 +20,8 @@ function M.setup(border)
         vim.cmd("Lspsaga goto_definition")
         open_fold_after_jump()
       end, { buffer = ev.buf, desc = "Go to definition" })
-      keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>",
-        { buffer = ev.buf, desc = "Peek definition" })
-      keymap("n", "ga", "<cmd>lua require('fzf-lua').lsp_finder()<CR>",
-        { desc = "[g]o [a]ll usages" })
+      keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>", { buffer = ev.buf, desc = "Peek definition" })
+      keymap("n", "ga", "<cmd>lua require('fzf-lua').lsp_finder()<CR>", { desc = "[g]o [a]ll usages" })
       keymap("n", "gr", function()
         require("core.utils.telescope_pickers").builtin("lsp_references", {
           mode = "normal",
@@ -114,8 +112,15 @@ function M.setup(border)
                 pcall(vim.api.nvim_buf_clear_namespace, self.state.bufnr, -1, 0, -1)
 
                 if entry.lnum and entry.col then
-                  pcall(vim.api.nvim_buf_add_highlight, self.state.bufnr, -1, "TelescopePreviewLine", entry.lnum - 1, 0,
-                    -1)
+                  pcall(
+                    vim.api.nvim_buf_add_highlight,
+                    self.state.bufnr,
+                    -1,
+                    "TelescopePreviewLine",
+                    entry.lnum - 1,
+                    0,
+                    -1
+                  )
 
                   local lines = vim.api.nvim_buf_get_lines(self.state.bufnr, entry.lnum - 1, entry.lnum, false)
                   if lines and lines[1] then
@@ -136,8 +141,15 @@ function M.setup(border)
                     end
 
                     if end_col >= start_col then
-                      pcall(vim.api.nvim_buf_add_highlight, self.state.bufnr, -1, "TelescopeMatching", entry.lnum - 1,
-                        start_col, end_col + 1)
+                      pcall(
+                        vim.api.nvim_buf_add_highlight,
+                        self.state.bufnr,
+                        -1,
+                        "TelescopeMatching",
+                        entry.lnum - 1,
+                        start_col,
+                        end_col + 1
+                      )
                     end
                   end
                 end
@@ -180,18 +192,34 @@ function M.setup(border)
       end, { buffer = ev.buf, desc = "[g]o [t]ype definition" })
 
       keymap("n", "gD", "<cmd>lua require('fzf-lua').lsp_declarations()<CR>", { desc = "[g]o [D]eclarations" })
-      keymap("n", "<leader>pt", "<cmd>Lspsaga peek_type_definition<CR>",
-        { buffer = ev.buf, desc = "Peek type definition" })
-      keymap("n", "<leader>ls", "<cmd>lua require('fzf-lua').lsp_document_symbols()<CR>",
-        { desc = "[l]list [s]ymbols (document)" })
-      keymap("n", "<leader>lS", "<cmd>lua require('fzf-lua').lsp_live_workspace_symbols()<CR>",
-        { desc = "[L]ist all [S]ymbols (workspace)" })
+      keymap(
+        "n",
+        "<leader>pt",
+        "<cmd>Lspsaga peek_type_definition<CR>",
+        { buffer = ev.buf, desc = "Peek type definition" }
+      )
+      keymap(
+        "n",
+        "<leader>ls",
+        "<cmd>lua require('fzf-lua').lsp_document_symbols()<CR>",
+        { desc = "[l]list [s]ymbols (document)" }
+      )
+      keymap(
+        "n",
+        "<leader>lS",
+        "<cmd>lua require('fzf-lua').lsp_live_workspace_symbols()<CR>",
+        { desc = "[L]ist all [S]ymbols (workspace)" }
+      )
       keymap("n", "<leader>rn", vim.lsp.buf.rename, { desc = "[r]e [n]ame symbol under cursor" })
       keymap("n", "<F2>", vim.lsp.buf.rename, { desc = "Rename symbol under cursor" })
       keymap("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "[c]ode [a]ction" })
       keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>", { buffer = ev.buf, desc = "[p]eek [d]efinition" })
-      keymap("n", "<leader>pt", "<cmd>Lspsaga peek_type_definition<CR>",
-        { buffer = ev.buf, desc = "[p]eek [t]ype definition" })
+      keymap(
+        "n",
+        "<leader>pt",
+        "<cmd>Lspsaga peek_type_definition<CR>",
+        { buffer = ev.buf, desc = "[p]eek [t]ype definition" }
+      )
 
       keymap({ "n", "i" }, "<D-i>", function()
         signature.show_signature_help(border)
@@ -306,10 +334,14 @@ function M.setup(border)
       end, { buffer = ev.buf, desc = "Buffer diagnostics" })
 
       keymap("n", "]x", function()
-        vim.diagnostic.goto_next({ severity = { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR } })
+        vim.diagnostic.goto_next({
+          severity = { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR },
+        })
       end, { buffer = ev.buf, desc = "Next error" })
       keymap("n", "[x", function()
-        vim.diagnostic.goto_prev({ severity = { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR } })
+        vim.diagnostic.goto_prev({
+          severity = { min = vim.diagnostic.severity.ERROR, max = vim.diagnostic.severity.ERROR },
+        })
       end, { buffer = ev.buf, desc = "Previous error" })
       keymap("n", "<leader>xj", function()
         vim.diagnostic.goto_next({ severity = { min = vim.diagnostic.severity.WARN } })
