@@ -121,6 +121,19 @@ local function setup_toml(lspconfig, capabilities)
   })
 end
 
+local function setup_roslyn(lspconfig, capabilities)
+  lspconfig.roslyn.setup({
+    capabilities = capabilities,
+    filetypes = { "cs", "razor" },
+    settings = {
+      ["csharp|background_analysis"] = {
+        dotnet_analyzer_diagnostics_scope = "openFiles",
+        dotnet_compiler_diagnostics_scope = "openFiles",
+      },
+    },
+  })
+end
+
 local function setup_go(lspconfig, capabilities)
   lspconfig.gopls.setup({
     capabilities = capabilities,
@@ -240,6 +253,7 @@ function M.setup(lspconfig, capabilities)
     gopls = setup_go,
     ts_ls = setup_typescript,
     clangd = setup_clang,
+    roslyn = setup_roslyn,
   }
 
   for _, server_name in ipairs(server_names) do

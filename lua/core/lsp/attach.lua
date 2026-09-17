@@ -17,7 +17,7 @@ function M.setup(border)
       end
 
       keymap("n", "gd", function()
-        vim.cmd("Lspsaga goto_definition")
+        vim.lsp.buf.definition()
         open_fold_after_jump()
       end, { buffer = ev.buf, desc = "Go to definition" })
       keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>", { buffer = ev.buf, desc = "Peek definition" })
