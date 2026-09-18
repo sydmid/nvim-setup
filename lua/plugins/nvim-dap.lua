@@ -41,6 +41,33 @@ return {
         },
       }
 
+      local codelldb_path = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/adapter/codelldb"
+      dap.adapters.codelldb = {
+        type = "server",
+        port = "${port}",
+        executable = {
+          command = vim.fn.executable(codelldb_path) == 1 and codelldb_path or "codelldb",
+          args = { "--port", "${port}" },
+        },
+      }
+
+      local lldb_config = {
+        {
+          name = "Launch file",
+          type = "codelldb",
+          request = "launch",
+          program = function()
+            return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+          end,
+          cwd = "${workspaceFolder}",
+          stopOnEntry = false,
+        },
+      }
+
+      dap.configurations.cpp = lldb_config
+      dap.configurations.c = lldb_config
+      dap.configurations.rust = lldb_config
+
       -- VSCode-like keybindings
       map("n", "<F5>", dap.continue, "DAP: Continue/Start")
       map("n", "<F9>", dap.toggle_breakpoint, "DAP: Toggle breakpoint")

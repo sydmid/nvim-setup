@@ -37,6 +37,8 @@ return {
           zsh = { "shfmt_zsh", "zsh_indent" }, -- Try shfmt_zsh first, fallback to custom indenter
           cs = { "my_csharpier" }, -- C# formatting
           csproj = { "my_csharpier" }, -- C# formatting
+          c = { "clang-format" },
+          cpp = { "clang-format" },
         },
         formatters = {
           -- Modern Python formatting with Ruff

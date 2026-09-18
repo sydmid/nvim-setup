@@ -40,6 +40,9 @@ return {
       "rust-analyzer", -- Rust LSP server
       "codelldb", -- LLDB-based debugger for Rust
       "taplo", -- TOML formatter and language server
+      -- C/C++ development tools
+      "clangd", -- C/C++ language server
+      "clang-format", -- C/C++ formatter
     },
   },
 }
