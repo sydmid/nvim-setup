@@ -554,7 +554,8 @@ return {
             vim.cmd("DiffviewOpen")
           end
         end,
-        desc = "Toggle Diffview",
+        mode = "n",
+        desc = "Toggle Diffview between git diff and normal mode",
       },
     },
     config = function()

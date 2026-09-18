@@ -36,6 +36,27 @@ function M.setup()
     end
     require("oil").open(root or vim.fn.getcwd())
   end, { desc = "Open workspace root with Oil" })
+
+  map("n", "<D-S-e>", function()
+    local path = vim.fn.expand("%:p")
+    local dir
+    if path == "" then
+      dir = vim.fn.getcwd()
+    else
+      dir = vim.fn.fnamemodify(path, ":h")
+    end
+    vim.ui.open(dir)
+  end, { desc = "Open current directory in OS explorer" })
+
+  map("n", "<D-S-d>", function()
+    local lib = require("diffview.lib")
+    local view = lib.get_current_view()
+    if view then
+      vim.cmd("DiffviewClose")
+    else
+      vim.cmd("DiffviewOpen")
+    end
+  end, { desc = "Toggle Diffview between git diff and normal mode" })
 end
 
 return M
