@@ -131,4 +131,38 @@ return {
       end, { desc = "Split arguments" })
     end,
   },
+  -- Better textobjects
+  {
+    "echasnovski/mini.ai",
+    dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
+    config = function()
+      local ai = require("mini.ai")
+      ai.setup({
+        custom_textobjects = {
+          B = function()
+            local from = { line = 1, col = 1 }
+            local to = { line = vim.fn.line("$"), col = math.max(vim.fn.getline("$"):len(), 1) }
+            return { from = from, to = to }
+          end,
+          F = ai.gen_spec.treesitter({ a = "@function.outer", i = "@function.inner" }),
+          o = ai.gen_spec.treesitter({ a = "@block.outer", i = "@block.inner" }),
+        },
+        search_method = "cover",
+      })
+    end,
+  },
+  -- Align text interactively
+  {
+    "echasnovski/mini.align",
+    config = function()
+      require("mini.align").setup()
+    end,
+  },
+  -- Go forward/backward with square brackets
+  {
+    "echasnovski/mini.bracketed",
+    config = function()
+      require("mini.bracketed").setup()
+    end,
+  },
 }
