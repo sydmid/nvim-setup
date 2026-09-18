@@ -215,13 +215,13 @@ return {
     {
       "<D-p>",
       function()
-        Snacks.picker.recent({
+        Snacks.picker.smart({
           layout = "vscode",
           exclude = {
             ".git",
             "*.meta",
           },
-          ignored = false,
+          filter = { cwd = true },
         })
       end,
       desc = "Smart File Picker (git-aware)",
