@@ -65,6 +65,18 @@ function M.setup()
       vim.defer_fn(reset_folds, 400)
     end,
   })
+
+  local yank_group = augroup("HighlightYank", { clear = true })
+  autocmd("TextYankPost", {
+    group = yank_group,
+    pattern = "*",
+    callback = function()
+      (vim.hl or vim.highlight).on_yank({
+        higroup = "IncSearch",
+        timeout = 200,
+      })
+    end,
+  })
 end
 
 return M

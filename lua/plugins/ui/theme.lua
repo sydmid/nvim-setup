@@ -31,15 +31,7 @@ return {
       end, { desc = "Change Background", silent = true })
     end,
   },
-  -- Highlight yanked text with enhanced styling
-  {
-    "machakann/vim-highlightedyank",
-    event = "VeryLazy",
-    config = function()
-      -- Enhanced yank highlight with no-clown-fiesta colors
-      vim.g.highlightedyank_highlight_duration = 200
-    end,
-  },
+
   -- hlchunk.nvim - Beautiful animated indentation and chunk highlighting
   {
     "shellRaining/hlchunk.nvim",

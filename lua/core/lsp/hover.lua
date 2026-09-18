@@ -35,15 +35,18 @@ local function normalize_hover(contents)
 end
 
 function M.setup_handler(border)
-  vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-    border = border,
-    focusable = true,
-    style = "minimal",
-    max_width = 80,
-    max_height = 15,
-    wrap = true,
-    close_events = { "CursorMoved", "BufHidden" },
-  })
+  vim.lsp.handlers["textDocument/hover"] = function(err, result, ctx, config)
+    local opts = vim.tbl_deep_extend("force", config or {}, {
+      border = border,
+      focusable = true,
+      style = "minimal",
+      max_width = 80,
+      max_height = 15,
+      wrap = true,
+      close_events = { "CursorMoved", "BufHidden" },
+    })
+    return vim.lsp.handlers.hover(err, result, ctx, opts)
+  end
 end
 
 function M.request_hover(border)

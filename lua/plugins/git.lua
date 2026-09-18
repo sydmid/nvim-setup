@@ -669,7 +669,6 @@ return {
   -- git-conflict.nvim - VS Code-style inline merge conflict resolution
   {
     "akinsho/git-conflict.nvim",
-    version = "*",
     event = "BufReadPre",
     config = function()
       require("git-conflict").setup({
