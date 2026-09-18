@@ -53,6 +53,41 @@ function M.setup()
     ":lua require('flash').jump({search = {forward = true, wrap = false, multi_window = false}})<CR>",
     { desc = "Flash forward" }
   )
+
+  -- Toggle focus between editor and NvimTree with Tab
+  map("n", "<Tab>", function()
+    local buftype = vim.bo.buftype
+    local filetype = vim.bo.filetype
+
+    -- Exclude terminals (e.g. standard terminal, snacks_terminal)
+    if buftype == "terminal" or filetype == "snacks_terminal" then
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-i>", true, false, true), "n", true)
+      return
+    end
+
+    if filetype == "NvimTree" then
+      -- If inside NvimTree, go to previous window
+      vim.cmd("wincmd p")
+    else
+      -- Check if NvimTree is open in the current tab
+      local is_nvimtree_open = false
+      for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+        local buf = vim.api.nvim_win_get_buf(win)
+        if vim.bo[buf].filetype == "NvimTree" then
+          is_nvimtree_open = true
+          break
+        end
+      end
+
+      if is_nvimtree_open then
+        -- If in normal editor and NvimTree is open, focus NvimTree
+        vim.cmd("NvimTreeFocus")
+      else
+        -- If NvimTree is not open, fallback to default normal mode Tab (<C-i> jump forward)
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-i>", true, false, true), "n", true)
+      end
+    end
+  end, { desc = "Toggle focus between editor and NvimTree", silent = true })
 end
 
 return M
