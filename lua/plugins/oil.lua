@@ -3,6 +3,46 @@ return {
     "stevearc/oil.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
+      -- Function to open selected file's directory in OS explorer
+      local function open_dir_in_os()
+        local oil = require("oil")
+        local entry = oil.get_cursor_entry()
+        if not entry then
+          vim.notify("No entry selected", vim.log.levels.WARN)
+          return
+        end
+
+        local current_dir = oil.get_current_dir()
+        if not current_dir then
+          vim.notify("Could not get current directory", vim.log.levels.ERROR)
+          return
+        end
+
+        -- Ensure current_dir ends with a path separator
+        if not current_dir:match("/$") then
+          current_dir = current_dir .. "/"
+        end
+
+        local selected_path = current_dir .. entry.name
+        local target_dir
+
+        if entry.type == "file" then
+          target_dir = vim.fn.fnamemodify(selected_path, ":h")
+        elseif entry.type == "directory" then
+          target_dir = selected_path
+        else
+          local stat = vim.loop.fs_stat(selected_path)
+          if stat and stat.type == "directory" then
+            target_dir = selected_path
+          else
+            target_dir = vim.fn.fnamemodify(selected_path, ":h")
+          end
+        end
+
+        target_dir = vim.fn.resolve(target_dir)
+        vim.ui.open(target_dir)
+      end
+
       -- Function to change workspace to selected file's parent folder or selected folder
       local function change_workspace_to_selection()
         local oil = require("oil")
@@ -115,6 +155,8 @@ return {
           ["ee"] = "actions.open_external",
           ["th"] = { "actions.toggle_hidden", mode = "n" },
           ["<C-w>"] = { change_workspace_to_selection, mode = "n", desc = "Change workspace to selection" },
+          ["<D-S-d>"] = { change_workspace_to_selection, mode = "n", desc = "Change workspace to selection" },
+          ["<D-S-e>"] = { open_dir_in_os, mode = "n", desc = "Open directory in OS explorer" },
         },
         float = {
           padding = 2,
