@@ -19,16 +19,19 @@ local function cleanup()
 end
 
 function M.setup_handlers(border)
-  vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-    border = border,
-    focusable = false,
-    silent = true,
-    close_events = { "CursorMoved", "BufHidden", "InsertLeave" },
-    max_width = 80,
-    max_height = 15,
-    wrap = true,
-    style = "minimal",
-  })
+  vim.lsp.handlers["textDocument/signatureHelp"] = function(err, result, ctx, config)
+    local opts = vim.tbl_deep_extend("force", config or {}, {
+      border = border,
+      focusable = false,
+      silent = true,
+      close_events = { "CursorMoved", "BufHidden", "InsertLeave" },
+      max_width = 80,
+      max_height = 15,
+      wrap = true,
+      style = "minimal",
+    })
+    return vim.lsp.handlers.signature_help(err, result, ctx, opts)
+  end
 end
 
 function M.show_signature_with_index(border, override_index, custom_params, fallback_params)
