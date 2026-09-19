@@ -165,4 +165,14 @@ return {
       require("mini.bracketed").setup()
     end,
   },
+  -- Autopairs
+  {
+    "echasnovski/mini.pairs",
+    event = "InsertEnter",
+    config = function()
+      require("mini.pairs").setup({
+        modes = { insert = true, command = true, terminal = false },
+      })
+    end,
+  },
 }
