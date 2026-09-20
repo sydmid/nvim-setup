@@ -175,4 +175,30 @@ return {
       })
     end,
   },
+  -- Highlight word under cursor
+  {
+    "echasnovski/mini.cursorword",
+    version = "*",
+    config = function()
+      require("mini.cursorword").setup()
+    end,
+  },
+  -- Move any selection in any direction
+  {
+    "echasnovski/mini.move",
+    version = "*",
+    config = function()
+      require("mini.move").setup({
+        options = { reindent_linewise = false },
+      })
+    end,
+  },
+  -- Text edit operators
+  {
+    "echasnovski/mini.operators",
+    version = "*",
+    config = function()
+      require("mini.operators").setup()
+    end,
+  },
 }
