@@ -2,29 +2,48 @@ return {
   -- Mini Nvim
   { "echasnovski/mini.nvim", version = false },
   -- Comments
-  -- {
-  --     'echasnovski/mini.comment',
-  --     enabled = false,
-  --     version = false,
-  --     dependencies = {
-  --         "JoosepAlviste/nvim-ts-context-commentstring",
-  --     },
-  --     config = function()
-  --         -- disable the autocommand from ts-context-commentstring
-  --         require('ts_context_commentstring').setup {
-  --             enable_autocmd = false,
-  --         }
-  --
-  --         require("mini.comment").setup {
-  --             -- tsx, jsx, html , svelte comment support
-  --             options = {
-  --                 custom_commentstring = function()
-  --                     return require("ts_context_commentstring.internal").calculate_commentstring() or vim.bo.commentstring
-  --                 end,
-  --             },
-  --         }
-  --     end
-  -- },
+  {
+    "echasnovski/mini.comment",
+    version = false,
+    dependencies = {
+      "JoosepAlviste/nvim-ts-context-commentstring",
+    },
+    config = function()
+      -- disable the autocommand from ts-context-commentstring
+      require("ts_context_commentstring").setup({
+        enable_autocmd = false,
+      })
+
+      local miniComment = require("mini.comment")
+      miniComment.setup({
+        -- tsx, jsx, html , svelte comment support
+        options = {
+          custom_commentstring = function()
+            return require("ts_context_commentstring.internal").calculate_commentstring() or vim.bo.commentstring
+          end,
+        },
+      })
+
+      vim.keymap.set("n", "<D-/>", function()
+        -- Save current position
+        local start_row, start_col = unpack(vim.api.nvim_win_get_cursor(0))
+
+        -- Toggle comment
+        miniComment.toggle_lines(start_row, start_row)
+
+        -- Move down one line
+        local next_row = math.min(start_row + 1, vim.api.nvim_buf_line_count(0))
+        vim.api.nvim_win_set_cursor(0, { next_row, start_col })
+      end, { silent = true, desc = "Toggle comment line and move down" })
+
+      vim.keymap.set(
+        "x",
+        "<D-/>",
+        "gc",
+        { remap = true, silent = true, desc = "Toggle comment (visual)" }
+      )
+    end,
+  },
   -- File explorer (this works properly with oil unlike nvim-tree)
   -- {
   --     'echasnovski/mini.files',
