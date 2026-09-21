@@ -384,14 +384,6 @@ return {
     end,
   },
 
-  -- Surround text
-  {
-    "kylechui/nvim-surround",
-    version = "*",
-    event = "VeryLazy",
-    opts = {},
-  },
-
   -- Trouble (diagnostics, references, etc.)
   {
     "folke/trouble.nvim",
