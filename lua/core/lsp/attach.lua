@@ -2,7 +2,6 @@ local M = {}
 
 function M.setup(border)
   local signature = require("core.lsp.signature")
-  local hover = require("core.lsp.hover")
 
   vim.api.nvim_create_autocmd("LspAttach", {
     group = vim.api.nvim_create_augroup("UserLspConfig", {}),
