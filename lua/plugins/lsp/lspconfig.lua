@@ -33,7 +33,6 @@ return {
       local filetypes = require("core.lsp.filetypes")
       local servers = require("core.lsp.servers")
       local signature = require("core.lsp.signature")
-      local hover = require("core.lsp.hover")
       local diagnostics = require("core.lsp.diagnostics")
       local appearance = require("core.lsp.appearance")
 
@@ -51,7 +50,6 @@ return {
       appearance.setup_colorscheme_hook()
 
       signature.setup_handlers(appearance.retro_border)
-      hover.setup_handler(appearance.retro_border)
 
       -- Setup LSP
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
