@@ -7,7 +7,6 @@ return {
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
       { "nvim-telescope/telescope-ui-select.nvim" },
       "nvim-tree/nvim-web-devicons",
-      "folke/todo-comments.nvim",
       {
         "nvim-telescope/telescope-frecency.nvim",
         dependencies = { "kkharji/sqlite.lua" },
@@ -132,12 +131,6 @@ return {
 
       -- Add a mapping
       vim.keymap.set("n", "<leader>cd", telescope.extensions.zoxide.list)
-
-      -- Load todo-comments telescope extension if available
-      local has_todo_comments = pcall(require, "todo-comments")
-      if has_todo_comments then
-        pcall(telescope.load_extension, "todo-comments")
-      end
 
       -- Load csharpls-extended telescope extension if available
       local has_csharpls_extended = pcall(require, "csharpls_extended")
@@ -288,21 +281,12 @@ return {
       local keymap = vim.keymap -- for conciseness
 
       keymap.set("n", "<leader>ft", function()
-        -- Try to use todo-comments telescope extension
-        local ok = pcall(function()
-          telescope.extensions["todo-comments"].todo({
-            attach_mappings = tp.compose_mappings(),
-          })
-        end)
-
-        if not ok then
-          --Fallback: use live_grep with the exact keywords from your todo-comments config
-          tp.builtin("live_grep", {
-            prompt_title = "🔍 Find TODOs",
-            default_text = "\\b(FIX|FIXME|BUG|FIXIT|ISSUE|TODO|HACK|WARN|WARNING|XXX|PERF|OPTIM|PERFORMANCE|OPTIMIZE|NOTE|INFO|TEST|TESTING|PASSED|FAILED):",
-            additional_args = { "--regex" },
-          })
-        end
+        -- Use live_grep with the exact keywords from mini.hipatterns config
+        tp.builtin("live_grep", {
+          prompt_title = "🔍 Find TODOs",
+          default_text = "\\b(FIX|FIXME|BUG|FIXIT|ISSUE|TODO|HACK|WARN|WARNING|XXX|PERF|OPTIM|PERFORMANCE|OPTIMIZE|NOTE|INFO|TEST|TESTING|PASSED|FAILED):",
+          additional_args = { "--regex" },
+        })
       end, { desc = "Find todos" })
 
       keymap.set("n", "<leader>fh", function()
