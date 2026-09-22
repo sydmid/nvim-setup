@@ -36,12 +36,7 @@ return {
         vim.api.nvim_win_set_cursor(0, { next_row, start_col })
       end, { silent = true, desc = "Toggle comment line and move down" })
 
-      vim.keymap.set(
-        "x",
-        "<D-/>",
-        "gc",
-        { remap = true, silent = true, desc = "Toggle comment (visual)" }
-      )
+      vim.keymap.set("x", "<D-/>", "gc", { remap = true, silent = true, desc = "Toggle comment (visual)" })
     end,
   },
   -- File explorer (this works properly with oil unlike nvim-tree)

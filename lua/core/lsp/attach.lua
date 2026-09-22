@@ -2,7 +2,6 @@ local M = {}
 
 function M.setup(border)
   local signature = require("core.lsp.signature")
-  local hover = require("core.lsp.hover")
 
   vim.api.nvim_create_autocmd("LspAttach", {
     group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -17,8 +16,32 @@ function M.setup(border)
       end
 
       keymap("n", "gd", function()
-        vim.lsp.buf.definition()
-        open_fold_after_jump()
+        vim.lsp.buf.definition({
+          on_list = function(options)
+            local unique_defs = {}
+            local def_loc_hash = {}
+
+            for _, def_location in pairs(options.items) do
+              local hash_key = def_location.filename .. def_location.lnum
+              if not def_loc_hash[hash_key] then
+                def_loc_hash[hash_key] = true
+                table.insert(unique_defs, def_location)
+              end
+            end
+
+            options.items = unique_defs
+            ---@diagnostic disable-next-line: param-type-mismatch
+            vim.fn.setloclist(0, {}, " ", options)
+
+            if #options.items > 1 then
+              vim.cmd.lopen()
+            else
+              vim.cmd([[silent! lfirst]])
+            end
+
+            open_fold_after_jump()
+          end,
+        })
       end, { buffer = ev.buf, desc = "Go to definition" })
       keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>", { buffer = ev.buf, desc = "Peek definition" })
       keymap("n", "ga", "<cmd>lua require('fzf-lua').lsp_finder()<CR>", { desc = "[g]o [a]ll usages" })
@@ -231,8 +254,13 @@ function M.setup(border)
         signature.next_or_complete(border)
       end, { buffer = ev.buf, desc = "Next signature overload or completion", silent = true })
       keymap("n", "gh", function()
-        hover.request_hover(border)
-      end, { buffer = ev.buf, desc = "Show documentation (Enhanced & Focusable)", silent = true })
+        vim.lsp.buf.hover({
+          border = border,
+          max_height = 40,
+          max_width = 100,
+          close_events = { "CursorMoved", "BufLeave", "WinLeave", "LSPDetach" },
+        })
+      end, { buffer = ev.buf, desc = "Show documentation", silent = true })
 
       keymap("n", "<leader>ca", "<cmd>Lspsaga code_action<CR>", { buffer = ev.buf, desc = "Code actions (Lspsaga)" })
       keymap("n", "<leader>lr", "<cmd>Lspsaga rename<CR>", { buffer = ev.buf, desc = "Rename symbol (Lspsaga)" })
