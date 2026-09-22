@@ -43,6 +43,15 @@ local function setup_bash(lspconfig, capabilities)
 end
 
 local function setup_python(lspconfig, capabilities)
+
+  if not capabilities.textDocument then
+    capabilities.textDocument = {}
+  end
+  if not capabilities.textDocument.semanticTokens then
+    capabilities.textDocument.semanticTokens = {}
+  end
+  capabilities.textDocument.semanticTokens.multilineTokenSupport = true
+
   lspconfig.pyright.setup({
     capabilities = capabilities,
     settings = {
@@ -85,6 +94,15 @@ local function setup_ruff(lspconfig, capabilities)
 end
 
 local function setup_rust(lspconfig, capabilities)
+
+  if not capabilities.textDocument then
+    capabilities.textDocument = {}
+  end
+  if not capabilities.textDocument.semanticTokens then
+    capabilities.textDocument.semanticTokens = {}
+  end
+  capabilities.textDocument.semanticTokens.multilineTokenSupport = true
+
   lspconfig.rust_analyzer.setup({
     capabilities = capabilities,
     filetypes = { "rust" },
@@ -105,11 +123,6 @@ local function setup_rust(lspconfig, capabilities)
         check = { command = "clippy" },
       },
     },
-    on_attach = function(client, bufnr)
-      if client.server_capabilities.inlayHintProvider then
-        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-      end
-    end,
   })
 end
 
@@ -171,10 +184,6 @@ local function setup_typescript(lspconfig, capabilities)
       javascript = { inlayHints = inlay_hints },
     },
     on_attach = function(client, bufnr)
-      if client.server_capabilities.inlayHintProvider then
-        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-      end
-
       local keymap = vim.keymap.set
       keymap("n", "<leader>to", function()
         vim.lsp.buf.execute_command({
