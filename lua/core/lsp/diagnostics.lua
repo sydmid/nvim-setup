@@ -34,7 +34,7 @@ end
 function M.configure_defaults()
   vim.diagnostic.config({
     virtual_text = {
-      severity = { min = vim.diagnostic.severity.INFO },
+      severity = { min = vim.diagnostic.severity.WARN },
       spacing = 4,
       prefix = "●",
       format = M.virtual_text_format,
