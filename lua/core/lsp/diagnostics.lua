@@ -34,7 +34,7 @@ end
 function M.configure_defaults()
   vim.diagnostic.config({
     virtual_text = {
-      severity = { min = vim.diagnostic.severity.ERROR },
+      severity = { min = vim.diagnostic.severity.INFO },
       spacing = 4,
       prefix = "●",
       format = M.virtual_text_format,
@@ -53,6 +53,7 @@ function M.configure_defaults()
       source = "always",
       header = "",
       prefix = "",
+      max_width = 80,
       format = M.float_format,
     },
   })

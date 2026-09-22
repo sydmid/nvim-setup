@@ -10,6 +10,16 @@ function M.setup(border)
       local keymap = vim.keymap.set
       local client = vim.lsp.get_client_by_id(ev.data.client_id)
 
+      -- Start semantic tokens
+      if client and client.server_capabilities.semanticTokensProvider then
+        vim.lsp.semantic_tokens.start(ev.buf, client.id)
+      end
+
+      -- Start inlay hints
+      if client and client:supports_method("textDocument/inlayHint") then
+        vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })
+      end
+
       local function open_fold_after_jump()
         vim.defer_fn(function()
           pcall(vim.cmd, "silent! normal! zv")
@@ -212,7 +222,9 @@ function M.setup(border)
       )
       keymap("n", "<leader>rn", vim.lsp.buf.rename, { desc = "[r]e [n]ame symbol under cursor" })
       keymap("n", "<F2>", vim.lsp.buf.rename, { desc = "Rename symbol under cursor" })
-      keymap("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "[c]ode [a]ction" })
+      keymap("n", "<leader>ca", function()
+        require('tiny-code-action').code_action()
+      end, { desc = "[c]ode [a]ction" })
       keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>", { buffer = ev.buf, desc = "[p]eek [d]efinition" })
       keymap(
         "n",
@@ -234,7 +246,7 @@ function M.setup(border)
         hover.request_hover(border)
       end, { buffer = ev.buf, desc = "Show documentation (Enhanced & Focusable)", silent = true })
 
-      keymap("n", "<leader>ca", "<cmd>Lspsaga code_action<CR>", { buffer = ev.buf, desc = "Code actions (Lspsaga)" })
+      -- Removed duplicate <leader>ca keymap mapped to Lspsaga code_action
       keymap("n", "<leader>lr", "<cmd>Lspsaga rename<CR>", { buffer = ev.buf, desc = "Rename symbol (Lspsaga)" })
       keymap("n", "<leader>lf", "<cmd>Lspsaga finder<CR>", { buffer = ev.buf, desc = "LSP finder" })
       keymap("n", "<leader>lo", "<cmd>Lspsaga outline<CR>", { buffer = ev.buf, desc = "LSP outline" })
