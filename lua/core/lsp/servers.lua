@@ -137,6 +137,7 @@ end
 local function setup_roslyn(lspconfig, capabilities)
   lspconfig.roslyn.setup({
     capabilities = capabilities,
+    cmd = { "roslyn" },
     filetypes = { "cs", "razor" },
     settings = {
       ["csharp|background_analysis"] = {
