@@ -6,13 +6,13 @@ local symbol_pickers = require("core.ui.symbol_pickers")
 local theme_opts = symbols.theme_opts
 
 return {
-  -- Kanagawa (only theme)
   {
-    "rebelot/kanagawa.nvim",
+    "rose-pine/neovim",
+    name = "rose-pine",
     lazy = false,
     priority = 1000,
     config = function()
-      require("kanagawa").setup({
+      require("rose-pine").setup({
         commentStyle = { italic = true },
         functionStyle = { bold = true },
         keywordStyle = { bold = true },
@@ -22,7 +22,7 @@ return {
           light = "lotus",
         },
       })
-
+     vim.cmd("colorscheme rose-pine")
       background.load_preference()
       background.set_mode(background.current_index)
 
