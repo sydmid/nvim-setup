@@ -53,7 +53,6 @@ function M.setup(border)
           end,
         })
       end, { buffer = ev.buf, desc = "Go to definition" })
-      keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>", { buffer = ev.buf, desc = "Peek definition" })
       keymap("n", "ga", "<cmd>lua require('fzf-lua').lsp_finder()<CR>", { desc = "[g]o [a]ll usages" })
       keymap("n", "gr", function()
         require("core.utils.telescope_pickers").builtin("lsp_references", {
@@ -220,17 +219,11 @@ function M.setup(border)
         require("core.utils.telescope_pickers").builtin("lsp_implementations", { mode = "normal" })
       end, { buffer = ev.buf, desc = "[g]o [I]mplementation" })
       keymap("n", "gt", function()
-        vim.cmd("Lspsaga goto_type_definition")
+        vim.lsp.buf.type_definition()
         open_fold_after_jump()
       end, { buffer = ev.buf, desc = "[g]o [t]ype definition" })
 
       keymap("n", "gD", "<cmd>lua require('fzf-lua').lsp_declarations()<CR>", { desc = "[g]o [D]eclarations" })
-      keymap(
-        "n",
-        "<leader>pt",
-        "<cmd>Lspsaga peek_type_definition<CR>",
-        { buffer = ev.buf, desc = "Peek type definition" }
-      )
       keymap(
         "n",
         "<leader>ls",
@@ -248,13 +241,6 @@ function M.setup(border)
       keymap("n", "<leader>ca", function()
         require('tiny-code-action').code_action()
       end, { desc = "[c]ode [a]ction" })
-      keymap("n", "<leader>pd", "<cmd>Lspsaga peek_definition<CR>", { buffer = ev.buf, desc = "[p]eek [d]efinition" })
-      keymap(
-        "n",
-        "<leader>pt",
-        "<cmd>Lspsaga peek_type_definition<CR>",
-        { buffer = ev.buf, desc = "[p]eek [t]ype definition" }
-      )
 
       keymap({ "n", "i" }, "<D-i>", function()
         signature.show_signature_help(border)
@@ -274,10 +260,8 @@ function M.setup(border)
         })
       end, { buffer = ev.buf, desc = "Show documentation", silent = true })
 
-      -- Removed duplicate <leader>ca keymap mapped to Lspsaga code_action
-      keymap("n", "<leader>lr", "<cmd>Lspsaga rename<CR>", { buffer = ev.buf, desc = "Rename symbol (Lspsaga)" })
-      keymap("n", "<leader>lf", "<cmd>Lspsaga finder<CR>", { buffer = ev.buf, desc = "LSP finder" })
-      keymap("n", "<leader>lo", "<cmd>Lspsaga outline<CR>", { buffer = ev.buf, desc = "LSP outline" })
+      keymap("n", "<leader>lr", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename symbol" })
+      keymap("n", "<leader>lf", "<cmd>lua require('fzf-lua').lsp_finder()<CR>", { buffer = ev.buf, desc = "LSP finder" })
 
       keymap("n", "<leader>xx", function()
         local line_diags = vim.diagnostic.get(0, { lnum = vim.fn.line(".") - 1 })
