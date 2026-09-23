@@ -155,7 +155,7 @@ return {
           ["ee"] = "actions.open_external",
           ["th"] = { "actions.toggle_hidden", mode = "n" },
           ["<C-w>"] = { change_workspace_to_selection, mode = "n", desc = "Change workspace to selection" },
-          ["<D-S-d>"] = { change_workspace_to_selection, mode = "n", desc = "Change workspace to selection" },
+          ["<D-S-w>"] = { change_workspace_to_selection, mode = "n", desc = "Change workspace to selection" },
           ["<D-S-e>"] = { open_dir_in_os, mode = "n", desc = "Open directory in OS explorer" },
         },
         float = {
