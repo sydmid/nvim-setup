@@ -235,4 +235,40 @@ return {
       })
     end,
   },
+  -- Diff overlay and visualizations
+  {
+    "echasnovski/mini.diff",
+    version = "*",
+    config = function()
+      require("mini.diff").setup()
+      vim.keymap.set("n", "<leader>go", "<cmd>lua MiniDiff.toggle_overlay()<CR>", { desc = "Toggle mini.diff overlay" })
+    end,
+  },
+  -- Track and reuse file visits
+  {
+    "echasnovski/mini.visits",
+    version = "*",
+    config = function()
+      require("mini.visits").setup()
+      vim.keymap.set(
+        "n",
+        "<leader>vv",
+        "<cmd>lua MiniVisits.add_label('core')<CR>",
+        { desc = "Add 'core' label (mini.visits)" }
+      )
+      vim.keymap.set(
+        "n",
+        "<leader>vV",
+        "<cmd>lua MiniVisits.remove_label('core')<CR>",
+        { desc = "Remove 'core' label (mini.visits)" }
+      )
+      vim.keymap.set("n", "<leader>vl", "<cmd>lua MiniVisits.add_label()<CR>", { desc = "Add label (mini.visits)" })
+      vim.keymap.set(
+        "n",
+        "<leader>vL",
+        "<cmd>lua MiniVisits.remove_label()<CR>",
+        { desc = "Remove label (mini.visits)" }
+      )
+    end,
+  },
 }
