@@ -1,5 +1,4 @@
 -- Snacks.nvim - A collection of useful Neovim utilities
--- Integrated with existing which-key groups and nvim architecture
 return {
   "folke/snacks.nvim",
   priority = 1000,
