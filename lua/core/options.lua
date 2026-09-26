@@ -65,6 +65,7 @@ function M.setup()
   opt.backup = false
   opt.backupskip = "/tmp/*,$TMPDIR/*,$TMP/*,$TEMP/*,*/shm/*,/private/var/*,.vault.vim"
   opt.breakat = [[\ \t;:,!?]]
+  opt.breakindent = true
   opt.breakindentopt = "shift:2,min:20"
   opt.cmdheight = 1
   opt.cmdwinheight = 5
@@ -73,6 +74,7 @@ function M.setup()
   opt.concealcursor = "niv"
   opt.conceallevel = 0
   opt.cursorcolumn = false
+  opt.cursorlineopt = "screenline,number"
   opt.diffopt = "filler,iwhite,internal,linematch:60,algorithm:patience"
   opt.display = "lastline"
   opt.encoding = "utf-8"

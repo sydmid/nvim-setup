@@ -33,6 +33,16 @@ function M.setup()
     command = "checktime",
   })
 
+  local format_opts_group = augroup("FormatOptions", { clear = true })
+  autocmd("FileType", {
+    group = format_opts_group,
+    pattern = "*",
+    callback = function()
+      vim.opt_local.formatoptions:remove({ "c", "o" })
+    end,
+    desc = "Disable auto-commenting on new line",
+  })
+
   local folds_group = augroup("TreesitterFoldFix", { clear = true })
   autocmd("BufWinEnter", {
     group = folds_group,
