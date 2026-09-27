@@ -1,6 +1,8 @@
 return {
   -- Mini Nvim
   { "echasnovski/mini.nvim", version = false },
+  -- Icons
+  { "echasnovski/mini.icons", version = false, config = true },
   -- Comments
   {
     "echasnovski/mini.comment",
@@ -231,6 +233,106 @@ return {
 
           -- Highlight hex color strings (`#rrggbb`) using that color
           hex_color = hipatterns.gen_highlighter.hex_color(),
+        },
+      })
+    end,
+  },
+  -- Keybinding hints (replaces which-key)
+  {
+    "echasnovski/mini.clue",
+    version = "*",
+    config = function()
+      local miniclue = require("mini.clue")
+      miniclue.setup({
+        triggers = {
+          -- Leader triggers
+          { mode = "n", keys = "<Leader>" },
+          { mode = "x", keys = "<Leader>" },
+
+          -- Built-in completion
+          { mode = "i", keys = "<C-x>" },
+
+          -- `g` key
+          { mode = "n", keys = "g" },
+          { mode = "x", keys = "g" },
+
+          -- Marks
+          { mode = "n", keys = "'" },
+          { mode = "n", keys = "`" },
+          { mode = "x", keys = "'" },
+          { mode = "x", keys = "`" },
+
+          -- Registers
+          { mode = "n", keys = '"' },
+          { mode = "x", keys = '"' },
+          { mode = "i", keys = "<C-r>" },
+          { mode = "c", keys = "<C-r>" },
+
+          -- Window commands
+          { mode = "n", keys = "<C-w>" },
+
+          -- `z` key
+          { mode = "n", keys = "z" },
+          { mode = "x", keys = "z" },
+        },
+
+        window = {
+          delay = 500,
+          config = {
+            width = "auto",
+            border = "rounded",
+          },
+        },
+
+        clues = {
+          -- Enhance this by adding descriptions for <Leader> mapping groups
+          { mode = "n", keys = "<Leader>a", desc = "+AI" },
+          { mode = "x", keys = "<Leader>a", desc = "+AI" },
+          { mode = "n", keys = "<Leader>d", desc = "+Debug" },
+          { mode = "x", keys = "<Leader>d", desc = "+Debug" },
+          { mode = "n", keys = "<Leader>e", desc = "+Error Lens/Explorer" },
+          { mode = "x", keys = "<Leader>e", desc = "+Error Lens/Explorer" },
+          { mode = "n", keys = "<Leader>b", desc = "+Buffer" },
+          { mode = "x", keys = "<Leader>b", desc = "+Buffer" },
+          { mode = "n", keys = "<Leader>c", desc = "+Context/Code-Actions" },
+          { mode = "x", keys = "<Leader>c", desc = "+Context/Code-Actions" },
+          { mode = "n", keys = "<Leader>f", desc = "+File/Find" },
+          { mode = "x", keys = "<Leader>f", desc = "+File/Find" },
+          { mode = "n", keys = "<Leader>g", desc = "+Git/Goto" },
+          { mode = "x", keys = "<Leader>g", desc = "+Git/Goto" },
+          { mode = "n", keys = "<Leader>gc", desc = "+Conflicts" },
+          { mode = "x", keys = "<Leader>gc", desc = "+Conflicts" },
+          { mode = "n", keys = "<Leader>h", desc = "+Hunks/Git-Stage" },
+          { mode = "x", keys = "<Leader>h", desc = "+Hunks/Git-Stage" },
+          { mode = "n", keys = "<Leader>j", desc = "+Jump" },
+          { mode = "x", keys = "<Leader>j", desc = "+Jump" },
+          { mode = "n", keys = "<Leader>k", desc = "+Jump/Flash" },
+          { mode = "x", keys = "<Leader>k", desc = "+Jump/Flash" },
+          { mode = "n", keys = "<Leader>l", desc = "+LSP" },
+          { mode = "x", keys = "<Leader>l", desc = "+LSP" },
+          { mode = "n", keys = "<Leader>p", desc = "+Peek/Preview" },
+          { mode = "x", keys = "<Leader>p", desc = "+Peek/Preview" },
+          { mode = "n", keys = "<Leader>r", desc = "+Rename/Refactor" },
+          { mode = "x", keys = "<Leader>r", desc = "+Rename/Refactor" },
+          { mode = "n", keys = "<Leader>s", desc = "+Snacks" },
+          { mode = "x", keys = "<Leader>s", desc = "+Snacks" },
+          { mode = "n", keys = "<Leader>t", desc = "+Toggles" },
+          { mode = "x", keys = "<Leader>t", desc = "+Toggles" },
+          { mode = "n", keys = "<Leader>u", desc = "+Test/Utils" },
+          { mode = "x", keys = "<Leader>u", desc = "+Test/Utils" },
+          { mode = "n", keys = "<Leader>v", desc = "+Visual/View" },
+          { mode = "x", keys = "<Leader>v", desc = "+Visual/View" },
+          { mode = "n", keys = "<Leader>x", desc = "+Diagnostics/Trouble" },
+          { mode = "x", keys = "<Leader>x", desc = "+Diagnostics/Trouble" },
+          { mode = "n", keys = "<Leader>z", desc = "+Fold" },
+          { mode = "x", keys = "<Leader>z", desc = "+Fold" },
+
+          miniclue.gen_clues.builtin_completion(),
+          miniclue.gen_clues.g(),
+          miniclue.gen_clues.marks(),
+          miniclue.gen_clues.registers(),
+          miniclue.gen_clues.windows(),
+          miniclue.gen_clues.z(),
         },
       })
     end,

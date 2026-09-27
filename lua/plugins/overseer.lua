@@ -4,7 +4,6 @@ return {
     "stevearc/overseer.nvim",
     dependencies = {
       "nvim-telescope/telescope.nvim",
-      "folke/which-key.nvim",
     },
     event = "VeryLazy",
     opts = {
