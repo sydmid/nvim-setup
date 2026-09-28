@@ -147,6 +147,14 @@ return {
       end, { desc = "Split arguments" })
     end,
   },
+  -- Extra mini functionality
+  {
+    "echasnovski/mini.extra",
+    version = "*",
+    config = function()
+      require("mini.extra").setup()
+    end,
+  },
   -- Better textobjects
   {
     "echasnovski/mini.ai",
@@ -155,11 +163,7 @@ return {
       local ai = require("mini.ai")
       ai.setup({
         custom_textobjects = {
-          B = function()
-            local from = { line = 1, col = 1 }
-            local to = { line = vim.fn.line("$"), col = math.max(vim.fn.getline("$"):len(), 1) }
-            return { from = from, to = to }
-          end,
+          B = require("mini.extra").gen_ai_spec.buffer(),
           F = ai.gen_spec.treesitter({ a = "@function.outer", i = "@function.inner" }),
           o = ai.gen_spec.treesitter({ a = "@block.outer", i = "@block.inner" }),
         },
