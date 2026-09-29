@@ -43,7 +43,6 @@ local function setup_bash(lspconfig, capabilities)
 end
 
 local function setup_python(lspconfig, capabilities)
-
   if not capabilities.textDocument then
     capabilities.textDocument = {}
   end
@@ -94,7 +93,6 @@ local function setup_ruff(lspconfig, capabilities)
 end
 
 local function setup_rust(lspconfig, capabilities)
-
   if not capabilities.textDocument then
     capabilities.textDocument = {}
   end

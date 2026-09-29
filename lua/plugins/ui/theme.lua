@@ -17,7 +17,7 @@ return {
         functionStyle = { bold = true },
         keywordStyle = { bold = true },
         statementStyle = { bold = true },
-        variant = "auto",  -- auto, main, moon, or dawn
+        variant = "auto", -- auto, main, moon, or dawn
         dark_variant = "main", -- main, moon, or dawn
         dim_inactive_windows = false,
         extend_background_behind_borders = true,
@@ -25,7 +25,7 @@ return {
         enable = {
           terminal = true,
           legacy_highlights = true, -- Improve compatibility for previous versions of Neovim
-          migrations = true,      -- Handle deprecated options automatically
+          migrations = true, -- Handle deprecated options automatically
         },
 
         styles = {
@@ -122,12 +122,12 @@ return {
             left_bottom = "╰",
             right_arrow = ">",
           },
-          textobject = "ic",           -- Inner chunk textobject
+          textobject = "ic", -- Inner chunk textobject
           max_file_size = 1024 * 1024, -- 1MB max file size
           error_sign = true,
           -- Animation settings for smooth effects
           duration = 200, -- Animation duration in ms
-          delay = 300,    -- Animation delay in ms
+          delay = 300, -- Animation delay in ms
           exclude_filetypes = {
             aerial = true,
             dashboard = true,

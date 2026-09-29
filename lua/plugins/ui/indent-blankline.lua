@@ -2,9 +2,11 @@ return {
   {
     "lukas-reineke/indent-blankline.nvim",
     main = "ibl",
-    opts = {},
-    config = function()
-      require("ibl").setup()
+    opts = {
+      scope = { enabled = false }, -- disabled in favor of mini.indentscope
+    },
+    config = function(_, opts)
+      require("ibl").setup(opts)
     end,
   },
 }
