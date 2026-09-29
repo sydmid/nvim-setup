@@ -239,7 +239,7 @@ function M.setup(border)
       keymap("n", "<leader>rn", vim.lsp.buf.rename, { desc = "[r]e [n]ame symbol under cursor" })
       keymap("n", "<F2>", vim.lsp.buf.rename, { desc = "Rename symbol under cursor" })
       keymap("n", "<leader>ca", function()
-        require('tiny-code-action').code_action()
+        require("tiny-code-action").code_action()
       end, { desc = "[c]ode [a]ction" })
 
       keymap({ "n", "i" }, "<D-i>", function()
@@ -261,7 +261,12 @@ function M.setup(border)
       end, { buffer = ev.buf, desc = "Show documentation", silent = true })
 
       keymap("n", "<leader>lr", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename symbol" })
-      keymap("n", "<leader>lf", "<cmd>lua require('fzf-lua').lsp_finder()<CR>", { buffer = ev.buf, desc = "LSP finder" })
+      keymap(
+        "n",
+        "<leader>lf",
+        "<cmd>lua require('fzf-lua').lsp_finder()<CR>",
+        { buffer = ev.buf, desc = "LSP finder" }
+      )
 
       keymap("n", "<leader>xx", function()
         local line_diags = vim.diagnostic.get(0, { lnum = vim.fn.line(".") - 1 })
