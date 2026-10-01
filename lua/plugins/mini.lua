@@ -284,6 +284,10 @@ return {
           { mode = "n", keys = "<Leader>" },
           { mode = "x", keys = "<Leader>" },
 
+          { mode = "n", keys = "\\" },
+          { mode = { "n", "x" }, keys = "[" },
+          { mode = { "n", "x" }, keys = "]" },
+
           -- Built-in completion
           { mode = "i", keys = "<C-x>" },
 
@@ -305,6 +309,9 @@ return {
 
           -- Window commands
           { mode = "n", keys = "<C-w>" },
+
+          -- `s` key
+          { mode = { "n", "x" }, keys = "s" },
 
           -- `z` key
           { mode = "n", keys = "z" },
@@ -366,7 +373,8 @@ return {
           miniclue.gen_clues.g(),
           miniclue.gen_clues.marks(),
           miniclue.gen_clues.registers(),
-          miniclue.gen_clues.windows(),
+          miniclue.gen_clues.square_brackets(),
+          miniclue.gen_clues.windows({ submode_resize = true }),
           miniclue.gen_clues.z(),
         },
       })
