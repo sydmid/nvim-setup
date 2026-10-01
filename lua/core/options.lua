@@ -66,7 +66,7 @@ function M.setup()
   opt.backupskip = "/tmp/*,$TMPDIR/*,$TMP/*,$TEMP/*,*/shm/*,/private/var/*,.vault.vim"
   opt.breakat = [[\ \t;:,!?]]
   opt.breakindent = true
-  opt.breakindentopt = "shift:2,min:20"
+  opt.breakindentopt = "list:-1"
   opt.cmdheight = 1
   opt.cmdwinheight = 5
   opt.complete = ".,w,b,k,kspell"
@@ -81,7 +81,7 @@ function M.setup()
   opt.equalalways = false
   opt.errorbells = true
   opt.fileformats = "unix,mac,dos"
-  opt.formatoptions = "1jcroql"
+  opt.formatoptions = "rqnl1j"
   opt.grepformat = "%f:%l:%c:%m"
   opt.grepprg = "rg --hidden --vimgrep --smart-case --"
   opt.helpheight = 12
@@ -89,6 +89,7 @@ function M.setup()
   opt.history = 2000
   opt.inccommand = "nosplit"
   opt.infercase = true
+  opt.formatlistpat = [[^\s*[0-9\-\+\*]\+[\.\)]*\s\+]]
   opt.jumpoptions = "stack"
   opt.laststatus = 3
   opt.linebreak = true
@@ -97,7 +98,14 @@ function M.setup()
   opt.magic = true
   opt.mousescroll = "ver:3,hor:6"
   opt.pumblend = 0
-  opt.pumheight = 15
+  opt.pumheight = 10
+  if vim.fn.has("nvim-0.12") == 1 then
+    pcall(function()
+      opt.pummaxwidth = 100
+      opt.pumborder = "bold"
+      opt.completetimeout = 100
+    end)
+  end
   opt.redrawtime = 1500
   opt.ruler = true
   opt.sessionoptions = "blank,buffers,curdir,help,tabpages,winsize,winpos,terminal,localoptions"
@@ -124,6 +132,11 @@ function M.setup()
     ".git,.hg,.svn,*.pyc,*.o,*.out,*.jpg,*.jpeg,*.png,*.gif,*.zip,**/tmp/**,*.DS_Store,**/node_modules/**,**/bower_modules/**"
   opt.wildignorecase = true
   opt.winblend = 0
+  if vim.fn.has("nvim-0.11") == 1 then
+    pcall(function()
+      opt.winborder = "bold"
+    end)
+  end
   opt.winminwidth = 10
   opt.winwidth = 30
   opt.wrapscan = true
