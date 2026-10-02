@@ -17,7 +17,6 @@ return {
         },
         bundled_plugin_cheatsheets = {
           enabled = {
-            "auto-session",
             "goto-preview",
             "octo.nvim",
             "telescope.nvim",
@@ -354,6 +353,8 @@ return {
   {
     "j-morano/buffer_manager.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
+    lazy = true,
+    keys = { { "<leader>bM", "<cmd>lua require(\"buffer_manager.ui\").toggle_quick_menu()<CR>", desc = "Buffer Manager" } },
     config = function()
       local opts = { noremap = true, silent = true }
       local ui = require("buffer_manager.ui")
@@ -529,27 +530,6 @@ return {
   -- sesible
   {
     "tpope/vim-sensible",
-  },
-  -- auto session
-  {
-    "rmagatti/auto-session",
-    lazy = false,
-
-    ---enables autocomplete for opts
-    ---@module "auto-session"
-    ---@type AutoSession.Config
-    opts = {
-      log_level = "error",
-      -- Saving / restoring
-      auto_save = true,
-      cwd_change_handling = true,
-      -- Filtering
-      suppressed_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
-      allowed_dirs = nil, -- Allow session restore/create in certain directories
-      auto_session_enable_last_session = false,
-      session_options = { "buffers", "curdir", "winsize" }, -- <--- important
-      -- log_level = 'debug',
-    },
   },
   -- marks
   {

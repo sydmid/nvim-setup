@@ -416,4 +416,39 @@ return {
       )
     end,
   },
+
+  -- Session management
+  {
+    "echasnovski/mini.sessions",
+    version = "*",
+    config = function()
+      local mini_sessions = require("mini.sessions")
+      mini_sessions.setup({
+        autowrite = true,
+      })
+
+      -- Helper to read current directory session
+      vim.keymap.set("n", "<leader>qs", function()
+        mini_sessions.read()
+      end, { desc = "Restore Session" })
+
+      vim.keymap.set("n", "<leader>ql", function()
+        local cwd = vim.fn.getcwd()
+        local session_name = cwd:gsub("/", "%%")
+        mini_sessions.write(session_name)
+      end, { desc = "Save Session" })
+    end,
+  },
+  -- Miscellaneous standard utilities
+  {
+    "echasnovski/mini.misc",
+    version = "*",
+    config = function()
+      local misc = require("mini.misc")
+      misc.setup({ make_global = { 'put', 'put_text', 'stat_summary', 'bench_time' } })
+      misc.setup_auto_root()
+      misc.setup_restore_cursor()
+      misc.setup_termbg_sync()
+    end,
+  },
 }
