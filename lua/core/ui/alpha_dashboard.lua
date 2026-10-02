@@ -5,7 +5,7 @@ function M.get_projects_section()
 
   -- ── Helper: build the "Recent Projects" section ──────────────
   local function get_project_buttons()
-    local session_dir = vim.fn.stdpath("data") .. "/sessions"
+    local session_dir = vim.fn.stdpath("data") .. "/session"
     local buttons = {}
 
     if vim.fn.isdirectory(session_dir) == 0 then
@@ -21,7 +21,7 @@ function M.get_projects_section()
         if not name then
           break
         end
-        if (typ == "file") and name:match("%.vim$") and name ~= ".vim" then
+        if (typ == "file") then
           local full = session_dir .. "/" .. name
           local stat = vim.loop.fs_stat(full)
           if stat then
@@ -36,10 +36,7 @@ function M.get_projects_section()
 
     -- Decode the URL-encoded path to a human-readable name
     local function decode(encoded)
-      local decoded = encoded:gsub("%.vim$", "")
-      decoded = decoded:gsub("%%(%x%x)", function(hex)
-        return string.char(tonumber(hex, 16))
-      end)
+      local decoded = encoded:gsub("%%", "/")
       return decoded
     end
 
@@ -54,8 +51,9 @@ function M.get_projects_section()
 
       -- Build restore command: cd to the decoded path, then restore the session
       local restore_cmd = string.format(
-        "<cmd>cd %s | lua require('auto-session').restore_session()<CR>",
-        vim.fn.fnameescape(project_path)
+        "<cmd>cd %s | lua require('mini.sessions').read('%s')<CR>",
+        vim.fn.fnameescape(project_path),
+        s.name
       )
 
       local btn = dashboard.button(shortcut, "  " .. display_name .. "  (" .. project_path .. ")", restore_cmd)
