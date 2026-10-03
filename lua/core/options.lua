@@ -8,7 +8,7 @@ function M.setup()
   vim.g.mapleader = " "
   vim.g.maplocalleader = "\\"
 
-  opt.iskeyword:remove("-")
+  opt.iskeyword:append("-")
   opt.fixendofline = false
   opt.endofline = true
   opt.binary = false
