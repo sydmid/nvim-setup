@@ -14,7 +14,6 @@ local server_names = {
   "ruff",
   "eslint",
   "bashls",
-  "roslyn",
   "gopls",
   "rust_analyzer",
   "taplo",
@@ -129,20 +128,6 @@ local function setup_toml(lspconfig, capabilities)
     capabilities = capabilities,
     filetypes = { "toml" },
     root_dir = lspconfig.util.root_pattern("*.toml", ".git"),
-  })
-end
-
-local function setup_roslyn(lspconfig, capabilities)
-  lspconfig.roslyn.setup({
-    capabilities = capabilities,
-    cmd = { "roslyn" },
-    filetypes = { "cs", "razor" },
-    settings = {
-      ["csharp|background_analysis"] = {
-        dotnet_analyzer_diagnostics_scope = "openFiles",
-        dotnet_compiler_diagnostics_scope = "openFiles",
-      },
-    },
   })
 end
 
@@ -261,7 +246,6 @@ function M.setup(lspconfig, capabilities)
     gopls = setup_go,
     ts_ls = setup_typescript,
     clangd = setup_clang,
-    roslyn = setup_roslyn,
   }
 
   for _, server_name in ipairs(server_names) do
