@@ -250,6 +250,9 @@ return {
     version = "*",
     config = function()
       require("mini.operators").setup()
+
+      vim.keymap.set("n", "(", "<Cmd>normal gxiagxila<CR>", { desc = "Move arg left" })
+      vim.keymap.set("n", ")", "<Cmd>normal gxiagxina<CR>", { desc = "Move arg right" })
     end,
   },
   -- Highlight patterns (TODOs, colors, etc.)
