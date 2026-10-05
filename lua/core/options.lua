@@ -126,7 +126,7 @@ function M.setup()
   opt.showcmd = false
   opt.showtabline = 2
   opt.smarttab = true
-  opt.spelllang = "en,uk,ru"
+  opt.spelllang = "en"
   opt.spelloptions = "camel"
   pcall(function()
     opt.smoothscroll = true
