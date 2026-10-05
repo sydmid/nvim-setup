@@ -69,8 +69,13 @@ function M.setup()
   opt.breakindentopt = "list:-1"
   opt.cmdheight = 1
   opt.cmdwinheight = 5
-  opt.complete = ".,w,b,k,kspell"
+  opt.complete = ".,w,b,kspell"
   opt.completeopt = "menuone,noselect"
+  if vim.fn.has("nvim-0.11") == 1 then
+    pcall(function()
+      opt.completeopt = "menuone,noselect,fuzzy,nosort"
+    end)
+  end
   opt.concealcursor = "niv"
   opt.conceallevel = 0
   opt.cursorcolumn = false
@@ -94,9 +99,10 @@ function M.setup()
   opt.laststatus = 3
   opt.linebreak = true
   opt.list = false
-  opt.listchars = "tab:→ ,nbsp:␣,trail:·,extends:→,precedes:←,space:·"
+  opt.fillchars = "eob: ,fold:╌"
+  opt.listchars = "extends:…,nbsp:␣,precedes:…,tab:> "
   opt.magic = true
-  opt.mousescroll = "ver:3,hor:6"
+  opt.mousescroll = "ver:25,hor:6"
   opt.pumblend = 0
   opt.pumheight = 10
   if vim.fn.has("nvim-0.12") == 1 then
@@ -109,12 +115,19 @@ function M.setup()
   opt.redrawtime = 1500
   opt.ruler = true
   opt.sessionoptions = "blank,buffers,curdir,help,tabpages,winsize,winpos,terminal,localoptions"
-  opt.shada = "!,'500,<50,@100,s10,h"
-  opt.shortmess = "aoOTIcF"
+  opt.shada = "'100,<50,s10,:1000,/100,@100,h"
+  opt.shortmess = "CFOSWaco"
+  if vim.fn.has("nvim-0.13") == 1 then
+    pcall(function()
+      opt.shortmess:append("u")
+    end)
+  end
   opt.showbreak = "↳  "
   opt.showcmd = false
   opt.showtabline = 2
   opt.smarttab = true
+  opt.spelllang = "en"
+  opt.spelloptions = "camel"
   pcall(function()
     opt.smoothscroll = true
   end)
