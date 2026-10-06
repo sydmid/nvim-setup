@@ -454,4 +454,32 @@ return {
       misc.setup_termbg_sync()
     end,
   },
+  -- Common configuration presets
+  {
+    "echasnovski/mini.basics",
+    version = "*",
+    config = function()
+      require("mini.basics").setup({
+        options = { basic = false },
+        mappings = { windows = true, move_with_alt = true },
+        autocommands = { relnum_in_visual_mode = true },
+      })
+    end,
+  },
+  -- Git integration
+  {
+    "echasnovski/mini.git",
+    version = "*",
+    config = function()
+      require("mini.git").setup()
+    end,
+  },
+  -- Better input UI
+  {
+    "echasnovski/mini.input",
+    version = "*",
+    config = function()
+      require("mini.input").setup()
+    end,
+  },
 }
