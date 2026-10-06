@@ -2,7 +2,9 @@ return {
   "p00f/clangd_extensions.nvim",
   dependencies = { "mortepau/codicons.nvim" },
   lazy = true,
-  config = function() end,
+  config = function(_, opts)
+    require("clangd_extensions").setup(opts)
+  end,
   opts = {
     inlay_hints = {
       inline = false,

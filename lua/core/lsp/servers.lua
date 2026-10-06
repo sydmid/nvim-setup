@@ -18,6 +18,7 @@ local server_names = {
   "rust_analyzer",
   "taplo",
   "clangd",
+  "roslyn",
 }
 
 local function setup_lua(lspconfig, capabilities)
@@ -203,7 +204,10 @@ local function setup_typescript(lspconfig, capabilities)
   })
 end
 
-local function setup_clang(lspconfig)
+local function setup_clang(lspconfig, capabilities)
+  -- Merge custom capabilities with the default ones
+  local clangd_capabilities = vim.tbl_deep_extend("force", capabilities or {}, { offsetEncoding = { "utf-16" } })
+  
   lspconfig.clangd.setup({
     keys = {
       { "<leader>ch", "<cmd>ClangdSwitchSourceHeader<cr>", desc = "Switch Source/Header (C/C++)" },
@@ -221,7 +225,7 @@ local function setup_clang(lspconfig)
         fname
       )
     end,
-    capabilities = { offsetEncoding = { "utf-16" } },
+    capabilities = clangd_capabilities,
     cmd = {
       "clangd",
       "--background-index",
@@ -235,6 +239,11 @@ local function setup_clang(lspconfig)
   })
 end
 
+local function setup_roslyn(lspconfig, capabilities)
+  -- Roslyn is handled by the roslyn.nvim plugin, but we can add additional config here if needed
+  -- The plugin sets up the LSP automatically via its own config
+end
+
 function M.setup(lspconfig, capabilities)
   local setup_by_name = {
     lua_ls = setup_lua,
@@ -246,6 +255,7 @@ function M.setup(lspconfig, capabilities)
     gopls = setup_go,
     ts_ls = setup_typescript,
     clangd = setup_clang,
+    roslyn = setup_roslyn,
   }
 
   for _, server_name in ipairs(server_names) do

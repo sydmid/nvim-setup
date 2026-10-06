@@ -466,20 +466,4 @@ return {
       })
     end,
   },
-  -- Git integration
-  {
-    "echasnovski/mini.git",
-    version = "*",
-    config = function()
-      require("mini.git").setup()
-    end,
-  },
-  -- Better input UI
-  {
-    "echasnovski/mini.input",
-    version = "*",
-    config = function()
-      require("mini.input").setup()
-    end,
-  },
-}
+  }

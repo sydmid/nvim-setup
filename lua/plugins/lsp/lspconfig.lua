@@ -59,6 +59,70 @@ return {
 
       local lspconfig = require("lspconfig")
       local mason_lspconfig = require("mason-lspconfig")
+      local mason_tool_installer = require("mason-tool-installer")
+
+      -- Setup mason-lspconfig for automatic server setup
+      mason_lspconfig.setup({
+        ensure_installed = {
+          "ts_ls",
+          "html",
+          "cssls",
+          "tailwindcss",
+          "svelte",
+          "lua_ls",
+          "graphql",
+          "emmet_ls",
+          "prismals",
+          "pyright",
+          "ruff",
+          "eslint",
+          "bashls",
+          "gopls",
+          "rust_analyzer",
+          "taplo",
+          "clangd",
+        },
+        automatic_installation = true,
+      })
+
+      -- Setup mason-tool-installer for non-LSP tools
+      mason_tool_installer.setup({
+        ensure_installed = {
+          "lua-language-server",
+          "roslyn",
+          "rzls",
+          "netcoredbg",
+          "prettier",
+          "stylua",
+          "isort",
+          "black",
+          "ruff",
+          "mypy",
+          "debugpy",
+          "pylint",
+          "eslint_d",
+          "prettier",
+          "typescript-language-server",
+          "js-debug-adapter",
+          "shfmt",
+          "shellcheck",
+          "csharpier",
+          "xmlformatter",
+          "gopls",
+          "gofumpt",
+          "golangci-lint",
+          "delve",
+          "rustfmt",
+          "rust-analyzer",
+          "codelldb",
+          "taplo",
+          "clangd",
+          "clang-format",
+        },
+        auto_update = false,
+        run_on_start = true,
+      })
+
       attach.setup(appearance.retro_border)
       servers.setup(lspconfig, capabilities)
 
