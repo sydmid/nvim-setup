@@ -543,4 +543,11 @@ return {
     event = "VeryLazy",
     opts = {},
   },
+  -- Patterns (Regex & Lua Pattern Explainer by OXY2DEV)
+  {
+    "OXY2DEV/patterns.nvim",
+    cmd = "Patterns",
+    event = "VeryLazy",
+    opts = {},
+  },
 }
