@@ -184,9 +184,18 @@ local function setup_typescript(lspconfig, capabilities)
             local latest_version = nil
             while true do
               local name, typ = vim.loop.fs_scandir_next(handle)
-              if not name then break end
+              if not name then
+                break
+              end
               if typ == "directory" and name:match("^v" .. default_version .. "%.") then
-                if not latest_version or vim.version.cmp({name:match("v(%d+)%.(%d+)%.(%d+)")}, {latest_version:match("v(%d+)%.(%d+)%.(%d+)")}) > 0 then
+                if
+                  not latest_version
+                  or vim.version.cmp(
+                      { name:match("v(%d+)%.(%d+)%.(%d+)") },
+                      { latest_version:match("v(%d+)%.(%d+)%.(%d+)") }
+                    )
+                    > 0
+                then
                   latest_version = name
                 end
               end
@@ -241,7 +250,7 @@ local function setup_typescript(lspconfig, capabilities)
 
   local node_path = find_node_path()
   local ts_server = vim.fn.stdpath("data") .. "/mason/bin/typescript-language-server"
-  
+
   local cmd = { ts_server, "--stdio" }
   if node_path then
     cmd = { node_path, ts_server, "--stdio" }
@@ -295,7 +304,7 @@ end
 local function setup_clang(lspconfig, capabilities)
   -- Merge custom capabilities with the default ones
   local clangd_capabilities = vim.tbl_deep_extend("force", capabilities or {}, { offsetEncoding = { "utf-16" } })
-  
+
   lspconfig.clangd.setup({
     keys = {
       { "<leader>ch", "<cmd>ClangdSwitchSourceHeader<cr>", desc = "Switch Source/Header (C/C++)" },
