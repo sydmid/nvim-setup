@@ -354,7 +354,9 @@ return {
     "j-morano/buffer_manager.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
     lazy = true,
-    keys = { { "<leader>bM", "<cmd>lua require(\"buffer_manager.ui\").toggle_quick_menu()<CR>", desc = "Buffer Manager" } },
+    keys = {
+      { "<leader>bM", '<cmd>lua require("buffer_manager.ui").toggle_quick_menu()<CR>', desc = "Buffer Manager" },
+    },
     config = function()
       local opts = { noremap = true, silent = true }
       local ui = require("buffer_manager.ui")

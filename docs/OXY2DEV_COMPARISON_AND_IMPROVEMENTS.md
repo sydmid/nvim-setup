@@ -7,10 +7,10 @@
 
 | Dimension | Our Neovim Configuration | OXY2DEV's Configuration (`OXY2DEV/nvim`) |
 | :--- | :--- | :--- |
-| **Primary Goal** | Feature-rich, highly robust, IDE-like Neovim setup targeting Neovim 0.11+ with VSCode/IntelliJ aesthetic polish and multi-language support. | Lightweight, highly customized general-purpose setup with custom Lua scripts and self-authored plugins. |
-| **Plugin Strategy** | Curated ecosystem of top-tier community plugins (`snacks.nvim`, `mini.nvim`, `fzf-lua`, `noice.nvim`, `lualine.nvim`, `nvim-cmp`). | Heavy reliance on custom in-house plugins (`OXY2DEV/markview.nvim`, `OXY2DEV/patterns.nvim`, `OXY2DEV/bars.nvim`, `OXY2DEV/ui.nvim`) and custom standalone Lua scripts (`lua/scripts/`). |
-| **Structure** | Clean modular separation (`lua/core/` for options, keymaps, commands, autocmds, utils; `lua/plugins/` categorized by feature). | Single-file script modules (`lua/scripts/`) loaded directly during `init.lua` before lazy loading plugin specifications. |
-| **Language Coverage** | Comprehensive LSP, DAP, and formatting configuration for C/C++, C#, Python, Rust, Lua, CMake, Web development, Arabic/Persian language support. | Focused language support (Lua, JS, Python) with custom Tree-sitter parsers (`tree-sitter-vhs`, `tree-sitter-lua_patterns`, `tree-sitter-qf`). |
+| **Primary Goal** | Feature-rich, highly robust, IDE-like Neovim setup targeting Neovim 0.11+ with VSCode/IntelliJ aesthetic polish and multi-language support. | Lightweight, highly customized general-purpose setup optimized for Android (Termux) & MacOS with bespoke custom plugins and single-file Lua scripts. |
+| **Plugin Strategy** | Curated ecosystem of top-tier community plugins (`snacks.nvim`, `mini.nvim`, `fzf-lua`, `noice.nvim`, `lualine.nvim`, `nvim-cmp`). Strict exception: `nvim-tree.lua` over `mini.files`. | Heavy reliance on self-authored custom plugins (`OXY2DEV/markview.nvim`, `OXY2DEV/patterns.nvim`, `OXY2DEV/bars.nvim`, `OXY2DEV/ui.nvim`, `foldtext.nvim`) and custom standalone Lua scripts (`lua/scripts/`). |
+| **Architecture** | Clean modular separation (`lua/core/` for options, keymaps, commands, autocmds, utils; `lua/plugins/` categorized by feature). | Single-file script modules (`lua/scripts/`) loaded directly during `init.lua` prior to lazy loading plugin specifications (`lua/custom_plugins/` & `lua/plugins/`). |
+| **Language Coverage** | Comprehensive LSP, DAP, and formatting configuration for C/C++, C#, Python, Rust, Lua, CMake, Web development, and Arabic/Persian language support. | Focused language support (Lua, JS, Python) with custom Tree-sitter parsers (`tree-sitter-vhs`, `tree-sitter-lua_patterns`, `tree-sitter-qf`). |
 
 ---
 
@@ -18,25 +18,27 @@
 
 ### A. Custom UI & Visual Polish
 * **OXY2DEV**:
-  - Uses `OXY2DEV/ui.nvim` and custom scripts for floating cmdline, popup menu, and formatted messages.
+  - Custom UI framework (`OXY2DEV/ui.nvim`) providing floating cmdline, pop-up menu, and formatted messages.
   - Custom statusline, winbar, statuscolumn, and tabline via `OXY2DEV/bars.nvim`.
-  - Animated cursor motion beacon (`beacon.lua`) for indicating cursor location on jumps (`gg`, `G`, etc.).
+  - Animated cursor beacon (`lua/scripts/beacon.lua`) for indicating cursor position on jumps (`gg`, `G`, etc.).
   - Fold text formatting via `OXY2DEV/foldtext.nvim`.
 * **Our Setup**:
   - `noice.nvim` for floating command line, messages, and popup menu integration.
   - `lualine.nvim` and `bufferline.nvim` for clean statusline and buffer tabs.
   - `mini.indentscope`, `indent-blankline.nvim`, `rainbow-delimiters.nvim`, and `smear-cursor.nvim` for visual scope and animated cursor trail.
-  - Added custom `beacon.lua` (`:Beacon`) utility in `lua/core/utils/beacon.lua` inspired by OXY2DEV.
+  - Animated position beacon (`lua/core/utils/beacon.lua` & `:Beacon` command) inspired by OXY2DEV.
 
 ### B. Diagnostic & LSP Handling
 * **OXY2DEV**:
-  - Custom floating diagnostic preview (`diagnostics.lua`) with quadrant-aware popup positioning and custom statuscolumn icons.
-  - Custom LSP hover handler (`lsp_hover.lua`).
+  - Custom floating diagnostic preview (`lua/scripts/diagnostics.lua`) with quadrant-aware popup positioning and custom statuscolumn icons.
+  - Custom LSP hover handler (`lua/scripts/lsp_hover.lua`).
+  - Supports both `nvim-cmp` and `blink.cmp`.
 * **Our Setup**:
   - Native Neovim 0.11+ LSP client configuration utilizing `vim.lsp.config`, native inlay hints, and native semantic tokens.
   - `chrisgrieser/nvim-lsp-endhints` for end-of-line inlay hints.
   - `rachartier/tiny-code-action.nvim` for beautiful floating code action popups.
   - `folke/trouble.nvim` for comprehensive diagnostics and references overview.
+  - `nvim-cmp` with `copilot-cmp` and `luasnip` for VSCode-like completion.
 
 ### C. Tree-Sitter & Markdown / Pattern Enhancement
 * **OXY2DEV**:
@@ -50,15 +52,16 @@
 
 ### D. Quickfix & Terminal Sync
 * **OXY2DEV**:
-  - Custom `quickfix.lua` using `quickfixtextfunc` with filetype detection, path shortening, Tree-sitter `qf` highlighting, and custom diagnostic signs.
+  - Custom `lua/scripts/quickfix.lua` using `quickfixtextfunc` with filetype detection, path shortening, Tree-sitter `qf` highlighting, and custom diagnostic signs.
   - `color_sync.lua`: Dynamically syncs Neovim's colorscheme with the terminal emulator's background/foreground using OSC control codes.
 * **Our Setup**:
   - Terminal background sync enabled via `mini.misc`'s `setup_termbg_sync()`.
+  - Quickfix path shortening and clean list formatting helper (`lua/core/utils/quickfix.lua`) configured via `vim.o.quickfixtextfunc`.
   - Quickfix list navigation powered by native quickfix, `trouble.nvim`, and `fzf-lua` quickfix pickers.
 
 ---
 
-## 3. Inspired Improvements Implemented in This Update
+## 3. Inspired Improvements Implemented
 
 1. **Integrated `OXY2DEV/patterns.nvim` (`lua/plugins/editor.lua`)**:
    - Enables real-time pattern breakdown and explanations for Regex and Lua pattern strings via the `:Patterns` command and hover windows.
@@ -67,6 +70,9 @@
    - Implemented a custom gradient beacon animator in `lua/core/utils/beacon.lua` to highlight cursor position after long movements or manual inspection.
    - Exposed `:Beacon` command in `lua/core/commands.lua` to trigger or toggle cursor beacon visual cues.
 
+3. **Custom Quickfix Formatting (`lua/core/utils/quickfix.lua` & `lua/core/options.lua`)**:
+   - Added path-shortening logic (e.g., `lua/core/utils/quickfix.lua` -> `l/c/u/quickfix.lua`) and line/col range formatting for quickfix lists via `vim.o.quickfixtextfunc`.
+
 ---
 
 ## 4. Actionable Future Recommendations
@@ -74,8 +80,5 @@
 1. **Evaluate `OXY2DEV/markview.nvim` alongside `render-markdown.nvim`**:
    - `markview.nvim` offers extensive callout styles, inline HTML/LaTeX support, and custom checkboxes. Users working heavily with Markdown documentation or technical notes can test switching `render-markdown` with `markview`.
 
-2. **Tree-Sitter Quickfix Formatting**:
-   - Consider setting a custom `vim.o.quickfixtextfunc` in `lua/core/options.lua` or `lua/core/autocmds.lua` to shorten long paths and show filetype icons directly in quickfix buffers.
-
-3. **Explore `OXY2DEV/helpview.nvim`**:
+2. **Explore `OXY2DEV/helpview.nvim`**:
    - Adds visual decorations, badges, and inline styling to standard Vim help documentation buffers (`:help`).
