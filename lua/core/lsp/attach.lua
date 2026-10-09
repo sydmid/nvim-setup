@@ -2,6 +2,10 @@ local M = {}
 
 function M.setup(border)
   local signature = require("core.lsp.signature")
+  local hover = require("core.lsp.hover")
+
+  -- Setup the fancy hover (does its own LspAttach keymap)
+  hover.setup()
 
   vim.api.nvim_create_autocmd("LspAttach", {
     group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -251,14 +255,6 @@ function M.setup(border)
       keymap("i", "<C-j>", function()
         signature.next_or_complete(border)
       end, { buffer = ev.buf, desc = "Next signature overload or completion", silent = true })
-      keymap("n", "gh", function()
-        vim.lsp.buf.hover({
-          border = border,
-          max_height = 40,
-          max_width = 100,
-          close_events = { "CursorMoved", "BufLeave", "WinLeave", "LSPDetach" },
-        })
-      end, { buffer = ev.buf, desc = "Show documentation", silent = true })
 
       keymap("n", "<leader>lr", vim.lsp.buf.rename, { buffer = ev.buf, desc = "Rename symbol" })
       keymap(

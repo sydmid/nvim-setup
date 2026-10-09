@@ -89,10 +89,6 @@ function M.setup()
   opt.formatoptions = "rqnl1j"
   opt.grepformat = "%f:%l:%c:%m"
   opt.grepprg = "rg --hidden --vimgrep --smart-case --"
-  _G.quickfixtextfunc = function(info)
-    return require("core.utils.quickfix").quickfixtextfunc(info)
-  end
-  opt.quickfixtextfunc = "v:lua.quickfixtextfunc"
   opt.helpheight = 12
   opt.hidden = true
   opt.history = 2000

@@ -21,7 +21,7 @@ function M.get_projects_section()
         if not name then
           break
         end
-        if typ == "file" then
+        if (typ == "file") then
           local full = session_dir .. "/" .. name
           local stat = vim.loop.fs_stat(full)
           if stat then

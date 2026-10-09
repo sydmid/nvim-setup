@@ -354,9 +354,7 @@ return {
     "j-morano/buffer_manager.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
     lazy = true,
-    keys = {
-      { "<leader>bM", '<cmd>lua require("buffer_manager.ui").toggle_quick_menu()<CR>', desc = "Buffer Manager" },
-    },
+    keys = { { "<leader>bM", "<cmd>lua require(\"buffer_manager.ui\").toggle_quick_menu()<CR>", desc = "Buffer Manager" } },
     config = function()
       local opts = { noremap = true, silent = true }
       local ui = require("buffer_manager.ui")
@@ -542,13 +540,6 @@ return {
   -- Spectre (Find and Replace Enemy)
   {
     "nvim-pack/nvim-spectre",
-    event = "VeryLazy",
-    opts = {},
-  },
-  -- Patterns (Regex & Lua Pattern Explainer by OXY2DEV)
-  {
-    "OXY2DEV/patterns.nvim",
-    cmd = "Patterns",
     event = "VeryLazy",
     opts = {},
   },
