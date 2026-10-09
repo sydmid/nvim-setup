@@ -304,7 +304,6 @@ hover.__prepare = function()
 		-- Close on cursor leave (optional, can be disabled)
 		vim.api.nvim_create_autocmd("WinLeave", {
 			buffer = hover.buffer,
-			once = true,
 			callback = function()
 				-- Give a small delay before closing to allow intentional focus
 				vim.defer_fn(function()
@@ -509,22 +508,35 @@ hover.hover = function(window)
 
 		local contents = result.contents or {}
 		---@type string[]
-		local lines
+		local lines = {}
 
-		-- LSP hover contents can be:
-		-- 1. Literal string
-		-- 2. A table({ kind = ..., value = ... })
-		-- 3. A list({ kind = ..., value = ... }[])
+		-- Convert LSP hover contents (string, table, or list) into markdown lines
 		if type(contents) == "string" then
 			lines = vim.split(contents, "\n", { trimempty = true })
 			vim.bo[hover.buffer].ft = "markdown"
 		elseif vim.islist(contents) then
-			contents = contents[1]
+			local all_lines = {}
+			for _, item in ipairs(contents) do
+				if type(item) == "string" then
+					local item_lines = vim.split(item, "\n", { trimempty = true })
+					for _, l in ipairs(item_lines) do
+						table.insert(all_lines, l)
+					end
+				elseif type(item) == "table" and item.value then
+					local item_lines = vim.split(item.value, "\n", { trimempty = true })
+					for _, l in ipairs(item_lines) do
+						table.insert(all_lines, l)
+					end
+				end
+			end
+			lines = all_lines
+			vim.bo[hover.buffer].ft = "markdown"
+		elseif type(contents) == "table" then
 			lines = vim.split(contents.value or "", "\n", { trimempty = true })
 			vim.bo[hover.buffer].ft = contents.kind or "markdown"
 		else
-			lines = vim.split(contents.value or "", "\n", { trimempty = true })
-			vim.bo[hover.buffer].ft = contents.kind or "markdown"
+			lines = {}
+			vim.bo[hover.buffer].ft = "markdown"
 		end
 
 		-- Set content with text width for wrapping
@@ -555,11 +567,19 @@ hover.hover = function(window)
 		vim.wo[hover.window].foldmethod = "manual"
 		vim.wo[hover.window].cursorline = false
 
-		-- Calculate actual wrapped height
+		-- Calculate actual wrapped height safely
+		local calc_h = #lines
+		if vim.api.nvim_win_text_height then
+			local ok_h, res_h = pcall(vim.api.nvim_win_text_height, hover.window, { start_row = 0, end_row = -1 })
+			if ok_h and res_h and res_h.all then
+				calc_h = res_h.all
+			end
+		end
+
 		H = math.max(
 			1,
 			math.min(
-				vim.api.nvim_win_text_height(hover.window, { start_row = 0, end_row = -1 }).all,
+				calc_h,
 				H,
 				math.floor(vim.o.lines * 0.5)
 			)
@@ -611,20 +631,19 @@ hover.setup = function(config)
 	-- Set up keymap on LspAttach
 	vim.api.nvim_create_autocmd("LspAttach", {
 		callback = function(ev)
-			vim.api.nvim_buf_set_keymap(ev.buf, "n", "K", "", {
-				callback = function()
-					hover.hover()
-				end,
-				desc = "Show LSP hover"
-			})
+			vim.keymap.set("n", "K", function()
+				hover.hover()
+			end, { buffer = ev.buf, desc = "Show LSP hover" })
+
+			-- Map gh to show LSP hover
+			vim.keymap.set("n", "gh", function()
+				hover.hover()
+			end, { buffer = ev.buf, desc = "Show LSP hover (gh)" })
 
 			-- Also support <C-k> in normal mode for hover (alternative)
-			vim.api.nvim_buf_set_keymap(ev.buf, "n", "<C-k>", "", {
-				callback = function()
-					hover.hover()
-				end,
-				desc = "Show LSP hover (alternative)"
-			})
+			vim.keymap.set("n", "<C-k>", function()
+				hover.hover()
+			end, { buffer = ev.buf, desc = "Show LSP hover (alternative)" })
 		end
 	})
 

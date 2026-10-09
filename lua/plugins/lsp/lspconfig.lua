@@ -90,6 +90,7 @@ return {
         ensure_installed = {
           "lua-language-server",
           "roslyn",
+          "rzls",
           "netcoredbg",
           "prettier",
           "stylua",
@@ -100,6 +101,7 @@ return {
           "debugpy",
           "pylint",
           "eslint_d",
+          "prettier",
           "typescript-language-server",
           "js-debug-adapter",
           "shfmt",
@@ -110,6 +112,7 @@ return {
           "gofumpt",
           "golangci-lint",
           "delve",
+          "rustfmt",
           "rust-analyzer",
           "codelldb",
           "taplo",
@@ -117,7 +120,7 @@ return {
           "clang-format",
         },
         auto_update = false,
-        run_on_start = false,
+        run_on_start = true,
       })
 
       attach.setup(appearance.retro_border)

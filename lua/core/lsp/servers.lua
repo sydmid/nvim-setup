@@ -184,9 +184,18 @@ local function setup_typescript(lspconfig, capabilities)
             local latest_version = nil
             while true do
               local name, typ = vim.loop.fs_scandir_next(handle)
-              if not name then break end
+              if not name then
+                break
+              end
               if typ == "directory" and name:match("^v" .. default_version .. "%.") then
-                if not latest_version or vim.version.cmp({name:match("v(%d+)%.(%d+)%.(%d+)")}, {latest_version:match("v(%d+)%.(%d+)%.(%d+)")}) > 0 then
+                if
+                  not latest_version
+                  or vim.version.cmp(
+                      { name:match("v(%d+)%.(%d+)%.(%d+)") },
+                      { latest_version:match("v(%d+)%.(%d+)%.(%d+)") }
+                    )
+                    > 0
+                then
                   latest_version = name
                 end
               end
