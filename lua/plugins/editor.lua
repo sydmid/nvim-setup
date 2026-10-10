@@ -552,4 +552,11 @@ return {
     event = "VeryLazy",
     opts = {},
   },
+  -- Helpview (Fancy Vim help files previewer by OXY2DEV)
+  {
+    "OXY2DEV/helpview.nvim",
+    ft = "help",
+    event = "VeryLazy",
+    opts = {},
+  },
 }

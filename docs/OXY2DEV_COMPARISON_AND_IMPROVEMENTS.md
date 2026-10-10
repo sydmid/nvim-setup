@@ -66,11 +66,14 @@
 1. **Integrated `OXY2DEV/patterns.nvim` (`lua/plugins/editor.lua`)**:
    - Enables real-time pattern breakdown and explanations for Regex and Lua pattern strings via the `:Patterns` command and hover windows.
 
-2. **Added Animated Cursor Beacon (`lua/core/utils/beacon.lua` & `:Beacon`)**:
+2. **Integrated `OXY2DEV/helpview.nvim` (`lua/plugins/editor.lua`)**:
+   - Provides rich visual decorations, badges, inline styling, and structured formatting for standard Vim help files (`:help`).
+
+3. **Added Animated Cursor Beacon (`lua/core/utils/beacon.lua` & `:Beacon`)**:
    - Implemented a custom gradient beacon animator in `lua/core/utils/beacon.lua` to highlight cursor position after long movements or manual inspection.
    - Exposed `:Beacon` command in `lua/core/commands.lua` to trigger or toggle cursor beacon visual cues.
 
-3. **Custom Quickfix Formatting (`lua/core/utils/quickfix.lua` & `lua/core/options.lua`)**:
+4. **Custom Quickfix Formatting (`lua/core/utils/quickfix.lua` & `lua/core/options.lua`)**:
    - Added path-shortening logic (e.g., `lua/core/utils/quickfix.lua` -> `l/c/u/quickfix.lua`) and line/col range formatting for quickfix lists via `vim.o.quickfixtextfunc`.
 
 ---
@@ -78,7 +81,7 @@
 ## 4. Actionable Future Recommendations
 
 1. **Evaluate `OXY2DEV/markview.nvim` alongside `render-markdown.nvim`**:
-   - `markview.nvim` offers extensive callout styles, inline HTML/LaTeX support, and custom checkboxes. Users working heavily with Markdown documentation or technical notes can test switching `render-markdown` with `markview`.
+   - `markview.nvim` offers extensive callout styles, inline HTML/LaTeX support, and custom checkboxes. Users working heavily with Markdown documentation or technical notes can test switching or augmenting `render-markdown` with `markview`.
 
-2. **Explore `OXY2DEV/helpview.nvim`**:
-   - Adds visual decorations, badges, and inline styling to standard Vim help documentation buffers (`:help`).
+2. **Custom foldtext / UI scripts**:
+   - Consider modular custom foldtext functions inspired by `OXY2DEV/foldtext.nvim` if treesitter-based folding needs further aesthetic polish.
