@@ -55,6 +55,22 @@ function M.setup()
   opt.mouse = "a"
   opt.backspace = "indent,eol,start"
   opt.clipboard:append("unnamedplus")
+  if vim.fn.has("nvim-0.10") == 1 then
+    pcall(function()
+      local osc52 = require("vim.ui.clipboard.osc52")
+      vim.g.clipboard = {
+        name = "OSC 52",
+        copy = {
+          ["+"] = osc52.copy("+"),
+          ["*"] = osc52.copy("*"),
+        },
+        paste = {
+          ["+"] = osc52.paste("+"),
+          ["*"] = osc52.paste("*"),
+        },
+      }
+    end)
+  end
   opt.splitright = true
   opt.splitbelow = true
   opt.swapfile = false
